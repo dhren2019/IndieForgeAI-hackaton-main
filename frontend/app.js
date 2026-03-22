@@ -23666,23 +23666,33 @@ var import_react = __toESM(require_react(), 1);
 var import_client = __toESM(require_client(), 1);
 var jsx_dev_runtime = __toESM(require_jsx_dev_runtime(), 1);
 var TYPE_META = {
-  npc: { icon: "\uD83E\uDDD9", label: "NPC", desc: "Characters & personalities", color: "#f59e0b" },
-  quest: { icon: "⚔️", label: "Quest", desc: "Missions & objectives", color: "#3b82f6" },
-  item: { icon: "\uD83D\uDC8E", label: "Item", desc: "Armors, trinkets & relics", color: "#10b981" },
-  lore: { icon: "\uD83D\uDCDC", label: "Lore", desc: "World history & secrets", color: "#a78bfa" },
-  weapon: { icon: "\uD83D\uDDE1️", label: "Weapon", desc: "Swords, staves & firearms", color: "#ef4444" },
-  enemy: { icon: "\uD83D\uDC80", label: "Enemy", desc: "Beasts, demons & bosses", color: "#6b7280" }
+  npc: { icon: "\uD83E\uDDD9", label: "NPC", desc: "Personajes y personalidades", color: "#f59e0b" },
+  quest: { icon: "⚔️", label: "Misión", desc: "Misiones y objetivos", color: "#3b82f6" },
+  item: { icon: "\uD83D\uDC8E", label: "Objeto", desc: "Armaduras, reliquias y objetos", color: "#10b981" },
+  lore: { icon: "\uD83D\uDCDC", label: "Trasfondo", desc: "Historia del mundo y secretos", color: "#a78bfa" },
+  weapon: { icon: "\uD83D\uDDE1️", label: "Arma", desc: "Espadas, bastones y armas", color: "#ef4444" },
+  enemy: { icon: "\uD83D\uDC80", label: "Enemigo", desc: "Bestias, demonios y jefes", color: "#6b7280" }
 };
-var GENRES = ["Fantasy", "Sci-Fi", "Cyberpunk", "Western", "Horror", "Steampunk", "Post-Apocalyptic"];
-var NPC_ROLES = ["Merchant", "Villain", "Mentor", "Guard", "Spy", "Healer", "Assassin", "Wanderer"];
-var RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"];
-var DIFFICULTIES = ["Easy", "Medium", "Hard"];
-var ENEMY_DIFFICULTIES = ["Easy", "Medium", "Hard", "Boss"];
-var TONES = ["Epic", "Dark", "Mysterious", "Comedic", "Tragic", "Hopeful"];
-var WEAPON_CLASSES = ["Sword", "Axe", "Bow", "Staff", "Gun", "Hammer", "Dagger", "Spear"];
-var ELEMENTS = ["None", "Fire", "Ice", "Lightning", "Dark", "Holy", "Poison", "Wind"];
-var WEAPON_STYLES = ["One-handed", "Two-handed", "Ranged", "Magic"];
-var ENEMY_TYPES = ["Beast", "Undead", "Demon", "Mechanical", "Elemental", "Humanoid", "Dragon"];
+var GENEROS = ["Fantasía", "Ciencia Ficción", "Cyberpunk", "Western", "Terror", "Steampunk", "Post-Apocalíptico"];
+var ROLES_NPC = ["Mercader", "Villano", "Mentor", "Guardia", "Espía", "Sanador", "Asesino", "Errante"];
+var RAREZAS = ["Común", "Infrecuente", "Raro", "Épico", "Legendario"];
+var DIFICULTADES = ["Fácil", "Medio", "Difícil"];
+var DIFS_ENEMIGO = ["Fácil", "Medio", "Difícil", "Jefe"];
+var TONOS = ["Épico", "Oscuro", "Misterioso", "Cómico", "Trágico", "Esperanzador"];
+var CLASES_ARMA = ["Espada", "Hacha", "Arco", "Bastón", "Pistola", "Martillo", "Daga", "Lanza"];
+var ELEMENTOS = ["Ninguno", "Fuego", "Hielo", "Rayo", "Oscuro", "Sagrado", "Veneno", "Viento"];
+var ESTILOS_ARMA = ["Una mano", "Dos manos", "A distancia", "Mágico"];
+var TIPOS_ENEMIGO = ["Bestia", "No-muerto", "Demonio", "Mecánico", "Elemental", "Humanoide", "Dragón"];
+var GENRES = GENEROS;
+var NPC_ROLES = ROLES_NPC;
+var RARITIES = RAREZAS;
+var DIFFICULTIES = DIFICULTADES;
+var ENEMY_DIFFICULTIES = DIFS_ENEMIGO;
+var TONES = TONOS;
+var WEAPON_CLASSES = CLASES_ARMA;
+var ELEMENTS = ELEMENTOS;
+var WEAPON_STYLES = ESTILOS_ARMA;
+var ENEMY_TYPES = TIPOS_ENEMIGO;
 async function apiGenerate(type, meta) {
   const res = await fetch("/api/generate", {
     method: "POST",
@@ -23713,9 +23723,16 @@ async function apiSocialFeed(limit = 20) {
   const json = await res.json();
   return json.data ?? [];
 }
-async function apiExplore(tag = null, limit = 20) {
-  const url = tag ? `/api/social/explore?tag=${encodeURIComponent(tag)}&limit=${limit}` : `/api/social/explore?limit=${limit}`;
-  const res = await fetch(url);
+async function apiExplore(tag = null, sort = "reciente", limit = 20) {
+  const params = new URLSearchParams({ limit: String(limit), sort });
+  if (tag)
+    params.set("tag", tag);
+  const res = await fetch(`/api/social/explore?${params}`);
+  const json = await res.json();
+  return json.data ?? [];
+}
+async function apiTrending(limit = 20) {
+  const res = await fetch(`/api/social/trending?limit=${limit}`);
   const json = await res.json();
   return json.data ?? [];
 }
@@ -23780,6 +23797,24 @@ async function apiDeletePost(postId) {
   const json = await res.json();
   return json.success;
 }
+async function apiRecordInteraction(postId, action) {
+  await fetch("/api/social/interactions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ post_id: postId, action })
+  });
+}
+async function apiGenerateImage(type, result) {
+  const res = await fetch("/api/imagen", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type, result })
+  });
+  const json = await res.json();
+  if (json.success && json.data)
+    return { url: json.data.url };
+  return { url: null, error: json.error ?? "Error de generación" };
+}
 function getTitle(gen) {
   const r = gen.result;
   return r.name ?? r.title ?? `${gen.type} #${gen.id}`;
@@ -23788,14 +23823,53 @@ function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const m = Math.floor(diff / 60000);
   if (m < 1)
-    return "just now";
+    return "ahora mismo";
   if (m < 60)
-    return `${m}m ago`;
+    return `hace ${m}m`;
   const h = Math.floor(m / 60);
   if (h < 24)
-    return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+    return `hace ${h}h`;
+  return `hace ${Math.floor(h / 24)}d`;
 }
+function authorName(session_id) {
+  const raw = session_id.replace(/^(anon-|sess-)/, "");
+  let hash = 0;
+  for (let i = 0;i < raw.length; i++)
+    hash = hash * 31 + raw.charCodeAt(i) & 32767;
+  return `Aventurero #${hash % 9000 + 1000}`;
+}
+var FIELD_LABELS = {
+  name: "Nombre",
+  role: "Rol",
+  race: "Raza",
+  personality: "Personalidad",
+  secret: "Secreto",
+  dialogue: "Diálogo",
+  title: "Título",
+  type: "Tipo",
+  objective: "Objetivo",
+  reward: "Recompensa",
+  location: "Ubicación",
+  twist: "Giro",
+  rarity: "Rareza",
+  description: "Descripción",
+  effect: "Efecto",
+  value: "Valor",
+  era: "Era",
+  summary: "Resumen",
+  factions: "Facciones",
+  element: "Elemento",
+  style: "Estilo",
+  damage: "Daño",
+  special_ability: "Habilidad especial",
+  lore: "Trasfondo",
+  difficulty: "Dificultad",
+  hp: "HP",
+  attack_style: "Estilo de ataque",
+  weakness: "Debilidad",
+  drops: "Botín",
+  class: "Clase"
+};
 function JsonDisplay({ data }) {
   function highlight(str) {
     return str.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
@@ -23825,7 +23899,7 @@ function FieldsView({ data }) {
       children: [
         /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
           className: "field-key",
-          children: k.replace(/_/g, " ")
+          children: FIELD_LABELS[k] ?? k.replace(/_/g, " ")
         }, undefined, false, undefined, this),
         /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
           className: "field-value",
@@ -23838,6 +23912,69 @@ function FieldsView({ data }) {
     }, k, true, undefined, this))
   }, undefined, false, undefined, this);
 }
+function IllustratorPanel({
+  type,
+  result,
+  onImageReady
+}) {
+  const [loading, setLoading] = import_react.useState(false);
+  const [imageUrl2, setImageUrl2] = import_react.useState(null);
+  const [error, setError] = import_react.useState(null);
+  const handleGenerate = async () => {
+    setLoading(true);
+    setError(null);
+    const res = await apiGenerateImage(type, result);
+    setLoading(false);
+    if (res.url) {
+      setImageUrl2(res.url);
+      onImageReady?.(res.url);
+    } else {
+      setError(res.error ?? "Error desconocido");
+    }
+  };
+  return /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
+    className: "illustrator-panel",
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
+        className: "illustrator-header",
+        children: "\uD83C\uDFA8 Hoja de diseño del personaje"
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
+        className: "btn-illustrate",
+        onClick: handleGenerate,
+        disabled: loading,
+        children: loading ? /* @__PURE__ */ jsx_dev_runtime.jsxDEV(jsx_dev_runtime.Fragment, {
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime.jsxDEV("span", {
+              className: "spinner"
+            }, undefined, false, undefined, this),
+            " Generando diseño…"
+          ]
+        }, undefined, true, undefined, this) : imageUrl2 ? "\uD83D\uDD04 Regenerar diseño" : "\uD83C\uDFA8 Generar hoja de diseño"
+      }, undefined, false, undefined, this),
+      error && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
+        className: "illustrator-error",
+        children: error
+      }, undefined, false, undefined, this),
+      imageUrl2 && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
+        className: "illustrator-image-wrap",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime.jsxDEV("img", {
+            src: imageUrl2,
+            alt: "Hoja de diseño del personaje",
+            className: "illustrator-image"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime.jsxDEV("a", {
+            href: imageUrl2,
+            download: "hoja-de-diseno.png",
+            className: "illustrator-download",
+            children: "⬇ Descargar"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
 function ResultCard({
   gen,
   isFav,
@@ -23846,6 +23983,7 @@ function ResultCard({
   showActions = true
 }) {
   const [view, setView] = import_react.useState("fields");
+  const [showIllustrator, setShowIllustrator] = import_react.useState(false);
   const handleCopy = () => {
     navigator.clipboard.writeText(JSON.stringify(gen.result, null, 2));
   };
@@ -23879,7 +24017,7 @@ function ResultCard({
           }, undefined, false, undefined, this),
           gen.source === "fallback" && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("span", {
             className: "result-badge badge-fallback",
-            children: "fallback"
+            children: "respaldo"
           }, undefined, false, undefined, this),
           showActions && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
             className: "result-actions",
@@ -23887,24 +24025,24 @@ function ResultCard({
               /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
                 className: `icon-btn ${isFav ? "fav" : ""}`,
                 onClick: () => onFavToggle(gen.id, !isFav),
-                title: isFav ? "Remove from favorites" : "Add to favorites",
-                children: isFav ? "★ Saved" : "☆ Save"
+                title: isFav ? "Quitar de favoritos" : "Añadir a favoritos",
+                children: isFav ? "★ Guardado" : "☆ Guardar"
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
                 className: "icon-btn",
                 onClick: () => setView(view === "fields" ? "json" : "fields"),
-                children: view === "fields" ? "</> JSON" : "⊞ Fields"
+                children: view === "fields" ? "</> JSON" : "⊞ Campos"
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
                 className: "icon-btn",
                 onClick: handleCopy,
-                title: "Copy JSON",
+                title: "Copiar JSON",
                 children: "\uD83D\uDCCB"
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
                 className: "icon-btn",
                 onClick: handleExport,
-                title: "Export JSON",
+                title: "Exportar JSON",
                 children: "⬇"
               }, undefined, false, undefined, this),
               onShare && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
@@ -23912,6 +24050,12 @@ function ResultCard({
                 onClick: onShare,
                 title: "Compartir en la comunidad",
                 children: "\uD83C\uDF10 Compartir"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
+                className: `icon-btn ${showIllustrator ? "active" : ""}`,
+                onClick: () => setShowIllustrator((v) => !v),
+                title: "Generar ilustración con IA",
+                children: "\uD83C\uDFA8 Ilustrar"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this)
@@ -23921,6 +24065,10 @@ function ResultCard({
         data: gen.result
       }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime.jsxDEV(JsonDisplay, {
         data: gen.result
+      }, undefined, false, undefined, this),
+      showIllustrator && /* @__PURE__ */ jsx_dev_runtime.jsxDEV(IllustratorPanel, {
+        type: gen.type,
+        result: gen.result
       }, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this);
@@ -23978,7 +24126,7 @@ function GenerateForm({
                 className: "form-field",
                 children: [
                   /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                    children: "Genre"
+                    children: "Género"
                   }, undefined, false, undefined, this),
                   /* @__PURE__ */ jsx_dev_runtime.jsxDEV("select", {
                     value: fields.genre ?? "",
@@ -23986,7 +24134,7 @@ function GenerateForm({
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                         value: "",
-                        children: "— pick a genre —"
+                        children: "— elige un género —"
                       }, undefined, false, undefined, this),
                       GENRES.map((g) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                         children: g
@@ -24001,10 +24149,10 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Name (optional)"
+                        children: "Nombre (opcional)"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("input", {
-                        placeholder: "e.g. Aldric",
+                        placeholder: "ej. Aldric",
                         value: fields.name ?? "",
                         onChange: (e) => setField("name", e.target.value)
                       }, undefined, false, undefined, this)
@@ -24014,7 +24162,7 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Role"
+                        children: "Rol"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("select", {
                         value: fields.role ?? "",
@@ -24022,7 +24170,7 @@ function GenerateForm({
                         children: [
                           /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             value: "",
-                            children: "— pick a role —"
+                            children: "— elige un rol —"
                           }, undefined, false, undefined, this),
                           NPC_ROLES.map((r) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             children: r
@@ -24039,10 +24187,10 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Title (optional)"
+                        children: "Título (opcional)"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("input", {
-                        placeholder: 'e.g. "The Stolen Relic"',
+                        placeholder: 'ej. "La Reliquia Robada"',
                         value: fields.title ?? "",
                         onChange: (e) => setField("title", e.target.value)
                       }, undefined, false, undefined, this)
@@ -24052,7 +24200,7 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Difficulty"
+                        children: "Dificultad"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("select", {
                         value: fields.difficulty ?? "",
@@ -24060,7 +24208,7 @@ function GenerateForm({
                         children: [
                           /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             value: "",
-                            children: "— pick difficulty —"
+                            children: "— elige dificultad —"
                           }, undefined, false, undefined, this),
                           DIFFICULTIES.map((d) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             children: d
@@ -24077,10 +24225,10 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Name (optional)"
+                        children: "Nombre (opcional)"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("input", {
-                        placeholder: 'e.g. "Veilbreaker Sword"',
+                        placeholder: 'ej. "Espada Rompe-Velos"',
                         value: fields.name ?? "",
                         onChange: (e) => setField("name", e.target.value)
                       }, undefined, false, undefined, this)
@@ -24090,7 +24238,7 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Rarity"
+                        children: "Rareza"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("select", {
                         value: fields.rarity ?? "",
@@ -24098,7 +24246,7 @@ function GenerateForm({
                         children: [
                           /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             value: "",
-                            children: "— pick rarity —"
+                            children: "— elige rareza —"
                           }, undefined, false, undefined, this),
                           RARITIES.map((r) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             children: r
@@ -24115,10 +24263,10 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Topic"
+                        children: "Tema"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("input", {
-                        placeholder: 'e.g. "The Sundering War"',
+                        placeholder: 'ej. "La Gran Fractura"',
                         value: fields.topic ?? "",
                         onChange: (e) => setField("topic", e.target.value)
                       }, undefined, false, undefined, this)
@@ -24128,7 +24276,7 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Tone"
+                        children: "Tono"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("select", {
                         value: fields.tone ?? "",
@@ -24136,7 +24284,7 @@ function GenerateForm({
                         children: [
                           /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             value: "",
-                            children: "— pick a tone —"
+                            children: "— elige un tono —"
                           }, undefined, false, undefined, this),
                           TONES.map((t) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             children: t
@@ -24153,10 +24301,10 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Name (optional)"
+                        children: "Nombre (opcional)"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("input", {
-                        placeholder: 'e.g. "Ashfang Blade"',
+                        placeholder: 'ej. "Hoja Ahumada"',
                         value: fields.name ?? "",
                         onChange: (e) => setField("name", e.target.value)
                       }, undefined, false, undefined, this)
@@ -24166,7 +24314,7 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Weapon Class"
+                        children: "Tipo de arma"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("select", {
                         value: fields.weaponClass ?? "",
@@ -24174,7 +24322,7 @@ function GenerateForm({
                         children: [
                           /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             value: "",
-                            children: "— pick a class —"
+                            children: "— elige un tipo —"
                           }, undefined, false, undefined, this),
                           WEAPON_CLASSES.map((c) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             children: c
@@ -24187,7 +24335,7 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Element"
+                        children: "Elemento"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("select", {
                         value: fields.element ?? "",
@@ -24195,7 +24343,7 @@ function GenerateForm({
                         children: [
                           /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             value: "",
-                            children: "— pick an element —"
+                            children: "— elige un elemento —"
                           }, undefined, false, undefined, this),
                           ELEMENTS.map((el) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             children: el
@@ -24208,7 +24356,7 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Combat Style"
+                        children: "Estilo de combate"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("select", {
                         value: fields.style ?? "",
@@ -24216,7 +24364,7 @@ function GenerateForm({
                         children: [
                           /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             value: "",
-                            children: "— pick a style —"
+                            children: "— elige un estilo —"
                           }, undefined, false, undefined, this),
                           WEAPON_STYLES.map((s) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             children: s
@@ -24233,10 +24381,10 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Name (optional)"
+                        children: "Nombre (opcional)"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("input", {
-                        placeholder: 'e.g. "Emberlord Moloch"',
+                        placeholder: 'ej. "Señor Brasa Moloch"',
                         value: fields.name ?? "",
                         onChange: (e) => setField("name", e.target.value)
                       }, undefined, false, undefined, this)
@@ -24246,7 +24394,7 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Enemy Type"
+                        children: "Tipo de enemigo"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("select", {
                         value: fields.enemyType ?? "",
@@ -24254,7 +24402,7 @@ function GenerateForm({
                         children: [
                           /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             value: "",
-                            children: "— pick a type —"
+                            children: "— elige un tipo —"
                           }, undefined, false, undefined, this),
                           ENEMY_TYPES.map((t) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             children: t
@@ -24267,7 +24415,7 @@ function GenerateForm({
                     className: "form-field",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
-                        children: "Difficulty"
+                        children: "Dificultad"
                       }, undefined, false, undefined, this),
                       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("select", {
                         value: fields.difficulty ?? "",
@@ -24275,7 +24423,7 @@ function GenerateForm({
                         children: [
                           /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             value: "",
-                            children: "— pick difficulty —"
+                            children: "— elige dificultad —"
                           }, undefined, false, undefined, this),
                           ENEMY_DIFFICULTIES.map((d) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("option", {
                             children: d
@@ -24297,9 +24445,9 @@ function GenerateForm({
                 /* @__PURE__ */ jsx_dev_runtime.jsxDEV("span", {
                   className: "spinner"
                 }, undefined, false, undefined, this),
-                " Generating…"
+                " Generando…"
               ]
-            }, undefined, true, undefined, this) : `✦ Generate ${TYPE_META[type].label}`
+            }, undefined, true, undefined, this) : `✦ Generar ${TYPE_META[type].label}`
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this)
@@ -24466,16 +24614,20 @@ function PostCard({
 }) {
   const [expanded, setExpanded] = import_react.useState(false);
   const [showComments, setShowComments] = import_react.useState(false);
+  const [showIllustrator, setShowIllustrator] = import_react.useState(false);
   const [liked, setLiked] = import_react.useState(post.liked_by_me);
   const [likeCount, setLikeCount] = import_react.useState(post.like_count);
   const [cmtCount, setCmtCount] = import_react.useState(post.comment_count);
+  import_react.useEffect(() => {
+    apiRecordInteraction(post.id, "view");
+  }, [post.id]);
   const meta = TYPE_META[post.type];
   const preview = post.result.personality ?? post.result.objective ?? post.result.description ?? post.result.summary ?? post.result.special_ability ?? post.result.attack_style ?? "";
   const handleLike = async (e) => {
     e.stopPropagation();
     const newLiked = await apiToggleLike(post.id);
     setLiked(newLiked);
-    setLikeCount((c) => newLiked ? c + 1 : c - 1);
+    setLikeCount((c) => newLiked ? c + 1 : Math.max(0, c - 1));
   };
   const handleDelete = async (e) => {
     e.stopPropagation();
@@ -24499,7 +24651,12 @@ function PostCard({
     children: [
       /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
         className: "post-header",
-        onClick: () => setExpanded((v) => !v),
+        onClick: () => {
+          const next = !expanded;
+          setExpanded(next);
+          if (next)
+            apiRecordInteraction(post.id, "expand");
+        },
         children: [
           /* @__PURE__ */ jsx_dev_runtime.jsxDEV("span", {
             className: `result-badge badge-${post.type}`,
@@ -24515,11 +24672,8 @@ function PostCard({
           }, undefined, false, undefined, this),
           /* @__PURE__ */ jsx_dev_runtime.jsxDEV("span", {
             className: "post-author",
-            children: [
-              "Aventurero#",
-              post.session_id.slice(5, 13).toUpperCase()
-            ]
-          }, undefined, true, undefined, this),
+            children: authorName(post.session_id)
+          }, undefined, false, undefined, this),
           /* @__PURE__ */ jsx_dev_runtime.jsxDEV("span", {
             className: "post-time",
             children: timeAgo(post.created_at)
@@ -24534,16 +24688,30 @@ function PostCard({
         className: "post-description",
         children: post.description
       }, undefined, false, undefined, this),
+      post.image_url && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
+        className: "post-image-wrap",
+        children: /* @__PURE__ */ jsx_dev_runtime.jsxDEV("img", {
+          src: post.image_url,
+          alt: "Hoja de diseño",
+          className: "post-image"
+        }, undefined, false, undefined, this)
+      }, undefined, false, undefined, this),
       !expanded && preview && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
         className: "post-preview",
         children: preview
       }, undefined, false, undefined, this),
       expanded && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
         className: "post-body",
-        children: /* @__PURE__ */ jsx_dev_runtime.jsxDEV(FieldsView, {
-          data: post.result
-        }, undefined, false, undefined, this)
-      }, undefined, false, undefined, this),
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime.jsxDEV(FieldsView, {
+            data: post.result
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime.jsxDEV(IllustratorPanel, {
+            type: post.type,
+            result: post.result
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
       post.tags.length > 0 && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
         className: "post-tags",
         children: post.tags.map((tag) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("span", {
@@ -24644,7 +24812,8 @@ function PublicarModal({
       type: gen.type,
       result: gen.result,
       tags,
-      generation_id: gen.id
+      generation_id: gen.id,
+      image_url: imageUrl
     });
     setLoading(false);
     if (res.success) {
@@ -24761,6 +24930,37 @@ function PublicarModal({
                   children: "Se publicará el contenido generado"
                 }, undefined, false, undefined, this)
               ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
+              className: "form-field",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime.jsxDEV("label", {
+                  children: "Ilustración (opcional — se compartirá con la publicación)"
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime.jsxDEV(IllustratorPanel, {
+                  type: gen.type,
+                  result: gen.result,
+                  onImageReady: (url) => {
+                    setImageUrl(url);
+                    showToast("\uD83C\uDFA8 Ilustración lista para compartir");
+                  }
+                }, undefined, false, undefined, this),
+                imageUrl && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
+                  className: "modal-image-attached",
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime.jsxDEV("span", {
+                      className: "image-attached-badge",
+                      children: "✅ Ilustración adjunta"
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
+                      className: "icon-btn",
+                      onClick: () => setImageUrl(null),
+                      style: { marginLeft: 8 },
+                      children: "Quitar"
+                    }, undefined, false, undefined, this)
+                  ]
+                }, undefined, true, undefined, this)
+              ]
             }, undefined, true, undefined, this)
           ]
         }, undefined, true, undefined, this),
@@ -24801,20 +25001,23 @@ function SocialPanel({
   const [followedTags, setFollowedTags] = import_react.useState(new Set);
   const [popularTags, setPopularTags] = import_react.useState([]);
   const [filterTag, setFilterTag] = import_react.useState(null);
+  const [sortMode, setSortMode] = import_react.useState("reciente");
   const [shareTarget, setShareTarget] = import_react.useState(null);
   const loadPosts = import_react.useCallback(async () => {
     setLoading(true);
     try {
       if (subTab === "feed")
         setPosts(await apiSocialFeed());
+      else if (subTab === "trending")
+        setPosts(await apiTrending());
       else if (subTab === "explorar")
-        setPosts(await apiExplore(filterTag));
+        setPosts(await apiExplore(filterTag, sortMode));
       else
         setPosts(await apiMyPosts());
     } finally {
       setLoading(false);
     }
-  }, [subTab, filterTag]);
+  }, [subTab, filterTag, sortMode]);
   const loadMeta = import_react.useCallback(async () => {
     const [followed, popular] = await Promise.all([apiFollowedTags(), apiPopularTags()]);
     setFollowedTags(new Set(followed));
@@ -24864,6 +25067,14 @@ function SocialPanel({
                 children: "✦ Para ti"
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
+                className: `subtab-btn ${subTab === "trending" ? "active" : ""}`,
+                onClick: () => {
+                  setSubTab("trending");
+                  setFilterTag(null);
+                },
+                children: "\uD83D\uDD25 Trending"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
                 className: `subtab-btn ${subTab === "explorar" ? "active" : ""}`,
                 onClick: () => setSubTab("explorar"),
                 children: "\uD83D\uDD0D Explorar"
@@ -24881,21 +25092,45 @@ function SocialPanel({
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          subTab === "explorar" && filterTag && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
-            className: "filter-banner",
+          subTab === "explorar" && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
+            className: "explore-controls",
             children: [
-              "Filtrando por: ",
-              /* @__PURE__ */ jsx_dev_runtime.jsxDEV("strong", {
+              filterTag && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
+                className: "filter-banner",
                 children: [
-                  "#",
-                  filterTag
+                  "Filtrando por: ",
+                  /* @__PURE__ */ jsx_dev_runtime.jsxDEV("strong", {
+                    children: [
+                      "#",
+                      filterTag
+                    ]
+                  }, undefined, true, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
+                    className: "clear-filter-btn",
+                    onClick: () => setFilterTag(null),
+                    children: "✕ Quitar"
+                  }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
-                className: "clear-filter-btn",
-                onClick: () => setFilterTag(null),
-                children: "✕ Quitar"
-              }, undefined, false, undefined, this)
+              /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
+                className: "sort-controls",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime.jsxDEV("span", {
+                    className: "sort-label",
+                    children: "Ordenar:"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
+                    className: `sort-btn ${sortMode === "reciente" ? "active" : ""}`,
+                    onClick: () => setSortMode("reciente"),
+                    children: "\uD83D\uDD50 Más recientes"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
+                    className: `sort-btn ${sortMode === "popular" ? "active" : ""}`,
+                    onClick: () => setSortMode("popular"),
+                    children: "⭐ Más populares"
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this)
             ]
           }, undefined, true, undefined, this),
           loading ? /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
@@ -24914,7 +25149,7 @@ function SocialPanel({
                 children: "\uD83C\uDF10"
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime.jsxDEV("p", {
-                children: subTab === "feed" ? "Tu feed está vacío. ¡Sigue etiquetas y publica creaciones!" : subTab === "explorar" ? filterTag ? `Sin publicaciones con #${filterTag}.` : "Sin publicaciones todavía. ¡Sé el primero!" : "Aún no has publicado nada. Usa el botón \uD83C\uDF10 Compartir."
+                children: subTab === "feed" ? "Tu feed está vacío. ¡Sigue etiquetas y publica creaciones!" : subTab === "trending" ? "No hay tendencias todavía. ¡Publica y consigue likes!" : subTab === "explorar" ? filterTag ? `Sin publicaciones con #${filterTag}.` : "Sin publicaciones todavía. ¡Sé el primero!" : "Aún no has publicado nada. Usa el botón \uD83C\uDF10 Compartir."
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
@@ -25039,20 +25274,20 @@ function App() {
   const handleResult = (gen) => {
     setLatest(gen);
     setHistory((h) => [gen, ...h]);
-    showToast(`${TYPE_META[gen.type].label} generated! ${gen.source === "fallback" ? "(fallback used)" : ""}`);
+    showToast(`¡${TYPE_META[gen.type].label} generado! ${gen.source === "fallback" ? "(usando respaldo)" : ""}`);
   };
   const handleFavToggle = async (id, add) => {
     await apiToggleFav(id, add);
     if (add) {
       setFavIds((s) => new Set(s).add(id));
-      showToast("Added to favorites ★");
+      showToast("¡Añadido a favoritos ★");
     } else {
       setFavIds((s) => {
         const n = new Set(s);
         n.delete(id);
         return n;
       });
-      showToast("Removed from favorites");
+      showToast("Eliminado de favoritos");
     }
     loadFavorites();
   };
@@ -25069,7 +25304,7 @@ function App() {
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
                 className: "logo-sub",
-                children: "Game Content Generator"
+                children: "Generador de Contenido para Videojuegos"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
@@ -25081,7 +25316,7 @@ function App() {
                   setTab("generate");
                   setSelected(null);
                 },
-                children: "✦ Generate"
+                children: "✦ Generar"
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
                 className: `tab-btn ${tab === "history" ? "active" : ""}`,
@@ -25090,7 +25325,7 @@ function App() {
                   setSelected(null);
                   loadHistory();
                 },
-                children: "\uD83D\uDCD6 History"
+                children: "\uD83D\uDCD6 Historial"
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
                 className: `tab-btn ${tab === "favorites" ? "active" : ""}`,
@@ -25099,7 +25334,7 @@ function App() {
                   setSelected(null);
                   loadFavorites();
                 },
-                children: "★ Favorites"
+                children: "★ Favoritos"
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
                 className: `tab-btn ${tab === "social" ? "active" : ""}`,
@@ -25121,7 +25356,7 @@ function App() {
                 className: "icon-btn",
                 style: { marginBottom: 16 },
                 onClick: () => setSelected(null),
-                children: "← Back"
+                children: "← Volver"
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime.jsxDEV(ResultCard, {
                 gen: selected,
@@ -25148,14 +25383,14 @@ function App() {
             favIds,
             onFavToggle: handleFavToggle,
             onSelect: setSelected,
-            emptyMsg: "No generations yet. Start by creating an NPC, Quest, Item, Lore, Weapon or Enemy."
+            emptyMsg: "Aún no hay generaciones. Crea un NPC, Misión, Objeto, Trasfondo, Arma o Enemigo."
           }, undefined, false, undefined, this),
           !selected && tab === "favorites" && /* @__PURE__ */ jsx_dev_runtime.jsxDEV(GalleryPanel, {
             items: favorites,
             favIds,
             onFavToggle: handleFavToggle,
             onSelect: setSelected,
-            emptyMsg: "No favorites yet. Save a generation you like by clicking ☆ Save."
+            emptyMsg: "Aún no hay favoritos. Guarda una generación haciendo clic en ☆ Guardar."
           }, undefined, false, undefined, this),
           !selected && tab === "social" && /* @__PURE__ */ jsx_dev_runtime.jsxDEV(SocialPanel, {
             latest,

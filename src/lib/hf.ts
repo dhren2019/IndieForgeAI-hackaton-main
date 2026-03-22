@@ -32,14 +32,14 @@ export async function callModel(prompt: string): Promise<HFResponse> {
       body: JSON.stringify({
         inputs: prompt,
         parameters: {
-          max_new_tokens: 256,
-          temperature: 0.7,
-          top_p: 0.9,
+          max_new_tokens: 512,
+          temperature: 0.85,
+          top_p: 0.92,
           do_sample: true,
           return_full_text: false,  // return only generated part
         },
       }),
-      signal: AbortSignal.timeout(30_000),  // 30 s timeout
+      signal: AbortSignal.timeout(45_000),  // 45 s timeout
     });
 
     if (!res.ok) {

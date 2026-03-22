@@ -27,6 +27,7 @@ interface Post {
   description: string;
   type: GenerationType;
   result: Record<string, unknown>;
+  image_url: string | null;
   created_at: string;
   like_count: number;
   comment_count: number;
@@ -49,24 +50,36 @@ interface Toast { msg: string; kind: "ok" | "error"; }
 // Constants
 // ---------------------------------------------------------------------------
 const TYPE_META = {
-  npc:    { icon: "🧙", label: "NPC",    desc: "Characters & personalities", color: "#f59e0b" },
-  quest:  { icon: "⚔️", label: "Quest",  desc: "Missions & objectives",      color: "#3b82f6" },
-  item:   { icon: "💎", label: "Item",   desc: "Armors, trinkets & relics",   color: "#10b981" },
-  lore:   { icon: "📜", label: "Lore",   desc: "World history & secrets",    color: "#a78bfa" },
-  weapon: { icon: "🗡️", label: "Weapon", desc: "Swords, staves & firearms",  color: "#ef4444" },
-  enemy:  { icon: "💀", label: "Enemy",  desc: "Beasts, demons & bosses",    color: "#6b7280" },
+  npc:    { icon: "🧙", label: "NPC",      desc: "Personajes y personalidades", color: "#f59e0b" },
+  quest:  { icon: "⚔️", label: "Misión",   desc: "Misiones y objetivos",       color: "#3b82f6" },
+  item:   { icon: "💎", label: "Objeto",   desc: "Armaduras, reliquias y objetos", color: "#10b981" },
+  lore:   { icon: "📜", label: "Trasfondo", desc: "Historia del mundo y secretos", color: "#a78bfa" },
+  weapon: { icon: "🗡️", label: "Arma",    desc: "Espadas, bastones y armas",  color: "#ef4444" },
+  enemy:  { icon: "💀", label: "Enemigo",  desc: "Bestias, demonios y jefes",  color: "#6b7280" },
 } as const;
 
-const GENRES      = ["Fantasy", "Sci-Fi", "Cyberpunk", "Western", "Horror", "Steampunk", "Post-Apocalyptic"];
-const NPC_ROLES   = ["Merchant", "Villain", "Mentor", "Guard", "Spy", "Healer", "Assassin", "Wanderer"];
-const RARITIES    = ["Common", "Uncommon", "Rare", "Epic", "Legendary"];
-const DIFFICULTIES = ["Easy", "Medium", "Hard"];
-const ENEMY_DIFFICULTIES = ["Easy", "Medium", "Hard", "Boss"];
-const TONES       = ["Epic", "Dark", "Mysterious", "Comedic", "Tragic", "Hopeful"];
-const WEAPON_CLASSES = ["Sword", "Axe", "Bow", "Staff", "Gun", "Hammer", "Dagger", "Spear"];
-const ELEMENTS    = ["None", "Fire", "Ice", "Lightning", "Dark", "Holy", "Poison", "Wind"];
-const WEAPON_STYLES = ["One-handed", "Two-handed", "Ranged", "Magic"];
-const ENEMY_TYPES = ["Beast", "Undead", "Demon", "Mechanical", "Elemental", "Humanoid", "Dragon"];
+const GENEROS         = ["Fantasía", "Ciencia Ficción", "Cyberpunk", "Western", "Terror", "Steampunk", "Post-Apocalíptico"];
+const ROLES_NPC       = ["Mercader", "Villano", "Mentor", "Guardia", "Espía", "Sanador", "Asesino", "Errante"];
+const RAREZAS         = ["Común", "Infrecuente", "Raro", "Épico", "Legendario"];
+const DIFICULTADES    = ["Fácil", "Medio", "Difícil"];
+const DIFS_ENEMIGO    = ["Fácil", "Medio", "Difícil", "Jefe"];
+const TONOS           = ["Épico", "Oscuro", "Misterioso", "Cómico", "Trágico", "Esperanzador"];
+const CLASES_ARMA     = ["Espada", "Hacha", "Arco", "Bastón", "Pistola", "Martillo", "Daga", "Lanza"];
+const ELEMENTOS       = ["Ninguno", "Fuego", "Hielo", "Rayo", "Oscuro", "Sagrado", "Veneno", "Viento"];
+const ESTILOS_ARMA    = ["Una mano", "Dos manos", "A distancia", "Mágico"];
+const TIPOS_ENEMIGO   = ["Bestia", "No-muerto", "Demonio", "Mecánico", "Elemental", "Humanoide", "Dragón"];
+
+// Legacy aliases (still used in GenerateForm)
+const GENRES          = GENEROS;
+const NPC_ROLES       = ROLES_NPC;
+const RARITIES        = RAREZAS;
+const DIFFICULTIES    = DIFICULTADES;
+const ENEMY_DIFFICULTIES = DIFS_ENEMIGO;
+const TONES           = TONOS;
+const WEAPON_CLASSES  = CLASES_ARMA;
+const ELEMENTS        = ELEMENTOS;
+const WEAPON_STYLES   = ESTILOS_ARMA;
+const ENEMY_TYPES     = TIPOS_ENEMIGO;
 
 // ---------------------------------------------------------------------------
 // API helpers
@@ -107,11 +120,16 @@ async function apiSocialFeed(limit = 20): Promise<Post[]> {
   return json.data ?? [];
 }
 
-async function apiExplore(tag: string | null = null, limit = 20): Promise<Post[]> {
-  const url = tag
-    ? `/api/social/explore?tag=${encodeURIComponent(tag)}&limit=${limit}`
-    : `/api/social/explore?limit=${limit}`;
-  const res = await fetch(url);
+async function apiExplore(tag: string | null = null, sort = "reciente", limit = 20): Promise<Post[]> {
+  const params = new URLSearchParams({ limit: String(limit), sort });
+  if (tag) params.set("tag", tag);
+  const res = await fetch(`/api/social/explore?${params}`);
+  const json = await res.json() as { success: boolean; data: Post[] };
+  return json.data ?? [];
+}
+
+async function apiTrending(limit = 20): Promise<Post[]> {
+  const res = await fetch(`/api/social/trending?limit=${limit}`);
   const json = await res.json() as { success: boolean; data: Post[] };
   return json.data ?? [];
 }
@@ -129,6 +147,7 @@ async function apiCreatePost(data: {
   result: Record<string, unknown>;
   tags: string[];
   generation_id?: number;
+  image_url?: string | null;
 }): Promise<{ success: boolean; data?: Post; error?: string }> {
   const res = await fetch("/api/social/posts", {
     method: "POST",
@@ -194,6 +213,28 @@ async function apiDeletePost(postId: number): Promise<boolean> {
   return json.success;
 }
 
+async function apiRecordInteraction(postId: number, action: "view" | "expand" | "like" | "comment"): Promise<void> {
+  await fetch("/api/social/interactions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ post_id: postId, action }),
+  });
+}
+
+async function apiGenerateImage(
+  type: GenerationType,
+  result: Record<string, unknown>
+): Promise<{ url: string | null; error?: string }> {
+  const res = await fetch("/api/imagen", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type, result }),
+  });
+  const json = await res.json() as { success: boolean; data?: { url: string }; error?: string };
+  if (json.success && json.data) return { url: json.data.url };
+  return { url: null, error: json.error ?? "Error de generación" };
+}
+
 // ---------------------------------------------------------------------------
 // Utilities
 // ---------------------------------------------------------------------------
@@ -205,12 +246,30 @@ function getTitle(gen: Generation): string {
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
+  if (m < 1)  return "ahora mismo";
+  if (m < 60) return `hace ${m}m`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  if (h < 24) return `hace ${h}h`;
+  return `hace ${Math.floor(h / 24)}d`;
 }
+
+function authorName(session_id: string): string {
+  const raw = session_id.replace(/^(anon-|sess-)/, "");
+  let hash = 0;
+  for (let i = 0; i < raw.length; i++) hash = (hash * 31 + raw.charCodeAt(i)) & 0x7fff;
+  return `Aventurero #${hash % 9000 + 1000}`;
+}
+
+const FIELD_LABELS: Record<string, string> = {
+  name: "Nombre", role: "Rol", race: "Raza", personality: "Personalidad",
+  secret: "Secreto", dialogue: "Diálogo", title: "Título", type: "Tipo",
+  objective: "Objetivo", reward: "Recompensa", location: "Ubicación", twist: "Giro",
+  rarity: "Rareza", description: "Descripción", effect: "Efecto", value: "Valor",
+  era: "Era", summary: "Resumen", factions: "Facciones", element: "Elemento",
+  style: "Estilo", damage: "Daño", special_ability: "Habilidad especial", lore: "Trasfondo",
+  difficulty: "Dificultad", hp: "HP", attack_style: "Estilo de ataque",
+  weakness: "Debilidad", drops: "Botín", class: "Clase",
+};
 
 // ---------------------------------------------------------------------------
 // JSON pretty-printer
@@ -248,7 +307,7 @@ function FieldsView({ data }: { data: Record<string, unknown> }) {
     <div className="fields-grid">
       {Object.entries(data).map(([k, v]) => (
         <div className="field-item" key={k}>
-          <div className="field-key">{k.replace(/_/g, " ")}</div>
+          <div className="field-key">{FIELD_LABELS[k] ?? k.replace(/_/g, " ")}</div>
           <div className="field-value">
             {Array.isArray(v)
               ? v.map((item, i) => <span key={i} className="array-item">{String(item)}</span>)
@@ -256,6 +315,62 @@ function FieldsView({ data }: { data: Record<string, unknown> }) {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// IllustratorPanel — HuggingFace image generation (single multi-view design sheet)
+// ---------------------------------------------------------------------------
+function IllustratorPanel({
+  type,
+  result,
+  onImageReady,
+}: {
+  type: GenerationType;
+  result: Record<string, unknown>;
+  onImageReady?: (url: string) => void;
+}) {
+  const [loading, setLoading]   = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [error, setError]       = useState<string | null>(null);
+
+  const handleGenerate = async () => {
+    setLoading(true);
+    setError(null);
+    const res = await apiGenerateImage(type, result);
+    setLoading(false);
+    if (res.url) {
+      setImageUrl(res.url);
+      onImageReady?.(res.url);
+    } else {
+      setError(res.error ?? "Error desconocido");
+    }
+  };
+
+  return (
+    <div className="illustrator-panel">
+      <div className="illustrator-header">🎨 Hoja de diseño del personaje</div>
+      <button
+        className="btn-illustrate"
+        onClick={handleGenerate}
+        disabled={loading}
+      >
+        {loading
+          ? <><span className="spinner" /> Generando diseño…</>
+          : imageUrl ? "🔄 Regenerar diseño" : "🎨 Generar hoja de diseño"}
+      </button>
+      {error && <div className="illustrator-error">{error}</div>}
+      {imageUrl && (
+        <div className="illustrator-image-wrap">
+          <img src={imageUrl} alt="Hoja de diseño del personaje" className="illustrator-image" />
+          <a
+            href={imageUrl}
+            download="hoja-de-diseno.png"
+            className="illustrator-download"
+          >⬇ Descargar</a>
+        </div>
+      )}
     </div>
   );
 }
@@ -277,6 +392,7 @@ function ResultCard({
   showActions?: boolean;
 }) {
   const [view, setView] = useState<"fields" | "json">("fields");
+  const [showIllustrator, setShowIllustrator] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(JSON.stringify(gen.result, null, 2));
@@ -300,25 +416,30 @@ function ResultCard({
         <span className={`result-badge badge-${gen.type}`}>{meta.icon} {meta.label}</span>
         <span className="result-title">{getTitle(gen)}</span>
         {gen.source === "fallback" && (
-          <span className="result-badge badge-fallback">fallback</span>
+          <span className="result-badge badge-fallback">respaldo</span>
         )}
         {showActions && (
           <div className="result-actions">
             <button
               className={`icon-btn ${isFav ? "fav" : ""}`}
               onClick={() => onFavToggle(gen.id, !isFav)}
-              title={isFav ? "Remove from favorites" : "Add to favorites"}
+              title={isFav ? "Quitar de favoritos" : "Añadir a favoritos"}
             >
-              {isFav ? "★ Saved" : "☆ Save"}
+              {isFav ? "★ Guardado" : "☆ Guardar"}
             </button>
             <button className="icon-btn" onClick={() => setView(view === "fields" ? "json" : "fields")}>
-              {view === "fields" ? "</> JSON" : "⊞ Fields"}
+              {view === "fields" ? "</> JSON" : "⊞ Campos"}
             </button>
-            <button className="icon-btn" onClick={handleCopy} title="Copy JSON">📋</button>
-            <button className="icon-btn" onClick={handleExport} title="Export JSON">⬇</button>
+            <button className="icon-btn" onClick={handleCopy} title="Copiar JSON">📋</button>
+            <button className="icon-btn" onClick={handleExport} title="Exportar JSON">⬇</button>
             {onShare && (
               <button className="icon-btn share-icon-btn" onClick={onShare} title="Compartir en la comunidad">🌐 Compartir</button>
             )}
+            <button
+              className={`icon-btn ${showIllustrator ? "active" : ""}`}
+              onClick={() => setShowIllustrator((v) => !v)}
+              title="Generar ilustración con IA"
+            >🎨 Ilustrar</button>
           </div>
         )}
       </div>
@@ -326,6 +447,10 @@ function ResultCard({
       {view === "fields"
         ? <FieldsView data={gen.result} />
         : <JsonDisplay data={gen.result} />}
+
+      {showIllustrator && (
+        <IllustratorPanel type={gen.type} result={gen.result} />
+      )}
     </div>
   );
 }
@@ -376,9 +501,9 @@ function GenerateForm({
         <div className="form-grid">
           {/* Common: genre */}
           <div className="form-field">
-            <label>Genre</label>
+            <label>Género</label>
             <select value={fields.genre ?? ""} onChange={(e) => setField("genre", e.target.value)}>
-              <option value="">— pick a genre —</option>
+              <option value="">— elige un género —</option>
               {GENRES.map((g) => <option key={g}>{g}</option>)}
             </select>
           </div>
@@ -386,13 +511,13 @@ function GenerateForm({
           {/* NPC */}
           {type === "npc" && <>
             <div className="form-field">
-              <label>Name (optional)</label>
-              <input placeholder="e.g. Aldric" value={fields.name ?? ""} onChange={(e) => setField("name", e.target.value)} />
+              <label>Nombre (opcional)</label>
+              <input placeholder="ej. Aldric" value={fields.name ?? ""} onChange={(e) => setField("name", e.target.value)} />
             </div>
             <div className="form-field">
-              <label>Role</label>
+              <label>Rol</label>
               <select value={fields.role ?? ""} onChange={(e) => setField("role", e.target.value)}>
-                <option value="">— pick a role —</option>
+                <option value="">— elige un rol —</option>
                 {NPC_ROLES.map((r) => <option key={r}>{r}</option>)}
               </select>
             </div>
@@ -401,13 +526,13 @@ function GenerateForm({
           {/* Quest */}
           {type === "quest" && <>
             <div className="form-field">
-              <label>Title (optional)</label>
-              <input placeholder='e.g. "The Stolen Relic"' value={fields.title ?? ""} onChange={(e) => setField("title", e.target.value)} />
+              <label>Título (opcional)</label>
+              <input placeholder='ej. "La Reliquia Robada"' value={fields.title ?? ""} onChange={(e) => setField("title", e.target.value)} />
             </div>
             <div className="form-field">
-              <label>Difficulty</label>
+              <label>Dificultad</label>
               <select value={fields.difficulty ?? ""} onChange={(e) => setField("difficulty", e.target.value)}>
-                <option value="">— pick difficulty —</option>
+                <option value="">— elige dificultad —</option>
                 {DIFFICULTIES.map((d) => <option key={d}>{d}</option>)}
               </select>
             </div>
@@ -416,13 +541,13 @@ function GenerateForm({
           {/* Item */}
           {type === "item" && <>
             <div className="form-field">
-              <label>Name (optional)</label>
-              <input placeholder='e.g. "Veilbreaker Sword"' value={fields.name ?? ""} onChange={(e) => setField("name", e.target.value)} />
+              <label>Nombre (opcional)</label>
+              <input placeholder='ej. "Espada Rompe-Velos"' value={fields.name ?? ""} onChange={(e) => setField("name", e.target.value)} />
             </div>
             <div className="form-field">
-              <label>Rarity</label>
+              <label>Rareza</label>
               <select value={fields.rarity ?? ""} onChange={(e) => setField("rarity", e.target.value)}>
-                <option value="">— pick rarity —</option>
+                <option value="">— elige rareza —</option>
                 {RARITIES.map((r) => <option key={r}>{r}</option>)}
               </select>
             </div>
@@ -431,13 +556,13 @@ function GenerateForm({
           {/* Lore */}
           {type === "lore" && <>
             <div className="form-field">
-              <label>Topic</label>
-              <input placeholder='e.g. "The Sundering War"' value={fields.topic ?? ""} onChange={(e) => setField("topic", e.target.value)} />
+              <label>Tema</label>
+              <input placeholder='ej. "La Gran Fractura"' value={fields.topic ?? ""} onChange={(e) => setField("topic", e.target.value)} />
             </div>
             <div className="form-field">
-              <label>Tone</label>
+              <label>Tono</label>
               <select value={fields.tone ?? ""} onChange={(e) => setField("tone", e.target.value)}>
-                <option value="">— pick a tone —</option>
+                <option value="">— elige un tono —</option>
                 {TONES.map((t) => <option key={t}>{t}</option>)}
               </select>
             </div>
@@ -446,27 +571,27 @@ function GenerateForm({
           {/* Weapon */}
           {type === "weapon" && <>
             <div className="form-field">
-              <label>Name (optional)</label>
-              <input placeholder='e.g. "Ashfang Blade"' value={fields.name ?? ""} onChange={(e) => setField("name", e.target.value)} />
+              <label>Nombre (opcional)</label>
+              <input placeholder='ej. "Hoja Ahumada"' value={fields.name ?? ""} onChange={(e) => setField("name", e.target.value)} />
             </div>
             <div className="form-field">
-              <label>Weapon Class</label>
+              <label>Tipo de arma</label>
               <select value={fields.weaponClass ?? ""} onChange={(e) => setField("weaponClass", e.target.value)}>
-                <option value="">— pick a class —</option>
+                <option value="">— elige un tipo —</option>
                 {WEAPON_CLASSES.map((c) => <option key={c}>{c}</option>)}
               </select>
             </div>
             <div className="form-field">
-              <label>Element</label>
+              <label>Elemento</label>
               <select value={fields.element ?? ""} onChange={(e) => setField("element", e.target.value)}>
-                <option value="">— pick an element —</option>
+                <option value="">— elige un elemento —</option>
                 {ELEMENTS.map((el) => <option key={el}>{el}</option>)}
               </select>
             </div>
             <div className="form-field">
-              <label>Combat Style</label>
+              <label>Estilo de combate</label>
               <select value={fields.style ?? ""} onChange={(e) => setField("style", e.target.value)}>
-                <option value="">— pick a style —</option>
+                <option value="">— elige un estilo —</option>
                 {WEAPON_STYLES.map((s) => <option key={s}>{s}</option>)}
               </select>
             </div>
@@ -475,20 +600,20 @@ function GenerateForm({
           {/* Enemy */}
           {type === "enemy" && <>
             <div className="form-field">
-              <label>Name (optional)</label>
-              <input placeholder='e.g. "Emberlord Moloch"' value={fields.name ?? ""} onChange={(e) => setField("name", e.target.value)} />
+              <label>Nombre (opcional)</label>
+              <input placeholder='ej. "Señor Brasa Moloch"' value={fields.name ?? ""} onChange={(e) => setField("name", e.target.value)} />
             </div>
             <div className="form-field">
-              <label>Enemy Type</label>
+              <label>Tipo de enemigo</label>
               <select value={fields.enemyType ?? ""} onChange={(e) => setField("enemyType", e.target.value)}>
-                <option value="">— pick a type —</option>
+                <option value="">— elige un tipo —</option>
                 {ENEMY_TYPES.map((t) => <option key={t}>{t}</option>)}
               </select>
             </div>
             <div className="form-field">
-              <label>Difficulty</label>
+              <label>Dificultad</label>
               <select value={fields.difficulty ?? ""} onChange={(e) => setField("difficulty", e.target.value)}>
-                <option value="">— pick difficulty —</option>
+                <option value="">— elige dificultad —</option>
                 {ENEMY_DIFFICULTIES.map((d) => <option key={d}>{d}</option>)}
               </select>
             </div>
@@ -496,7 +621,7 @@ function GenerateForm({
         </div>
 
         <button className="btn-generate" onClick={handleGenerate} disabled={loading}>
-          {loading ? <><span className="spinner" /> Generating…</> : `✦ Generate ${TYPE_META[type].label}`}
+          {loading ? <><span className="spinner" /> Generando…</> : `✦ Generar ${TYPE_META[type].label}`}
         </button>
       </div>
     </>
@@ -646,9 +771,15 @@ function PostCard({
 }) {
   const [expanded, setExpanded]       = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [showIllustrator, setShowIllustrator] = useState(false);
   const [liked, setLiked]             = useState(post.liked_by_me);
   const [likeCount, setLikeCount]     = useState(post.like_count);
   const [cmtCount, setCmtCount]       = useState(post.comment_count);
+
+  // Registrar vista al montar (señal débil para el algoritmo ML)
+  useEffect(() => {
+    apiRecordInteraction(post.id, "view");
+  }, [post.id]);
 
   const meta    = TYPE_META[post.type];
   const preview = (
@@ -665,7 +796,7 @@ function PostCard({
     e.stopPropagation();
     const newLiked = await apiToggleLike(post.id);
     setLiked(newLiked);
-    setLikeCount((c) => newLiked ? c + 1 : c - 1);
+    setLikeCount((c) => newLiked ? c + 1 : Math.max(0, c - 1));
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -684,16 +815,27 @@ function PostCard({
 
   return (
     <div className="post-card">
-      <div className="post-header" onClick={() => setExpanded((v) => !v)}>
+      <div className="post-header" onClick={() => {
+        const next = !expanded;
+        setExpanded(next);
+        // Registrar 'expand' como señal fuerte de interés (primera vez)
+        if (next) apiRecordInteraction(post.id, "expand");
+      }}>
         <span className={`result-badge badge-${post.type}`}>{meta.icon} {meta.label}</span>
         <span className="post-title">{post.title}</span>
-        <span className="post-author">Aventurero#{post.session_id.slice(5, 13).toUpperCase()}</span>
+        <span className="post-author">{authorName(post.session_id)}</span>
         <span className="post-time">{timeAgo(post.created_at)}</span>
         <span className="post-expand">{expanded ? "▲" : "▼"}</span>
       </div>
 
       {post.description && (
         <div className="post-description">{post.description}</div>
+      )}
+
+      {post.image_url && (
+        <div className="post-image-wrap">
+          <img src={post.image_url} alt="Hoja de diseño" className="post-image" />
+        </div>
       )}
 
       {!expanded && preview && (
@@ -703,6 +845,7 @@ function PostCard({
       {expanded && (
         <div className="post-body">
           <FieldsView data={post.result} />
+          <IllustratorPanel type={post.type} result={post.result} />
         </div>
       )}
 
@@ -796,6 +939,7 @@ function PublicarModal({
       result: gen.result,
       tags,
       generation_id: gen.id,
+      image_url: imageUrl,
     });
     setLoading(false);
     if (res.success) {
@@ -855,6 +999,20 @@ function PublicarModal({
               Se publicará el contenido generado
             </span>
           </div>
+          <div className="form-field">
+            <label>Ilustración (opcional — se compartirá con la publicación)</label>
+            <IllustratorPanel
+              type={gen.type}
+              result={gen.result}
+              onImageReady={(url) => { setImageUrl(url); showToast("🎨 Ilustración lista para compartir"); }}
+            />
+            {imageUrl && (
+              <div className="modal-image-attached">
+                <span className="image-attached-badge">✅ Ilustración adjunta</span>
+                <button className="icon-btn" onClick={() => setImageUrl(null)} style={{ marginLeft: 8 }}>Quitar</button>
+              </div>
+            )}
+          </div>
         </div>
         <div className="modal-footer">
           <button className="icon-btn" onClick={onClose}>Cancelar</button>
@@ -870,7 +1028,7 @@ function PublicarModal({
 // ---------------------------------------------------------------------------
 // SocialPanel
 // ---------------------------------------------------------------------------
-type SocialSubTab = "feed" | "explorar" | "misposts";
+type SocialSubTab = "feed" | "trending" | "explorar" | "misposts";
 
 function SocialPanel({
   latest,
@@ -885,18 +1043,20 @@ function SocialPanel({
   const [followedTags, setFollowedTags] = useState<Set<string>>(new Set());
   const [popularTags, setPopularTags] = useState<Array<{ tag: string; count: number }>>([]);
   const [filterTag, setFilterTag]     = useState<string | null>(null);
+  const [sortMode, setSortMode]       = useState<"reciente" | "popular">("reciente");
   const [shareTarget, setShareTarget] = useState<Generation | null>(null);
 
   const loadPosts = useCallback(async () => {
     setLoading(true);
     try {
-      if (subTab === "feed")     setPosts(await apiSocialFeed());
-      else if (subTab === "explorar") setPosts(await apiExplore(filterTag));
-      else                       setPosts(await apiMyPosts());
+      if (subTab === "feed")         setPosts(await apiSocialFeed());
+      else if (subTab === "trending") setPosts(await apiTrending());
+      else if (subTab === "explorar") setPosts(await apiExplore(filterTag, sortMode));
+      else                            setPosts(await apiMyPosts());
     } finally {
       setLoading(false);
     }
-  }, [subTab, filterTag]);
+  }, [subTab, filterTag, sortMode]);
 
   const loadMeta = useCallback(async () => {
     const [followed, popular] = await Promise.all([apiFollowedTags(), apiPopularTags()]);
@@ -935,6 +1095,10 @@ function SocialPanel({
             onClick={() => { setSubTab("feed"); setFilterTag(null); }}>
             ✦ Para ti
           </button>
+          <button className={`subtab-btn ${subTab === "trending" ? "active" : ""}`}
+            onClick={() => { setSubTab("trending"); setFilterTag(null); }}>
+            🔥 Trending
+          </button>
           <button className={`subtab-btn ${subTab === "explorar" ? "active" : ""}`}
             onClick={() => setSubTab("explorar")}>
             🔍 Explorar
@@ -951,10 +1115,25 @@ function SocialPanel({
           )}
         </div>
 
-        {subTab === "explorar" && filterTag && (
-          <div className="filter-banner">
-            Filtrando por: <strong>#{filterTag}</strong>
-            <button className="clear-filter-btn" onClick={() => setFilterTag(null)}>✕ Quitar</button>
+        {subTab === "explorar" && (
+          <div className="explore-controls">
+            {filterTag && (
+              <div className="filter-banner">
+                Filtrando por: <strong>#{filterTag}</strong>
+                <button className="clear-filter-btn" onClick={() => setFilterTag(null)}>✕ Quitar</button>
+              </div>
+            )}
+            <div className="sort-controls">
+              <span className="sort-label">Ordenar:</span>
+              <button
+                className={`sort-btn ${sortMode === "reciente" ? "active" : ""}`}
+                onClick={() => setSortMode("reciente")}
+              >🕐 Más recientes</button>
+              <button
+                className={`sort-btn ${sortMode === "popular" ? "active" : ""}`}
+                onClick={() => setSortMode("popular")}
+              >⭐ Más populares</button>
+            </div>
           </div>
         )}
 
@@ -966,7 +1145,9 @@ function SocialPanel({
             <p>
               {subTab === "feed"
                 ? "Tu feed está vacío. ¡Sigue etiquetas y publica creaciones!"
-                : subTab === "explorar"
+                : subTab === "trending"
+                  ? "No hay tendencias todavía. ¡Publica y consigue likes!"
+                  : subTab === "explorar"
                   ? filterTag
                     ? `Sin publicaciones con #${filterTag}.`
                     : "Sin publicaciones todavía. ¡Sé el primero!"
@@ -1082,17 +1263,17 @@ function App() {
   const handleResult = (gen: Generation) => {
     setLatest(gen);
     setHistory((h) => [gen, ...h]);
-    showToast(`${TYPE_META[gen.type].label} generated! ${gen.source === "fallback" ? "(fallback used)" : ""}`);
+    showToast(`¡${TYPE_META[gen.type].label} generado! ${gen.source === "fallback" ? "(usando respaldo)" : ""}`);
   };
 
   const handleFavToggle = async (id: number, add: boolean) => {
     await apiToggleFav(id, add);
     if (add) {
       setFavIds((s) => new Set(s).add(id));
-      showToast("Added to favorites ★");
+      showToast("¡Añadido a favoritos ★");
     } else {
       setFavIds((s) => { const n = new Set(s); n.delete(id); return n; });
-      showToast("Removed from favorites");
+      showToast("Eliminado de favoritos");
     }
     loadFavorites();
   };
@@ -1102,12 +1283,12 @@ function App() {
       <header>
         <div>
           <div className="logo">⚔ IndieForge AI</div>
-          <div className="logo-sub">Game Content Generator</div>
+          <div className="logo-sub">Generador de Contenido para Videojuegos</div>
         </div>
         <nav>
-          <button className={`tab-btn ${tab === "generate"  ? "active" : ""}`} onClick={() => { setTab("generate");  setSelected(null); }}>✦ Generate</button>
-          <button className={`tab-btn ${tab === "history"   ? "active" : ""}`} onClick={() => { setTab("history");   setSelected(null); loadHistory(); }}>📖 History</button>
-          <button className={`tab-btn ${tab === "favorites" ? "active" : ""}`} onClick={() => { setTab("favorites"); setSelected(null); loadFavorites(); }}>★ Favorites</button>
+          <button className={`tab-btn ${tab === "generate"  ? "active" : ""}`} onClick={() => { setTab("generate");  setSelected(null); }}>✦ Generar</button>
+          <button className={`tab-btn ${tab === "history"   ? "active" : ""}`} onClick={() => { setTab("history");   setSelected(null); loadHistory(); }}>📖 Historial</button>
+          <button className={`tab-btn ${tab === "favorites" ? "active" : ""}`} onClick={() => { setTab("favorites"); setSelected(null); loadFavorites(); }}>★ Favoritos</button>
           <button className={`tab-btn ${tab === "social"    ? "active" : ""}`} onClick={() => { setTab("social");    setSelected(null); }}>🌐 Social</button>
         </nav>
       </header>
@@ -1116,7 +1297,7 @@ function App() {
         {/* Detail view when card is clicked */}
         {selected && (
           <>
-            <button className="icon-btn" style={{ marginBottom: 16 }} onClick={() => setSelected(null)}>← Back</button>
+            <button className="icon-btn" style={{ marginBottom: 16 }} onClick={() => setSelected(null)}>← Volver</button>
             <ResultCard gen={selected} isFav={favIds.has(selected.id)} onFavToggle={handleFavToggle} />
           </>
         )}
@@ -1138,7 +1319,7 @@ function App() {
             favIds={favIds}
             onFavToggle={handleFavToggle}
             onSelect={setSelected}
-            emptyMsg="No generations yet. Start by creating an NPC, Quest, Item, Lore, Weapon or Enemy."
+            emptyMsg="Aún no hay generaciones. Crea un NPC, Misión, Objeto, Trasfondo, Arma o Enemigo."
           />
         )}
 
@@ -1149,7 +1330,7 @@ function App() {
             favIds={favIds}
             onFavToggle={handleFavToggle}
             onSelect={setSelected}
-            emptyMsg="No favorites yet. Save a generation you like by clicking ☆ Save."
+            emptyMsg="Aún no hay favoritos. Guarda una generación haciendo clic en ☆ Guardar."
           />
         )}
 

@@ -696,6 +696,81 @@
       .social-layout { flex-direction: column; }
       .social-sidebar { width: 100%; }
     }
+
+    /* ---------- SORT / EXPLORE CONTROLS ---------- */
+    .explore-controls { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .sort-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .sort-label { font-size: 0.8em; color: var(--muted); }
+    .sort-btn {
+      padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted); cursor: pointer; font-size: 0.82em;
+      transition: all .15s;
+    }
+    .sort-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .sort-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ---------- ILLUSTRATOR PANEL ---------- */
+    .illustrator-panel {
+      margin-top: 16px; padding: 16px; border-radius: 10px;
+      background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.25);
+    }
+    .illustrator-header {
+      font-size: 0.9em; font-weight: 600; color: var(--accent2);
+      margin-bottom: 12px;
+    }
+    .illustrator-angles { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .angle-btn {
+      padding: 6px 14px; border-radius: 20px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); cursor: pointer; font-size: 0.82em;
+      position: relative; transition: all .15s;
+    }
+    .angle-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+    .angle-btn.active { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+    .angle-btn.has-image { border-color: #10b981; }
+    .angle-dot { position: absolute; top: 2px; right: 4px; font-size: 0.5em; color: #10b981; }
+    .btn-illustrate {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; border-radius: 8px;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      color: #fff; border: none; cursor: pointer; font-size: 0.88em;
+      font-weight: 600; transition: opacity .15s;
+    }
+    .btn-illustrate:hover { opacity: 0.88; }
+    .btn-illustrate:disabled { opacity: 0.5; cursor: not-allowed; }
+    .illustrator-error {
+      margin-top: 10px; padding: 10px 14px; border-radius: 8px;
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+      color: #ef4444; font-size: 0.83em;
+    }
+    .illustrator-image-wrap {
+      margin-top: 14px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+    }
+    .illustrator-image {
+      width: 100%; max-width: 512px; border-radius: 10px;
+      border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .illustrator-download {
+      font-size: 0.82em; color: var(--accent2); text-decoration: none;
+      padding: 4px 10px; border: 1px solid var(--accent2); border-radius: 6px;
+    }
+    .illustrator-download:hover { background: var(--accent2); color: #fff; }
+    /* Post image (shared illustrations in social feed) */
+    .post-image-wrap {
+      margin: 8px 0; border-radius: 10px; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .post-image {
+      width: 100%; display: block; max-height: 420px; object-fit: contain;
+      background: #0d0d14;
+    }
+    /* PublicarModal image attachment */
+    .modal-image-attached {
+      display: flex; align-items: center; margin-top: 8px;
+      padding: 6px 10px; border-radius: 8px;
+      background: rgba(16,185,129,0.12); border: 1px solid #10b981;
+    }
+    .image-attached-badge { font-size: 0.88em; color: #10b981; }
   </style>
 </head>
 <body>

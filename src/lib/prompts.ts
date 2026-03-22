@@ -66,58 +66,58 @@ export function buildPrompt(type: GenerationType, meta: PromptMeta): string {
 }
 
 function npcPrompt(m: NPCMeta): string {
-  const name  = m.name  || "a random character";
-  const genre = m.genre || "fantasy";
-  const role  = m.role  || "villager";
-  return `Generate a ${genre} NPC named ${name} who is a ${role}.
-Respond ONLY with valid JSON matching this exact schema, nothing else:
-{"name":"string","role":"string","race":"string","personality":"string (max 15 words)","secret":"string (max 15 words)","dialogue":"string (max 20 words)"}`;
+  const name  = m.name  || "un personaje aleatorio";
+  const genre = m.genre || "fantasía";
+  const role  = m.role  || "aldeano";
+  return `Eres un escritor creativo de videojuegos de rol. Genera un NPC rico en detalles de ${genre} llamado ${name} que es un ${role}. TODO EN ESPAÑOL.
+Responde SOLO con JSON válido con este esquema exacto, sin texto adicional ni markdown:
+{"name":"string","role":"string","race":"string","age":"string","appearance":"descripción física detallada (25-35 palabras)","personality":"rasgos de personalidad completos (20-30 palabras)","backstory":"historia de fondo (30-40 palabras)","secret":"secreto oscuro o revelación (15-20 palabras)","motivation":"qué quiere conseguir (15-20 palabras)","dialogue":"frase característica del personaje (20-30 palabras)","combat_style":"cómo pelea o se defiende (10-15 palabras)"}`;
 }
 
 function questPrompt(m: QuestMeta): string {
-  const title      = m.title      || "an adventure";
-  const genre      = m.genre      || "fantasy";
-  const difficulty = m.difficulty || "medium";
-  return `Generate a ${genre} quest titled "${title}" with ${difficulty} difficulty.
-Respond ONLY with valid JSON matching this exact schema, nothing else:
-{"title":"string","type":"string","objective":"string (max 20 words)","reward":"string","location":"string","twist":"string (max 15 words)"}`;
+  const title      = m.title      || "una aventura";
+  const genre      = m.genre      || "fantasía";
+  const difficulty = m.difficulty || "media";
+  return `Eres un diseñador de videojuegos de rol. Genera una misión detallada de ${genre} titulada "${title}" con dificultad ${difficulty}. TODO EN ESPAÑOL.
+Responde SOLO con JSON válido con este esquema exacto, sin texto adicional ni markdown:
+{"title":"string","type":"string","difficulty":"string","objective":"objetivo principal detallado (25-35 palabras)","description":"contexto narrativo de la misión (30-40 palabras)","reward":"recompensas completas","location":"lugar específico con descripción breve (15-20 palabras)","enemies":["enemigo1","enemigo2"],"twist":"giro argumental impactante (20-25 palabras)","steps":["paso1","paso2","paso3"]}`;
 }
 
 function itemPrompt(m: ItemMeta): string {
-  const name   = m.name   || "a magical object";
-  const genre  = m.genre  || "fantasy";
-  const rarity = m.rarity || "rare";
-  return `Generate a ${rarity} ${genre} item named "${name}".
-Respond ONLY with valid JSON matching this exact schema, nothing else:
-{"name":"string","type":"string","rarity":"string","description":"string (max 20 words)","effect":"string (max 15 words)","value":number}`;
+  const name   = m.name   || "un objeto mágico";
+  const genre  = m.genre  || "fantasía";
+  const rarity = m.rarity || "raro";
+  return `Eres un diseñador de objetos para videojuegos de rol. Genera un objeto ${rarity} de ${genre} llamado "${name}". TODO EN ESPAÑOL.
+Responde SOLO con JSON válido con este esquema exacto, sin texto adicional ni markdown:
+{"name":"string","type":"string","rarity":"string","description":"descripción visual y táctil detallada (25-35 palabras)","lore":"historia del objeto (25-35 palabras)","effect":"efecto mecánico completo con números (20-25 palabras)","requirements":"requisitos para usarlo (10-15 palabras)","value":number,"weight":"string"}`;
 }
 
 function lorePrompt(m: LoreMeta): string {
-  const topic = m.topic || "the world";
-  const genre = m.genre || "fantasy";
-  const tone  = m.tone  || "epic";
-  return `Generate a ${tone} ${genre} lore entry about "${topic}".
-Respond ONLY with valid JSON matching this exact schema, nothing else:
-{"title":"string","era":"string","summary":"string (max 30 words)","factions":["string","string"],"secret":"string (max 20 words)"}`;
+  const topic = m.topic || "el mundo";
+  const genre = m.genre || "fantasía";
+  const tone  = m.tone  || "épico";
+  return `Eres un escritor de trasfondo para videojuegos de rol. Genera una entrada de lore ${tone} de ${genre} sobre "${topic}". TODO EN ESPAÑOL.
+Responde SOLO con JSON válido con este esquema exacto, sin texto adicional ni markdown:
+{"title":"string","era":"string","region":"string","summary":"resumen narrativo completo (40-55 palabras)","factions":["facción1 con descripción breve","facción2 con descripción breve"],"key_figures":["personaje importante 1","personaje importante 2"],"secret":"verdad oculta o conspiración (20-30 palabras)","impact":"cómo afecta al mundo actual (20-25 palabras)"}`;
 }
 
 function weaponPrompt(m: WeaponMeta): string {
-  const name        = m.name        || "a legendary weapon";
-  const genre       = m.genre       || "fantasy";
-  const weaponClass = m.weaponClass || "sword";
-  const element     = m.element     || "none";
-  const style       = m.style       || "one-handed";
-  return `Generate a ${genre} ${style} ${weaponClass} named "${name}" with ${element} element.
-Respond ONLY with valid JSON matching this exact schema, nothing else:
-{"name":"string","class":"string","element":"string","style":"string","damage":"string","special_ability":"string (max 15 words)","lore":"string (max 20 words)","value":number}`;
+  const name        = m.name        || "un arma legendaria";
+  const genre       = m.genre       || "fantasía";
+  const weaponClass = m.weaponClass || "espada";
+  const element     = m.element     || "ninguno";
+  const style       = m.style       || "una mano";
+  return `Eres un herrero legendario y escritor de videojuegos de rol. Genera un ${weaponClass} de ${genre} para ${style} llamada "${name}" con elemento ${element}. TODO EN ESPAÑOL.
+Responde SOLO con JSON válido con este esquema exacto, sin texto adicional ni markdown:
+{"name":"string","class":"string","element":"string","style":"string","damage":"rango de daño con tipos (ej: 75-110 físico + 35 fuego)","speed":"velocidad de ataque","range":"alcance del arma","special_ability":"habilidad especial única con mecánica completa (20-30 palabras)","passive":"efecto pasivo (15-20 palabras)","lore":"historia del arma (30-40 palabras)","crafting_material":"materiales para forjarla (10-15 palabras)","value":number}`;
 }
 
 function enemyPrompt(m: EnemyMeta): string {
-  const name       = m.name       || "a fearsome enemy";
-  const genre      = m.genre      || "fantasy";
-  const enemyType  = m.enemyType  || "beast";
-  const difficulty = m.difficulty || "medium";
-  return `Generate a ${difficulty} ${genre} ${enemyType} enemy named "${name}".
-Respond ONLY with valid JSON matching this exact schema, nothing else:
-{"name":"string","type":"string","difficulty":"string","hp":number,"attack_style":"string (max 15 words)","weakness":"string","drops":"string (max 10 words)","description":"string (max 20 words)"}`;
+  const name       = m.name       || "un enemigo temible";
+  const genre      = m.genre      || "fantasía";
+  const enemyType  = m.enemyType  || "bestia";
+  const difficulty = m.difficulty || "medio";
+  return `Eres un diseñador de enemigos para videojuegos de rol. Genera un enemigo ${difficulty} de tipo ${enemyType} en género ${genre} llamado "${name}". TODO EN ESPAÑOL.
+Responde SOLO con JSON válido con este esquema exacto, sin texto adicional ni markdown:
+{"name":"string","type":"string","difficulty":"string","hp":number,"armor":number,"speed":"string","attack_style":"estilo de combate detallado (20-25 palabras)","abilities":["habilidad1 con descripción","habilidad2 con descripción"],"weakness":"debilidades específicas (15-20 palabras)","resistance":"resistencias del enemigo (10-15 palabras)","drops":"botín completo con probabilidades (15-20 palabras)","description":"descripción física y personalidad (30-40 palabras)","lore":"origen e historia (25-30 palabras)"}`;
 }

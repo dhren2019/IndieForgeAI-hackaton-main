@@ -8,6 +8,7 @@ import { handleGenerate }       from "./routes/generate";
 import { handleHistory }        from "./routes/history";
 import { handleFavoriteToggle } from "./routes/favorites";
 import { handleSocial }         from "./routes/social";
+import { handleImageGen }       from "./routes/imagegen";
 import { getDB }                from "./db/client";
 import { readFileSync }         from "fs";
 import { join }                 from "path";
@@ -35,6 +36,9 @@ function runMigration() {
 }
 
 runMigration();
+
+// Ensure image_url column exists for databases created before this schema change
+try { getDB().run("ALTER TABLE posts ADD COLUMN image_url TEXT"); } catch { /* already exists */ }
 
 // ---------------------------------------------------------------------------
 // Static file helper — serves frontend/
@@ -100,6 +104,8 @@ Bun.serve({
     // API routes
     if (pathname === "/api/generate" && req.method === "POST") {
       res = await handleGenerate(req);
+    } else if (pathname === "/api/imagen" && req.method === "POST") {
+      res = await handleImageGen(req);
     } else if (pathname === "/api/history" && req.method === "GET") {
       res = handleHistory(req);
     } else if (pathname.startsWith("/api/favorite")) {

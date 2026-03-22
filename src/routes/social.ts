@@ -9,6 +9,7 @@ import {
   getPostById,
   getFeed,
   explorePosts,
+  getTrendingPosts,
   getMyPosts,
   deletePost,
   toggleLike,
@@ -18,7 +19,9 @@ import {
   unfollowTag,
   getFollowedTags,
   getPopularTags,
+  recordInteraction,
   type GenerationType,
+  type UserInteractionType,
 } from "../db/client";
 
 // ---------------------------------------------------------------------------
@@ -38,6 +41,10 @@ export async function handleSocial(req: Request): Promise<Response> {
   // GET   /api/social/feed
   if (pathname === "/api/social/feed" && method === "GET")
     return handleFeed(url, session);
+
+  // GET   /api/social/trending
+  if (pathname === "/api/social/trending" && method === "GET")
+    return handleTrending(url, session);
 
   // GET   /api/social/explore
   if (pathname === "/api/social/explore" && method === "GET")
@@ -62,6 +69,10 @@ export async function handleSocial(req: Request): Promise<Response> {
   // POST  /api/social/tags/dejar
   if (pathname === "/api/social/tags/dejar" && method === "POST")
     return handleUnfollowTag(req, session);
+
+  // POST  /api/social/interactions  (señales ML del usuario)
+  if (pathname === "/api/social/interactions" && method === "POST")
+    return handleRecordInteraction(req, session);
 
   // Rutas con ID: /api/social/posts/:id[/...]
   const postMatch = pathname.match(/^\/api\/social\/posts\/(\d+)(\/.*)?$/);
@@ -94,6 +105,7 @@ async function handleCreatePost(req: Request, session: string): Promise<Response
   const result      = body.result as Record<string, unknown>;
   const tags        = Array.isArray(body.tags) ? body.tags.map(String) : [];
   const gen_id      = typeof body.generation_id === "number" ? body.generation_id : null;
+  const image_url   = typeof body.image_url === "string" ? body.image_url : null;
 
   if (!title)  return json({ error: "El título es obligatorio" }, 400);
   if (!type || !["npc","quest","item","lore","weapon","enemy"].includes(type))
@@ -102,8 +114,16 @@ async function handleCreatePost(req: Request, session: string): Promise<Response
     return json({ error: "Resultado inválido" }, 400);
 
   const db   = getDB();
-  const post = createPost(db, { session_id: session, generation_id: gen_id, title, description, type, result, tags });
+  const post = createPost(db, { session_id: session, generation_id: gen_id, title, description, type, result, tags, image_url });
   return json({ success: true, data: post });
+}
+
+function handleTrending(url: URL, session: string): Response {
+  const limit  = Math.min(Number(url.searchParams.get("limit")  ?? "20"), 50);
+  const offset = Number(url.searchParams.get("offset") ?? "0");
+  const db     = getDB();
+  const posts  = getTrendingPosts(db, session, limit, offset);
+  return json({ success: true, data: posts });
 }
 
 function handleFeed(url: URL, session: string): Response {
@@ -118,8 +138,9 @@ function handleExplore(url: URL, session: string): Response {
   const limit  = Math.min(Number(url.searchParams.get("limit")  ?? "20"), 50);
   const offset = Number(url.searchParams.get("offset") ?? "0");
   const tag    = url.searchParams.get("tag") || null;
+  const sort   = url.searchParams.get("sort") || "reciente";
   const db     = getDB();
-  const posts  = explorePosts(db, session, tag, limit, offset);
+  const posts  = explorePosts(db, session, tag, sort, limit, offset);
   return json({ success: true, data: posts });
 }
 
@@ -146,6 +167,8 @@ function handleDeletePost(id: number, session: string): Response {
 function handleLike(postId: number, session: string): Response {
   const db    = getDB();
   const liked = toggleLike(db, session, postId);
+  // Registrar interacción 'like' para el algoritmo ML
+  if (liked) recordInteraction(db, session, postId, "like");
   return json({ success: true, liked });
 }
 
@@ -166,6 +189,8 @@ async function handleAddComment(req: Request, postId: number, session: string): 
 
   const db      = getDB();
   const comment = addComment(db, session, postId, content);
+  // Registrar interacción 'comment' para el algoritmo ML
+  recordInteraction(db, session, postId, "comment");
   return json({ success: true, data: comment });
 }
 
@@ -194,6 +219,17 @@ async function handleUnfollowTag(req: Request, session: string): Promise<Respons
   const tag  = body?.tag?.trim().toLowerCase();
   if (!tag)  return json({ error: "Etiqueta requerida" }, 400);
   unfollowTag(getDB(), session, tag);
+  return json({ success: true });
+}
+
+async function handleRecordInteraction(req: Request, session: string): Promise<Response> {
+  const body = await req.json().catch(() => null) as { post_id?: number; action?: string } | null;
+  const post_id = Number(body?.post_id);
+  const action  = body?.action as UserInteractionType | undefined;
+  if (!post_id || isNaN(post_id)) return json({ error: "post_id inválido" }, 400);
+  if (!action || !["view", "expand", "like", "comment"].includes(action))
+    return json({ error: "action inválida" }, 400);
+  recordInteraction(getDB(), session, post_id, action);
   return json({ success: true });
 }
 

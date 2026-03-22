@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS posts (
   description   TEXT NOT NULL DEFAULT '',
   type          TEXT NOT NULL CHECK (type IN ('npc', 'quest', 'item', 'lore', 'weapon', 'enemy')),
   result        TEXT NOT NULL,
+  image_url     TEXT,
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -78,3 +79,18 @@ CREATE INDEX IF NOT EXISTS idx_posts_created    ON posts(created_at);
 CREATE INDEX IF NOT EXISTS idx_post_tags_tag    ON post_tags(tag);
 CREATE INDEX IF NOT EXISTS idx_post_likes_post  ON post_likes(post_id);
 CREATE INDEX IF NOT EXISTS idx_post_comments_post ON post_comments(post_id);
+
+-- Tabla de interacciones del usuario (señales para el algoritmo de recomendación ML)
+-- action: 'view' (0.1), 'expand' (1.0), 'like' (3.0), 'comment' (2.5)
+CREATE TABLE IF NOT EXISTS user_interactions (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id   TEXT NOT NULL,
+  post_id      INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  action       TEXT NOT NULL CHECK (action IN ('view', 'expand', 'like', 'comment')),
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_ui_session         ON user_interactions(session_id);
+CREATE INDEX IF NOT EXISTS idx_ui_post            ON user_interactions(post_id);
+CREATE INDEX IF NOT EXISTS idx_ui_session_post    ON user_interactions(session_id, post_id);
+CREATE INDEX IF NOT EXISTS idx_ui_session_action  ON user_interactions(session_id, action);
