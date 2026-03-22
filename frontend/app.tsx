@@ -917,6 +917,7 @@ function PublicarModal({
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags]         = useState<string[]>([]);
   const [loading, setLoading]   = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const addTag = (raw: string) => {
     const t = raw.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 30);
