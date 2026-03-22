@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      NODE_ENV: production
+      # SQLite mode (no Postgres needed for quick demo)
+      DATABASE_FILE: /data/indieforge.db
+      HF_TOKEN: ${HF_TOKEN}
+      HF_MODEL_URL: ${HF_MODEL_URL}
+    volumes:
+      - app_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/history"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: Postgres service (uncomment if you switch to bun:postgres)
+  # postgres:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_DB: indieforge
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pg_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+volumes:
+  app_data:
+  # pg_data:
