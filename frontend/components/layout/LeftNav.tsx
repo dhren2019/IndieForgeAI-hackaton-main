@@ -10,25 +10,33 @@ const NAV_ITEMS: { id: AppTab; label: string; icon: string }[] = [
 ];
 
 export function LeftNav() {
-  const { tab, setTab } = useAppState();
+  const { tab, setTab, navCollapsed, toggleNav } = useAppState();
   return (
     <nav className="app-nav">
       <div className="app-nav__section">
-        <span className="app-nav__label">Navegación</span>
+        {!navCollapsed && <span className="app-nav__label">Navegación</span>}
         {NAV_ITEMS.map(item => (
           <button
             key={item.id}
             className={`nav-item${tab === item.id ? " nav-item--active" : ""}`}
             onClick={() => setTab(item.id)}
+            title={navCollapsed ? item.label : undefined}
           >
             <span className="nav-item__icon">{item.icon}</span>
-            <span className="nav-item__label">{item.label}</span>
+            {!navCollapsed && <span className="nav-item__label">{item.label}</span>}
           </button>
         ))}
       </div>
-      <div className="app-nav__footer">
-        IndieForge AI v1.0
-      </div>
+
+      {/* Toggle at the bottom — icon only */}
+      <button
+        className="app-nav__toggle"
+        onClick={toggleNav}
+        title={navCollapsed ? "Expandir menú" : "Colapsar menú"}
+        aria-label={navCollapsed ? "Expandir menú" : "Colapsar menú"}
+      >
+        <span className="app-nav__toggle-icon">{navCollapsed ? "›" : "‹"}</span>
+      </button>
     </nav>
   );
 }

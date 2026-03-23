@@ -11,7 +11,11 @@ import { FavoritesPage }            from "./pages/FavoritesPage";
 import { SocialPage }               from "./pages/SocialPage";
 
 function Pages() {
-  const { tab, toasts, showToast } = useAppState();
+  const { tab, toasts, showToast, navCollapsed } = useAppState();
+
+  React.useEffect(() => {
+    document.getElementById("root")?.classList.toggle("nav-collapsed", navCollapsed);
+  }, [navCollapsed]);
 
   return (
     <>

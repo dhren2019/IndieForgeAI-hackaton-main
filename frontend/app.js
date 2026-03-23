@@ -3,15 +3,29 @@ var __getProtoOf = Object.getPrototypeOf;
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+function __accessProp(key) {
+  return this[key];
+}
+var __toESMCache_node;
+var __toESMCache_esm;
 var __toESM = (mod, isNodeMode, target) => {
+  var canCache = mod != null && typeof mod === "object";
+  if (canCache) {
+    var cache = isNodeMode ? __toESMCache_node ??= new WeakMap : __toESMCache_esm ??= new WeakMap;
+    var cached = cache.get(mod);
+    if (cached)
+      return cached;
+  }
   target = mod != null ? __create(__getProtoOf(mod)) : {};
   const to = isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target;
   for (let key of __getOwnPropNames(mod))
     if (!__hasOwnProp.call(to, key))
       __defProp(to, key, {
-        get: () => mod[key],
+        get: __accessProp.bind(mod, key),
         enumerable: true
       });
+  if (canCache)
+    cache.set(mod, to);
   return to;
 };
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
@@ -1821,8 +1835,9 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/index.js
 var require_react = __commonJS((exports, module) => {
+  var react_development = __toESM(require_react_development());
   if (false) {} else {
-    module.exports = require_react_development();
+    module.exports = react_development;
   }
 });
 
@@ -2271,15 +2286,16 @@ var require_scheduler_development = __commonJS((exports) => {
 
 // node_modules/scheduler/index.js
 var require_scheduler = __commonJS((exports, module) => {
+  var scheduler_development = __toESM(require_scheduler_development());
   if (false) {} else {
-    module.exports = require_scheduler_development();
+    module.exports = scheduler_development;
   }
 });
 
 // node_modules/react-dom/cjs/react-dom.development.js
 var require_react_dom_development = __commonJS((exports) => {
-  var React = __toESM(require_react(), 1);
-  var Scheduler = __toESM(require_scheduler(), 1);
+  var React = __toESM(require_react());
+  var Scheduler = __toESM(require_scheduler());
   if (true) {
     (function() {
       if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
@@ -22725,14 +22741,15 @@ You might need to use a local HTTP server (instead of file://): ` + "https://rea
 
 // node_modules/react-dom/index.js
 var require_react_dom = __commonJS((exports, module) => {
+  var react_dom_development = __toESM(require_react_dom_development());
   if (false) {} else {
-    module.exports = require_react_dom_development();
+    module.exports = react_dom_development;
   }
 });
 
 // node_modules/react-dom/client.js
 var require_client = __commonJS((exports) => {
-  var m = __toESM(require_react_dom(), 1);
+  var m = __toESM(require_react_dom());
   if (false) {} else {
     i = m.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
     exports.createRoot = function(c, o) {
@@ -22757,7 +22774,7 @@ var require_client = __commonJS((exports) => {
 
 // node_modules/react/cjs/react-jsx-dev-runtime.development.js
 var require_react_jsx_dev_runtime_development = __commonJS((exports) => {
-  var React = __toESM(require_react(), 1);
+  var React = __toESM(require_react());
   if (true) {
     (function() {
       var REACT_ELEMENT_TYPE = Symbol.for("react.element");
@@ -23638,12 +23655,14 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/jsx-dev-runtime.js
 var require_jsx_dev_runtime = __commonJS((exports, module) => {
+  var react_jsx_dev_runtime_development = __toESM(require_react_jsx_dev_runtime_development());
   if (false) {} else {
-    module.exports = require_react_jsx_dev_runtime_development();
+    module.exports = react_jsx_dev_runtime_development;
   }
 });
 
 // frontend/app.tsx
+var import_react17 = __toESM(require_react(), 1);
 var import_client = __toESM(require_client(), 1);
 
 // frontend/state/app-state.tsx
@@ -23738,10 +23757,18 @@ function AppProvider({ children }) {
   const [tab, setTab] = import_react.useState("generate");
   const [latest, setLatest] = import_react.useState(null);
   const [toasts, setToasts] = import_react.useState([]);
+  const [navCollapsed, setNavCollapsed] = import_react.useState(() => localStorage.getItem("indieforge_nav_collapsed") === "true");
   const [selectedModel, setSelectedModelRaw] = import_react.useState(() => localStorage.getItem("indieforge_model") ?? DEFAULT_MODEL);
   const setSelectedModel = import_react.useCallback((model) => {
     localStorage.setItem("indieforge_model", model);
     setSelectedModelRaw(model);
+  }, []);
+  const toggleNav = import_react.useCallback(() => {
+    setNavCollapsed((v) => {
+      const next = !v;
+      localStorage.setItem("indieforge_nav_collapsed", String(next));
+      return next;
+    });
   }, []);
   const showToast = import_react.useCallback((msg, kind = "ok") => {
     const id = crypto.randomUUID();
@@ -23749,7 +23776,7 @@ function AppProvider({ children }) {
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3000);
   }, []);
   return /* @__PURE__ */ jsx_dev_runtime.jsxDEV(AppContext.Provider, {
-    value: { tab, latest, toasts, selectedModel, showToast, setTab, setLatest, setSelectedModel },
+    value: { tab, latest, toasts, selectedModel, navCollapsed, showToast, setTab, setLatest, setSelectedModel, toggleNav },
     children
   }, undefined, false, undefined, this);
 }
@@ -23794,26 +23821,27 @@ var NAV_ITEMS = [
   { id: "social", label: "Social", icon: "\uD83C\uDF10" }
 ];
 function LeftNav() {
-  const { tab, setTab } = useAppState();
+  const { tab, setTab, navCollapsed, toggleNav } = useAppState();
   return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("nav", {
     className: "app-nav",
     children: [
       /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
         className: "app-nav__section",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
+          !navCollapsed && /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
             className: "app-nav__label",
             children: "Navegación"
           }, undefined, false, undefined, this),
           NAV_ITEMS.map((item) => /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("button", {
             className: `nav-item${tab === item.id ? " nav-item--active" : ""}`,
             onClick: () => setTab(item.id),
+            title: navCollapsed ? item.label : undefined,
             children: [
               /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
                 className: "nav-item__icon",
                 children: item.icon
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
+              !navCollapsed && /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
                 className: "nav-item__label",
                 children: item.label
               }, undefined, false, undefined, this)
@@ -23821,9 +23849,15 @@ function LeftNav() {
           }, item.id, true, undefined, this))
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
-        className: "app-nav__footer",
-        children: "IndieForge AI v1.0"
+      /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("button", {
+        className: "app-nav__toggle",
+        onClick: toggleNav,
+        title: navCollapsed ? "Expandir menú" : "Colapsar menú",
+        "aria-label": navCollapsed ? "Expandir menú" : "Colapsar menú",
+        children: /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
+          className: "app-nav__toggle-icon",
+          children: navCollapsed ? "›" : "‹"
+        }, undefined, false, undefined, this)
       }, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this);
@@ -23849,7 +23883,7 @@ function ToastContainer({ toasts }) {
 }
 
 // frontend/pages/HomePage.tsx
-var import_react9 = __toESM(require_react(), 1);
+var import_react10 = __toESM(require_react(), 1);
 
 // frontend/components/generate/GenerateForm.tsx
 var import_react2 = __toESM(require_react(), 1);
@@ -24214,7 +24248,7 @@ function GenerateForm({ onGenerate, loading, model, onModelChange }) {
 }
 
 // frontend/components/results/ResultCard.tsx
-var import_react4 = __toESM(require_react(), 1);
+var import_react5 = __toESM(require_react(), 1);
 
 // frontend/components/ui/Card.tsx
 var jsx_dev_runtime10 = __toESM(require_jsx_dev_runtime(), 1);
@@ -24386,7 +24420,28 @@ function ResultJson({ data }) {
 }
 
 // frontend/components/results/ImagePreview.tsx
+var import_react4 = __toESM(require_react(), 1);
+
+// frontend/components/results/Model3DPreview.tsx
 var import_react3 = __toESM(require_react(), 1);
+
+// frontend/components/ui/Loader.tsx
+var jsx_dev_runtime14 = __toESM(require_jsx_dev_runtime(), 1);
+function Loader({ size = "md", label, center = false }) {
+  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+    className: `loader-wrap ${center ? "loader-wrap--center" : ""}`,
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("span", {
+        className: `spinner spinner--${size}`,
+        "aria-hidden": "true"
+      }, undefined, false, undefined, this),
+      label && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("span", {
+        className: "loader-label",
+        children: label
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
 
 // frontend/lib/fetcher.ts
 async function fetcher(url, options) {
@@ -24441,6 +24496,9 @@ async function apiGenerateImage(type, result) {
 async function apiSaveGenerationImage(generationId, imageUrl) {
   return postJSON(`/api/generations/${generationId}/image`, { image_url: imageUrl }, "PATCH");
 }
+async function apiGenerate3D(imageUrl) {
+  return postJSON("/api/trellis", { imageUrl });
+}
 async function apiFeed(limit = 20) {
   return fetcher(`/api/social/feed?limit=${limit}`);
 }
@@ -24487,8 +24545,105 @@ async function apiRecordInteraction(postId, action) {
   return postJSON("/api/social/interactions", { post_id: postId, action });
 }
 
+// frontend/components/results/Model3DPreview.tsx
+var jsx_dev_runtime15 = __toESM(require_jsx_dev_runtime(), 1);
+function Model3DPreview({ imageUrl }) {
+  const [loading, setLoading] = import_react3.useState(false);
+  const [glbUrl, setGlbUrl] = import_react3.useState(null);
+  const [error, setError] = import_react3.useState(null);
+  const handleGenerate = async () => {
+    setLoading(true);
+    setError(null);
+    setGlbUrl(null);
+    const { data, error: e } = await apiGenerate3D(imageUrl);
+    setLoading(false);
+    if (data?.glbUrl) {
+      setGlbUrl(data.glbUrl);
+    } else {
+      setError(e ?? "Error al generar el modelo 3D");
+    }
+  };
+  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+    className: "model3d-preview",
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+        className: "model3d-preview__header",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+            className: "model3d-preview__icon",
+            children: "\uD83E\uDDCA"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+            children: "Modelo 3D — TRELLIS"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+            className: "model3d-preview__badge",
+            children: "Microsoft"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      !glbUrl && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+        className: "model3d-preview__hint",
+        children: [
+          "Convierte la hoja de diseño a un asset 3D interactivo usando ",
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("strong", {
+            children: "Microsoft TRELLIS"
+          }, undefined, false, undefined, this),
+          ". La generación puede tardar 1-3 minutos."
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
+        variant: glbUrl ? "secondary" : "primary",
+        size: "sm",
+        loading,
+        onClick: handleGenerate,
+        children: loading ? "Generando modelo 3D…" : glbUrl ? "\uD83D\uDD04 Regenerar modelo 3D" : "\uD83E\uDDCA Generar modelo 3D"
+      }, undefined, false, undefined, this),
+      error && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+        className: "model3d-preview__error",
+        children: error
+      }, undefined, false, undefined, this),
+      loading && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+        className: "model3d-preview__loading",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Loader, {
+            size: "md"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+            children: "TRELLIS está procesando la imagen. Puede tardar hasta 3 minutos…"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      glbUrl && !loading && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+        className: "model3d-preview__viewer-wrap",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("model-viewer", {
+            src: glbUrl,
+            alt: "Modelo 3D del personaje",
+            "auto-rotate": true,
+            "camera-controls": true,
+            "shadow-intensity": "1",
+            "environment-image": "neutral",
+            class: "model3d-preview__viewer"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+            className: "model3d-preview__controls-hint",
+            children: "\uD83D\uDDB1 Arrasta para rotar · Scroll para zoom"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("a", {
+            href: glbUrl,
+            download: "personaje-3d.glb",
+            className: "model3d-preview__download",
+            children: "⬇ Descargar .glb"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+
 // frontend/components/results/ImagePreview.tsx
-var jsx_dev_runtime14 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime16 = __toESM(require_jsx_dev_runtime(), 1);
 function ImagePreview({
   type,
   result,
@@ -24496,9 +24651,10 @@ function ImagePreview({
   initialImageUrl,
   onImageReady
 }) {
-  const [loading, setLoading] = import_react3.useState(false);
-  const [imageUrl, setImageUrl] = import_react3.useState(initialImageUrl ?? null);
-  const [error, setError] = import_react3.useState(null);
+  const [loading, setLoading] = import_react4.useState(false);
+  const [imageUrl, setImageUrl] = import_react4.useState(initialImageUrl ?? null);
+  const [error, setError] = import_react4.useState(null);
+  const [show3D, setShow3D] = import_react4.useState(false);
   const handleGenerate = async () => {
     setLoading(true);
     setError(null);
@@ -24506,6 +24662,7 @@ function ImagePreview({
     setLoading(false);
     if (data?.url) {
       setImageUrl(data.url);
+      setShow3D(false);
       onImageReady?.(data.url);
       if (generationId) {
         apiSaveGenerationImage(generationId, data.url);
@@ -24514,59 +24671,76 @@ function ImagePreview({
       setError(err ?? "Error de generación");
     }
   };
-  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
     className: "image-preview",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
         className: "image-preview__header",
         children: "\uD83C\uDFA8 Hoja de diseño"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Button, {
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Button, {
         variant: imageUrl ? "secondary" : "primary",
         size: "sm",
         loading,
         onClick: handleGenerate,
         children: imageUrl ? "\uD83D\uDD04 Regenerar diseño" : "\uD83C\uDFA8 Generar hoja de diseño"
       }, undefined, false, undefined, this),
-      error && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+      error && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
         className: "image-preview__error",
         children: error
       }, undefined, false, undefined, this),
-      imageUrl && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+      imageUrl && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
         className: "image-preview__wrap",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("img", {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("img", {
             src: imageUrl,
             alt: "Hoja de diseño del personaje",
             className: "image-preview__img"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("a", {
-            href: imageUrl,
-            download: "hoja-de-diseno.png",
-            className: "image-preview__download",
-            children: "⬇ Descargar"
-          }, undefined, false, undefined, this)
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+            className: "image-preview__actions",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("a", {
+                href: imageUrl,
+                download: "hoja-de-diseno.png",
+                className: "image-preview__download",
+                children: "⬇ Descargar imagen"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("button", {
+                className: `image-preview__3d-toggle${show3D ? " image-preview__3d-toggle--active" : ""}`,
+                onClick: () => setShow3D((v) => !v),
+                title: "Generar modelo 3D con TRELLIS",
+                children: [
+                  "\uD83E\uDDCA ",
+                  show3D ? "Ocultar 3D" : "Ver en 3D"
+                ]
+              }, undefined, true, undefined, this)
+            ]
+          }, undefined, true, undefined, this)
         ]
-      }, undefined, true, undefined, this)
+      }, undefined, true, undefined, this),
+      imageUrl && show3D && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Model3DPreview, {
+        imageUrl
+      }, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this);
 }
 
 // frontend/components/results/ResultCard.tsx
-var jsx_dev_runtime15 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime17 = __toESM(require_jsx_dev_runtime(), 1);
 function FieldsView({ data }) {
-  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
     className: "fields-grid",
-    children: Object.entries(data).map(([k, v]) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+    children: Object.entries(data).map(([k, v]) => /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
       className: "field-item",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
           className: "field-item__key",
           children: labelFor(k)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
           className: "field-item__value",
-          children: Array.isArray(v) ? v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+          children: Array.isArray(v) ? v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("span", {
             className: "field-item__tag",
             children: String(item)
           }, i, false, undefined, this)) : String(v)
@@ -24582,8 +24756,8 @@ function ResultCard({
   onShare,
   showActions = true
 }) {
-  const [view, setView] = import_react4.useState("fields");
-  const [showIllustrator, setShowIllustrator] = import_react4.useState(false);
+  const [view, setView] = import_react5.useState("fields");
+  const [showIllustrator, setShowIllustrator] = import_react5.useState(false);
   const meta = TYPE_META[gen.type];
   const title = getGenerationTitle(gen.result, gen.type, gen.id);
   const handleCopy = () => {
@@ -24598,27 +24772,27 @@ function ResultCard({
     a.click();
     URL.revokeObjectURL(url);
   };
-  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Card, {
+  return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Card, {
     className: "result-card",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
         className: "result-card__header",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
+          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Badge, {
             type: gen.type,
             icon: meta.icon,
             label: meta.label
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("span", {
             className: "result-card__title",
             children: title
           }, undefined, false, undefined, this),
-          gen.source === "fallback" && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
+          gen.source === "fallback" && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Badge, {
             type: "fallback",
             label: "respaldo",
             small: true
           }, undefined, false, undefined, this),
-          showActions && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(ResultActions, {
+          showActions && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ResultActions, {
             isFav,
             onFavToggle: () => onFavToggle(gen.id, !isFav),
             onCopy: handleCopy,
@@ -24631,12 +24805,12 @@ function ResultCard({
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      view === "fields" ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(FieldsView, {
+      view === "fields" ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(FieldsView, {
         data: gen.result
-      }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(ResultJson, {
+      }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ResultJson, {
         data: gen.result
       }, undefined, false, undefined, this),
-      showIllustrator && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(ImagePreview, {
+      showIllustrator && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ImagePreview, {
         type: gen.type,
         result: gen.result,
         generationId: gen.id,
@@ -24647,13 +24821,14 @@ function ResultCard({
 }
 
 // frontend/components/social/PublishModal.tsx
-var import_react6 = __toESM(require_react(), 1);
+var import_react7 = __toESM(require_react(), 1);
 
 // frontend/components/ui/Modal.tsx
-var import_react5 = __toESM(require_react(), 1);
-var jsx_dev_runtime16 = __toESM(require_jsx_dev_runtime(), 1);
+var import_react6 = __toESM(require_react(), 1);
+var import_react_dom = __toESM(require_react_dom(), 1);
+var jsx_dev_runtime18 = __toESM(require_jsx_dev_runtime(), 1);
 function Modal({ open, onClose, title, children, footer, size = "md" }) {
-  import_react5.useEffect(() => {
+  import_react6.useEffect(() => {
     if (!open)
       return;
     const handler = (e) => {
@@ -24661,29 +24836,33 @@ function Modal({ open, onClose, title, children, footer, size = "md" }) {
         onClose();
     };
     window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handler);
+      document.body.style.overflow = "";
+    };
   }, [open, onClose]);
   if (!open)
     return null;
-  return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+  const content = /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
     className: "modal-overlay",
     onClick: (e) => {
       if (e.target === e.currentTarget)
         onClose();
     },
-    children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+    children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
       className: `modal modal--${size}`,
       role: "dialog",
       "aria-modal": "true",
       children: [
-        title && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+        title && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
           className: "modal__header",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("h3", {
+            /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("h3", {
               className: "modal__title",
               children: title
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("button", {
+            /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("button", {
               className: "modal__close",
               onClick: onClose,
               "aria-label": "Cerrar",
@@ -24691,29 +24870,30 @@ function Modal({ open, onClose, title, children, footer, size = "md" }) {
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
           className: "modal__body",
           children
         }, undefined, false, undefined, this),
-        footer && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+        footer && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
           className: "modal__footer",
           children: footer
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this)
   }, undefined, false, undefined, this);
+  return import_react_dom.createPortal(content, document.body);
 }
 
 // frontend/components/social/PublishModal.tsx
-var jsx_dev_runtime17 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime19 = __toESM(require_jsx_dev_runtime(), 1);
 var MAX_TAGS = 8;
 function PublishModal({ gen, onClose, onPublished, onToast }) {
-  const [title, setTitle] = import_react6.useState(getGenerationTitle(gen.result, gen.type, gen.id));
-  const [desc, setDesc] = import_react6.useState("");
-  const [tagInput, setTagInput] = import_react6.useState("");
-  const [tags, setTags] = import_react6.useState([]);
-  const [imageUrl, setImageUrl] = import_react6.useState(undefined);
-  const [loading, setLoading] = import_react6.useState(false);
+  const [title, setTitle] = import_react7.useState(getGenerationTitle(gen.result, gen.type, gen.id));
+  const [desc, setDesc] = import_react7.useState("");
+  const [tagInput, setTagInput] = import_react7.useState("");
+  const [tags, setTags] = import_react7.useState([]);
+  const [imageUrl, setImageUrl] = import_react7.useState(gen.image_url ?? undefined);
+  const [loading, setLoading] = import_react7.useState(false);
   const meta = TYPE_META[gen.type];
   const addTag = (raw) => {
     const t = sanitizeTag(raw);
@@ -24754,37 +24934,37 @@ function PublishModal({ gen, onClose, onPublished, onToast }) {
     onPublished();
     onClose();
   };
-  return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Modal, {
+  return /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Modal, {
     open: true,
     title: "Publicar en la comunidad",
     onClose,
     size: "md",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
         className: "publish-form",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
             className: "publish-form__badge-row",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Badge, {
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Badge, {
                 type: gen.type,
                 icon: meta.icon,
                 label: meta.label
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("span", {
                 className: "publish-form__type-hint",
                 children: meta.label
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("label", {
+          /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("label", {
             className: "form-field",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("span", {
                 className: "form-field__label",
                 children: "Título *"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("input", {
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("input", {
                 className: "form-field__input",
                 value: title,
                 onChange: (e) => setTitle(e.target.value),
@@ -24793,14 +24973,14 @@ function PublishModal({ gen, onClose, onPublished, onToast }) {
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("label", {
+          /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("label", {
             className: "form-field",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("span", {
                 className: "form-field__label",
                 children: "Descripción (opcional)"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("textarea", {
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("textarea", {
                 className: "form-field__textarea",
                 value: desc,
                 onChange: (e) => setDesc(e.target.value),
@@ -24810,10 +24990,10 @@ function PublishModal({ gen, onClose, onPublished, onToast }) {
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
             className: "form-field",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("span", {
                 className: "form-field__label",
                 children: [
                   "Etiquetas (",
@@ -24823,22 +25003,22 @@ function PublishModal({ gen, onClose, onPublished, onToast }) {
                   ")"
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
                 className: "tag-input-wrap",
                 children: [
-                  tags.map((t) => /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("span", {
+                  tags.map((t) => /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("span", {
                     className: "tag-pill tag-pill--removable",
                     children: [
                       "#",
                       t,
-                      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("button", {
+                      /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("button", {
                         className: "tag-pill__remove",
                         onClick: () => removeTag(t),
                         children: "×"
                       }, undefined, false, undefined, this)
                     ]
                   }, t, true, undefined, this)),
-                  tags.length < MAX_TAGS && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("input", {
+                  tags.length < MAX_TAGS && /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("input", {
                     className: "tag-input-wrap__input",
                     value: tagInput,
                     onChange: (e) => setTagInput(e.target.value),
@@ -24847,37 +25027,52 @@ function PublishModal({ gen, onClose, onPublished, onToast }) {
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("span", {
                 className: "form-field__hint",
                 children: "Pulsa Enter o coma para añadir"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
             className: "form-field",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("span", {
                 className: "form-field__label",
-                children: "Imagen ilustrativa (opcional)"
+                children: "Hoja de diseño"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ImagePreview, {
+              imageUrl && /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
+                className: "publish-design-preview",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("img", {
+                    src: imageUrl,
+                    alt: "Hoja de diseño",
+                    className: "publish-design-preview__img"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("p", {
+                    className: "publish-design-preview__hint",
+                    children: "Se publicará esta imagen generada"
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(ImagePreview, {
                 type: gen.type,
                 result: gen.result,
+                initialImageUrl: gen.image_url ?? null,
                 onImageReady: (url) => setImageUrl(url)
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
         className: "modal__footer",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Button, {
+          /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Button, {
             variant: "ghost",
             onClick: onClose,
             children: "Cancelar"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Button, {
+          /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Button, {
             variant: "primary",
             onClick: handlePublish,
             loading,
@@ -24890,23 +25085,23 @@ function PublishModal({ gen, onClose, onPublished, onToast }) {
 }
 
 // frontend/components/layout/PageContainer.tsx
-var jsx_dev_runtime18 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime20 = __toESM(require_jsx_dev_runtime(), 1);
 function PageContainer({ children, narrow = false, wide = false }) {
-  return /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("main", {
+  return /* @__PURE__ */ jsx_dev_runtime20.jsxDEV("main", {
     className: `page-container ${narrow ? "page-container--narrow" : ""} ${wide ? "page-container--wide" : ""}`,
     children
   }, undefined, false, undefined, this);
 }
 
 // frontend/hooks/useGenerate.ts
-var import_react7 = __toESM(require_react(), 1);
+var import_react8 = __toESM(require_react(), 1);
 function useGenerate() {
-  const [state, setState] = import_react7.useState({
+  const [state, setState] = import_react8.useState({
     loading: false,
     error: null,
     result: null
   });
-  const generate = import_react7.useCallback(async (type, meta, model) => {
+  const generate = import_react8.useCallback(async (type, meta, model) => {
     setState({ loading: true, error: null, result: null });
     const { data, error } = await apiGenerate(type, meta, model);
     if (error || !data) {
@@ -24920,12 +25115,12 @@ function useGenerate() {
 }
 
 // frontend/hooks/useFavorites.ts
-var import_react8 = __toESM(require_react(), 1);
+var import_react9 = __toESM(require_react(), 1);
 function useFavorites() {
-  const [favorites, setFavorites] = import_react8.useState([]);
-  const [favIds, setFavIds] = import_react8.useState(new Set);
-  const [loading, setLoading] = import_react8.useState(false);
-  const reload = import_react8.useCallback(async () => {
+  const [favorites, setFavorites] = import_react9.useState([]);
+  const [favIds, setFavIds] = import_react9.useState(new Set);
+  const [loading, setLoading] = import_react9.useState(false);
+  const reload = import_react9.useCallback(async () => {
     setLoading(true);
     const { data } = await apiFavorites();
     if (data) {
@@ -24934,10 +25129,10 @@ function useFavorites() {
     }
     setLoading(false);
   }, []);
-  import_react8.useEffect(() => {
+  import_react9.useEffect(() => {
     reload();
   }, [reload]);
-  const toggle = import_react8.useCallback(async (id, add) => {
+  const toggle = import_react9.useCallback(async (id, add) => {
     if (add) {
       await apiAddFavorite(id);
       setFavIds((s) => new Set(s).add(id));
@@ -24955,12 +25150,12 @@ function useFavorites() {
 }
 
 // frontend/pages/HomePage.tsx
-var jsx_dev_runtime19 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime21 = __toESM(require_jsx_dev_runtime(), 1);
 function HomePage({ onToast }) {
   const { latest, setLatest, setTab, selectedModel, setSelectedModel } = useAppState();
   const { generate, loading, error } = useGenerate();
   const { favIds, toggle: toggleFav } = useFavorites();
-  const [publishing, setPublishing] = import_react9.useState(false);
+  const [publishing, setPublishing] = import_react10.useState(false);
   const handleGenerate = async (type, meta, model) => {
     const result = await generate(type, meta, model);
     if (result) {
@@ -24969,78 +25164,117 @@ function HomePage({ onToast }) {
     } else
       onToast(error ?? "Error al generar", "error");
   };
-  return /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(PageContainer, {
+  return /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("div", {
+    className: "page-bg-wrap",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
-        className: "home-layout",
+      /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("div", {
+        className: "social-bg",
+        "aria-hidden": "true",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("section", {
-            className: "home-layout__form",
-            children: /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(GenerateForm, {
-              onGenerate: handleGenerate,
-              loading,
-              model: selectedModel,
-              onModelChange: setSelectedModel
-            }, undefined, false, undefined, this)
+          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--1"
           }, undefined, false, undefined, this),
-          latest && /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("section", {
-            className: "home-layout__result",
-            children: /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(ResultCard, {
-              gen: latest,
-              isFav: favIds.has(latest.id),
-              onFavToggle: (id, add) => {
-                toggleFav(id, add);
-                onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
-              },
-              onShare: () => setPublishing(true)
-            }, undefined, false, undefined, this)
+          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--2"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--3"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--4"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("div", {
+            className: "social-bg__grid"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      publishing && latest && /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(PublishModal, {
-        gen: latest,
-        onClose: () => setPublishing(false),
-        onPublished: () => setTab("social"),
-        onToast
-      }, undefined, false, undefined, this)
+      /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(PageContainer, {
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("div", {
+            className: "page-hero",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("h1", {
+                className: "page-hero__title",
+                children: "Generador"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("p", {
+                className: "page-hero__sub",
+                children: "Crea personajes, mazmorras, objetos y más con IA"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("div", {
+            className: "home-layout",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("section", {
+                className: "home-layout__form",
+                children: /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(GenerateForm, {
+                  onGenerate: handleGenerate,
+                  loading,
+                  model: selectedModel,
+                  onModelChange: setSelectedModel
+                }, undefined, false, undefined, this)
+              }, undefined, false, undefined, this),
+              latest && /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("section", {
+                className: "home-layout__result",
+                children: /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(ResultCard, {
+                  gen: latest,
+                  isFav: favIds.has(latest.id),
+                  onFavToggle: (id, add) => {
+                    toggleFav(id, add);
+                    onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
+                  },
+                  onShare: () => setPublishing(true)
+                }, undefined, false, undefined, this)
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          publishing && latest && /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(PublishModal, {
+            gen: latest,
+            onClose: () => setPublishing(false),
+            onPublished: () => setTab("social"),
+            onToast
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
     ]
   }, undefined, true, undefined, this);
 }
 
 // frontend/pages/HistoryPage.tsx
-var import_react11 = __toESM(require_react(), 1);
+var import_react12 = __toESM(require_react(), 1);
 
 // frontend/components/history/HistoryItem.tsx
-var jsx_dev_runtime20 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime22 = __toESM(require_jsx_dev_runtime(), 1);
 function HistoryItem({ gen, onClick }) {
   const meta = TYPE_META[gen.type];
   const title = getGenerationTitle(gen.result, gen.type, gen.id);
   const preview = getPreviewText(gen.result);
-  return /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Card, {
+  return /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Card, {
     hoverable: true,
     className: "history-item",
     onClick: () => onClick(gen),
     children: [
-      /* @__PURE__ */ jsx_dev_runtime20.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("div", {
         className: "history-item__header",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Badge, {
+          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Badge, {
             type: gen.type,
             icon: meta.icon,
             label: meta.label,
             small: true
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime20.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("span", {
             className: "history-item__title",
             children: title
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime20.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("span", {
             className: "history-item__time",
             children: timeAgo(gen.created_at)
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      preview && /* @__PURE__ */ jsx_dev_runtime20.jsxDEV("p", {
+      preview && /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("p", {
         className: "history-item__preview",
         children: preview
       }, undefined, false, undefined, this)
@@ -25048,50 +25282,32 @@ function HistoryItem({ gen, onClick }) {
   }, undefined, true, undefined, this);
 }
 
-// frontend/components/ui/Loader.tsx
-var jsx_dev_runtime21 = __toESM(require_jsx_dev_runtime(), 1);
-function Loader({ size = "md", label, center = false }) {
-  return /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("div", {
-    className: `loader-wrap ${center ? "loader-wrap--center" : ""}`,
-    children: [
-      /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("span", {
-        className: `spinner spinner--${size}`,
-        "aria-hidden": "true"
-      }, undefined, false, undefined, this),
-      label && /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("span", {
-        className: "loader-label",
-        children: label
-      }, undefined, false, undefined, this)
-    ]
-  }, undefined, true, undefined, this);
-}
-
 // frontend/components/history/HistoryList.tsx
-var jsx_dev_runtime22 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime23 = __toESM(require_jsx_dev_runtime(), 1);
 function HistoryList({ items, loading, onSelect, emptyMsg }) {
   if (loading)
-    return /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Loader, {
+    return /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Loader, {
       center: true,
       label: "Cargando historial…"
     }, undefined, false, undefined, this);
   if (items.length === 0) {
-    return /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
       className: "empty-state",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
           className: "empty-state__icon",
           children: "\uD83D\uDDC3️"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("p", {
+        /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("p", {
           className: "empty-state__msg",
           children: emptyMsg
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
     className: "history-list",
-    children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(HistoryItem, {
+    children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(HistoryItem, {
       gen,
       onClick: onSelect
     }, gen.id, false, undefined, this))
@@ -25099,18 +25315,18 @@ function HistoryList({ items, loading, onSelect, emptyMsg }) {
 }
 
 // frontend/hooks/useHistory.ts
-var import_react10 = __toESM(require_react(), 1);
+var import_react11 = __toESM(require_react(), 1);
 function useHistory() {
-  const [history, setHistory] = import_react10.useState([]);
-  const [loading, setLoading] = import_react10.useState(false);
-  const reload = import_react10.useCallback(async () => {
+  const [history, setHistory] = import_react11.useState([]);
+  const [loading, setLoading] = import_react11.useState(false);
+  const reload = import_react11.useCallback(async () => {
     setLoading(true);
     const { data } = await apiHistory(30);
     if (data)
       setHistory(data);
     setLoading(false);
   }, []);
-  import_react10.useEffect(() => {
+  import_react11.useEffect(() => {
     reload();
   }, [reload]);
   const prepend = (gen) => setHistory((h) => [gen, ...h]);
@@ -25118,101 +25334,134 @@ function useHistory() {
 }
 
 // frontend/pages/HistoryPage.tsx
-var jsx_dev_runtime23 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime24 = __toESM(require_jsx_dev_runtime(), 1);
 function HistoryPage({ onToast }) {
   const { history, loading } = useHistory();
   const { favIds, toggle: toggleFav } = useFavorites();
-  const [selected, setSelected] = import_react11.useState(null);
-  const [publishing, setPublishing] = import_react11.useState(false);
-  return /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(PageContainer, {
+  const [selected, setSelected] = import_react12.useState(null);
+  const [publishing, setPublishing] = import_react12.useState(false);
+  return /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+    className: "page-bg-wrap",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
-        className: "split-layout",
+      /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+        className: "social-bg",
+        "aria-hidden": "true",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("aside", {
-            className: "split-layout__list",
-            children: [
-              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("h2", {
-                className: "section-title",
-                children: "Historial de generaciones"
-              }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(HistoryList, {
-                items: history,
-                loading,
-                onSelect: (g) => {
-                  setSelected(g);
-                  setPublishing(false);
-                },
-                selectedId: selected?.id,
-                emptyMsg: "No hay generaciones en el historial"
-              }, undefined, false, undefined, this)
-            ]
-          }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("main", {
-            className: "split-layout__detail",
-            children: selected ? /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(ResultCard, {
-              gen: selected,
-              isFav: favIds.has(selected.id),
-              onFavToggle: (id, add) => {
-                toggleFav(id, add);
-                onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
-              },
-              onShare: () => setPublishing(true)
-            }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
-              className: "empty-state",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
-                  className: "empty-state__icon",
-                  children: "\uD83D\uDCDC"
-                }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("p", {
-                  className: "empty-state__text",
-                  children: "Selecciona una entrada del historial"
-                }, undefined, false, undefined, this)
-              ]
-            }, undefined, true, undefined, this)
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--1"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--2"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--3"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--4"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+            className: "social-bg__grid"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      publishing && selected && /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(PublishModal, {
-        gen: selected,
-        onClose: () => setPublishing(false),
-        onPublished: () => onToast("Publicado ✨"),
-        onToast
-      }, undefined, false, undefined, this)
+      /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(PageContainer, {
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+            className: "page-hero",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("h1", {
+                className: "page-hero__title",
+                children: "Historial"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("p", {
+                className: "page-hero__sub",
+                children: "Todas tus generaciones anteriores"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+            className: "split-layout",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("aside", {
+                className: "split-layout__list",
+                children: /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(HistoryList, {
+                  items: history,
+                  loading,
+                  onSelect: (g) => {
+                    setSelected(g);
+                    setPublishing(false);
+                  },
+                  selectedId: selected?.id,
+                  emptyMsg: "No hay generaciones en el historial"
+                }, undefined, false, undefined, this)
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("main", {
+                className: "split-layout__detail",
+                children: selected ? /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(ResultCard, {
+                  gen: selected,
+                  isFav: favIds.has(selected.id),
+                  onFavToggle: (id, add) => {
+                    toggleFav(id, add);
+                    onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
+                  },
+                  onShare: () => setPublishing(true)
+                }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+                  className: "empty-state",
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+                      className: "empty-state__icon",
+                      children: "\uD83D\uDCDC"
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("p", {
+                      className: "empty-state__text",
+                      children: "Selecciona una entrada del historial"
+                    }, undefined, false, undefined, this)
+                  ]
+                }, undefined, true, undefined, this)
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          publishing && selected && /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(PublishModal, {
+            gen: selected,
+            onClose: () => setPublishing(false),
+            onPublished: () => onToast("Publicado ✨"),
+            onToast
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
     ]
   }, undefined, true, undefined, this);
 }
 
 // frontend/pages/FavoritesPage.tsx
-var import_react12 = __toESM(require_react(), 1);
+var import_react13 = __toESM(require_react(), 1);
 
 // frontend/components/favorites/FavoriteList.tsx
-var jsx_dev_runtime24 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime25 = __toESM(require_jsx_dev_runtime(), 1);
 function FavoriteList({ items, loading, onSelect }) {
   if (loading)
-    return /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Loader, {
+    return /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(Loader, {
       center: true,
       label: "Cargando favoritos…"
     }, undefined, false, undefined, this);
   if (items.length === 0) {
-    return /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
       className: "empty-state",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
           className: "empty-state__icon",
           children: "★"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("p", {
+        /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("p", {
           className: "empty-state__msg",
           children: "Aún no hay favoritos. Guarda una generación haciendo clic en ☆ Guardar."
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
     className: "history-list",
-    children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(HistoryItem, {
+    children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(HistoryItem, {
       gen,
       onClick: onSelect
     }, gen.id, false, undefined, this))
@@ -25220,82 +25469,115 @@ function FavoriteList({ items, loading, onSelect }) {
 }
 
 // frontend/pages/FavoritesPage.tsx
-var jsx_dev_runtime25 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime26 = __toESM(require_jsx_dev_runtime(), 1);
 function FavoritesPage({ onToast }) {
   const { favorites, loading, favIds, toggle: toggleFav } = useFavorites();
-  const [selected, setSelected] = import_react12.useState(null);
-  const [publishing, setPublishing] = import_react12.useState(false);
-  return /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(PageContainer, {
+  const [selected, setSelected] = import_react13.useState(null);
+  const [publishing, setPublishing] = import_react13.useState(false);
+  return /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+    className: "page-bg-wrap",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
-        className: "split-layout",
+      /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+        className: "social-bg",
+        "aria-hidden": "true",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("aside", {
-            className: "split-layout__list",
-            children: [
-              /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("h2", {
-                className: "section-title",
-                children: "Favoritos"
-              }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(FavoriteList, {
-                items: favorites,
-                loading,
-                onSelect: (g) => {
-                  setSelected(g);
-                  setPublishing(false);
-                },
-                selectedId: selected?.id
-              }, undefined, false, undefined, this)
-            ]
-          }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("main", {
-            className: "split-layout__detail",
-            children: selected ? /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(ResultCard, {
-              gen: selected,
-              isFav: favIds.has(selected.id),
-              onFavToggle: (id, add) => {
-                toggleFav(id, add);
-                onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
-              },
-              onShare: () => setPublishing(true)
-            }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
-              className: "empty-state",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
-                  className: "empty-state__icon",
-                  children: "⭐"
-                }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("p", {
-                  className: "empty-state__text",
-                  children: "Selecciona un favorito para verlo"
-                }, undefined, false, undefined, this)
-              ]
-            }, undefined, true, undefined, this)
+          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--1"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--2"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--3"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--4"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+            className: "social-bg__grid"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      publishing && selected && /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(PublishModal, {
-        gen: selected,
-        onClose: () => setPublishing(false),
-        onPublished: () => onToast("Publicado ✨"),
-        onToast
-      }, undefined, false, undefined, this)
+      /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(PageContainer, {
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+            className: "page-hero",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("h1", {
+                className: "page-hero__title",
+                children: "Favoritos"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("p", {
+                className: "page-hero__sub",
+                children: "Tus creaciones guardadas"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+            className: "split-layout",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("aside", {
+                className: "split-layout__list",
+                children: /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(FavoriteList, {
+                  items: favorites,
+                  loading,
+                  onSelect: (g) => {
+                    setSelected(g);
+                    setPublishing(false);
+                  },
+                  selectedId: selected?.id
+                }, undefined, false, undefined, this)
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("main", {
+                className: "split-layout__detail",
+                children: selected ? /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(ResultCard, {
+                  gen: selected,
+                  isFav: favIds.has(selected.id),
+                  onFavToggle: (id, add) => {
+                    toggleFav(id, add);
+                    onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
+                  },
+                  onShare: () => setPublishing(true)
+                }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+                  className: "empty-state",
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+                      className: "empty-state__icon",
+                      children: "⭐"
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("p", {
+                      className: "empty-state__text",
+                      children: "Selecciona un favorito para verlo"
+                    }, undefined, false, undefined, this)
+                  ]
+                }, undefined, true, undefined, this)
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          publishing && selected && /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(PublishModal, {
+            gen: selected,
+            onClose: () => setPublishing(false),
+            onPublished: () => onToast("Publicado ✨"),
+            onToast
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
     ]
   }, undefined, true, undefined, this);
 }
 
 // frontend/components/social/FeedPost.tsx
-var import_react14 = __toESM(require_react(), 1);
+var import_react15 = __toESM(require_react(), 1);
 
 // frontend/components/social/CommentList.tsx
-var import_react13 = __toESM(require_react(), 1);
-var jsx_dev_runtime26 = __toESM(require_jsx_dev_runtime(), 1);
+var import_react14 = __toESM(require_react(), 1);
+var jsx_dev_runtime27 = __toESM(require_jsx_dev_runtime(), 1);
 function CommentList({ postId, onToast }) {
-  const [comments, setComments] = import_react13.useState([]);
-  const [loading, setLoading] = import_react13.useState(true);
-  const [text, setText] = import_react13.useState("");
-  const [sending, setSending] = import_react13.useState(false);
-  import_react13.useEffect(() => {
+  const [comments, setComments] = import_react14.useState([]);
+  const [loading, setLoading] = import_react14.useState(true);
+  const [text, setText] = import_react14.useState("");
+  const [sending, setSending] = import_react14.useState(false);
+  import_react14.useEffect(() => {
     apiGetComments(postId).then(({ data }) => {
       if (data)
         setComments(data);
@@ -25318,43 +25600,43 @@ function CommentList({ postId, onToast }) {
     setSending(false);
   };
   if (loading)
-    return /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Loader, {
+    return /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Loader, {
       size: "sm",
       label: "Cargando comentarios…"
     }, undefined, false, undefined, this);
-  return /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
     className: "comment-list",
     children: [
-      comments.length === 0 && /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("p", {
+      comments.length === 0 && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("p", {
         className: "comment-list__empty",
         children: "Sin comentarios. ¡Sé el primero!"
       }, undefined, false, undefined, this),
-      comments.map((c) => /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+      comments.map((c) => /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
         className: "comment-item",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
             className: "comment-item__meta",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("span", {
                 className: "comment-item__author",
                 children: c.author
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("span", {
                 className: "comment-item__time",
                 children: timeAgo(c.created_at)
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("p", {
+          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("p", {
             className: "comment-item__content",
             children: c.content
           }, undefined, false, undefined, this)
         ]
       }, c.id, true, undefined, this)),
-      /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
         className: "comment-input",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("input", {
+          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("input", {
             className: "comment-input__field",
             placeholder: "Escribe un comentario… (Enter para enviar)",
             value: text,
@@ -25365,7 +25647,7 @@ function CommentList({ postId, onToast }) {
             },
             maxLength: 300
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Button, {
+          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Button, {
             variant: "primary",
             size: "sm",
             loading: sending,
@@ -25380,20 +25662,20 @@ function CommentList({ postId, onToast }) {
 }
 
 // frontend/components/social/FeedPost.tsx
-var jsx_dev_runtime27 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime28 = __toESM(require_jsx_dev_runtime(), 1);
 function FieldsView2({ data }) {
-  return /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
     className: "fields-grid fields-grid--compact",
-    children: Object.entries(data).map(([k, v]) => /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+    children: Object.entries(data).map(([k, v]) => /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
       className: "field-item",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
           className: "field-item__key",
           children: labelFor(k)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
           className: "field-item__value",
-          children: Array.isArray(v) ? v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("span", {
+          children: Array.isArray(v) ? v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("span", {
             className: "field-item__tag",
             children: String(item)
           }, i, false, undefined, this)) : String(v)
@@ -25411,12 +25693,12 @@ function FeedPost({
   onDelete,
   onToast
 }) {
-  const [expanded, setExpanded] = import_react14.useState(false);
-  const [showCmts, setShowCmts] = import_react14.useState(false);
-  const [liked, setLiked] = import_react14.useState(post.liked_by_me);
-  const [likeCount, setLikeCount] = import_react14.useState(post.like_count);
-  const [cmtCount, setCmtCount] = import_react14.useState(post.comment_count);
-  import_react14.useEffect(() => {
+  const [expanded, setExpanded] = import_react15.useState(false);
+  const [showCmts, setShowCmts] = import_react15.useState(false);
+  const [liked, setLiked] = import_react15.useState(post.liked_by_me);
+  const [likeCount, setLikeCount] = import_react15.useState(post.like_count);
+  const [cmtCount, setCmtCount] = import_react15.useState(post.comment_count);
+  import_react15.useEffect(() => {
     apiRecordInteraction(post.id, "view");
   }, [post.id]);
   const meta = TYPE_META[post.type];
@@ -25446,82 +25728,82 @@ function FeedPost({
     if (next)
       apiRecordInteraction(post.id, "expand");
   };
-  return /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("article", {
+  return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("article", {
     className: "post-card",
     style: { "--type-color": meta.color },
     children: [
-      /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
         className: "post-card__accent"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("header", {
+      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("header", {
         className: "post-card__header",
         onClick: handleExpand,
         children: [
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Badge, {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Badge, {
             type: post.type,
             icon: meta.icon,
             label: meta.label,
             small: true
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
             className: "post-card__title-area",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("h3", {
+              /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("h3", {
                 className: "post-card__title",
                 children: post.title
               }, undefined, false, undefined, this),
-              post.description && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("p", {
+              post.description && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("p", {
                 className: "post-card__desc",
                 children: post.description
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
             className: "post-card__meta",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("span", {
                 className: "post-card__author",
                 children: authorName(post.session_id)
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("span", {
                 className: "post-card__time",
                 children: timeAgo(post.created_at)
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("span", {
             className: "post-card__chevron",
             children: expanded ? "▲" : "▼"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      post.image_url && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+      post.image_url && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
         className: "post-image-wrap",
-        children: /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("img", {
+        children: /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("img", {
           src: post.image_url,
           alt: "Hoja de diseño",
           className: "post-image"
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      !expanded && preview && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("p", {
+      !expanded && preview && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("p", {
         className: "post-card__preview",
         children: preview
       }, undefined, false, undefined, this),
-      expanded && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+      expanded && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
         className: "post-card__body",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(FieldsView2, {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(FieldsView2, {
             data: post.result
           }, undefined, false, undefined, this),
-          post.generation_id && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(ImagePreview, {
+          post.generation_id && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(ImagePreview, {
             type: post.type,
             result: post.result
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      post.tags.length > 0 && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+      post.tags.length > 0 && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
         className: "post-card__tags",
-        children: post.tags.map((tag) => /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("span", {
+        children: post.tags.map((tag) => /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("span", {
           className: `tag-pill${followedTags.has(tag) ? " tag-pill--followed" : ""}`,
           onClick: (e) => {
             e.stopPropagation();
@@ -25534,21 +25816,21 @@ function FeedPost({
           ]
         }, tag, true, undefined, this))
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
         className: "post-card__footer",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("button", {
             className: `like-btn${liked ? " like-btn--active" : ""}`,
             onClick: handleLike,
             children: [
               liked ? "❤️" : "\uD83E\uDD0D",
               " ",
-              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("span", {
                 children: likeCount
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("button", {
             className: "comment-btn",
             onClick: (e) => {
               e.stopPropagation();
@@ -25557,12 +25839,12 @@ function FeedPost({
             },
             children: [
               "\uD83D\uDCAC ",
-              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("span", {
                 children: cmtCount
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          post.tags.length > 0 && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("button", {
+          post.tags.length > 0 && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("button", {
             className: "tag-filter-btn",
             onClick: (e) => {
               e.stopPropagation();
@@ -25573,7 +25855,7 @@ function FeedPost({
               post.tags[0]
             ]
           }, undefined, true, undefined, this),
-          isOwn && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("button", {
+          isOwn && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("button", {
             className: "delete-btn",
             onClick: handleDelete,
             title: "Eliminar publicación",
@@ -25581,7 +25863,7 @@ function FeedPost({
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      showCmts && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(CommentList, {
+      showCmts && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(CommentList, {
         postId: post.id,
         onToast
       }, undefined, false, undefined, this)
@@ -25590,7 +25872,7 @@ function FeedPost({
 }
 
 // frontend/components/social/FeedList.tsx
-var jsx_dev_runtime28 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime29 = __toESM(require_jsx_dev_runtime(), 1);
 function FeedList({
   posts,
   loading,
@@ -25602,27 +25884,27 @@ function FeedList({
   onToast
 }) {
   if (loading)
-    return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Loader, {
+    return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Loader, {
       label: "Cargando publicaciones..."
     }, undefined, false, undefined, this);
   if (posts.length === 0) {
-    return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
       className: "empty-state",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
           className: "empty-state__icon",
           children: "\uD83D\uDCED"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("p", {
+        /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("p", {
           className: "empty-state__text",
           children: "No hay publicaciones aquí todavía."
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
     className: "feed-list",
-    children: posts.map((p) => /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(FeedPost, {
+    children: posts.map((p) => /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(FeedPost, {
       post: p,
       followedTags,
       onTagFilter,
@@ -25635,9 +25917,9 @@ function FeedList({
 }
 
 // frontend/components/layout/Sidebar.tsx
-var jsx_dev_runtime29 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime30 = __toESM(require_jsx_dev_runtime(), 1);
 function Sidebar({ children }) {
-  return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("aside", {
+  return /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("aside", {
     className: "sidebar",
     children
   }, undefined, false, undefined, this);
@@ -25646,10 +25928,10 @@ function SidebarSection({
   title,
   children
 }) {
-  return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
     className: "sidebar__section",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
         className: "sidebar__title",
         children: title
       }, undefined, false, undefined, this),
@@ -25659,23 +25941,23 @@ function SidebarSection({
 }
 
 // frontend/components/ui/Tabs.tsx
-var jsx_dev_runtime30 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime31 = __toESM(require_jsx_dev_runtime(), 1);
 function Tabs({
   tabs,
   active,
   onChange,
   variant = "nav"
 }) {
-  return /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
     className: `tabs tabs--${variant}`,
     role: "tablist",
-    children: tabs.map((tab) => /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("button", {
+    children: tabs.map((tab) => /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("button", {
       role: "tab",
       "aria-selected": active === tab.id,
       className: `tabs__tab ${active === tab.id ? "tabs__tab--active" : ""}`,
       onClick: () => onChange(tab.id),
       children: [
-        tab.icon && /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
+        tab.icon && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
           className: "tabs__icon",
           children: tab.icon
         }, undefined, false, undefined, this),
@@ -25686,16 +25968,16 @@ function Tabs({
 }
 
 // frontend/hooks/useSocialFeed.ts
-var import_react15 = __toESM(require_react(), 1);
+var import_react16 = __toESM(require_react(), 1);
 function useSocialFeed() {
-  const [posts, setPosts] = import_react15.useState([]);
-  const [loading, setLoading] = import_react15.useState(false);
-  const [subTab, setSubTab] = import_react15.useState("feed");
-  const [sortMode, setSortMode] = import_react15.useState("reciente");
-  const [filterTag, setFilterTag] = import_react15.useState(null);
-  const [followedTags, setFollowedTags] = import_react15.useState(new Set);
-  const [popularTags, setPopularTags] = import_react15.useState([]);
-  const loadPosts = import_react15.useCallback(async () => {
+  const [posts, setPosts] = import_react16.useState([]);
+  const [loading, setLoading] = import_react16.useState(false);
+  const [subTab, setSubTab] = import_react16.useState("feed");
+  const [sortMode, setSortMode] = import_react16.useState("reciente");
+  const [filterTag, setFilterTag] = import_react16.useState(null);
+  const [followedTags, setFollowedTags] = import_react16.useState(new Set);
+  const [popularTags, setPopularTags] = import_react16.useState([]);
+  const loadPosts = import_react16.useCallback(async () => {
     setLoading(true);
     let data = null;
     if (subTab === "feed")
@@ -25710,17 +25992,17 @@ function useSocialFeed() {
       setPosts(data);
     setLoading(false);
   }, [subTab, filterTag, sortMode]);
-  const loadMeta = import_react15.useCallback(async () => {
+  const loadMeta = import_react16.useCallback(async () => {
     const [tags, popular] = await Promise.all([apiFollowedTags(), apiPopularTags()]);
     if (tags.data)
       setFollowedTags(new Set(tags.data));
     if (popular.data)
       setPopularTags(popular.data);
   }, []);
-  import_react15.useEffect(() => {
+  import_react16.useEffect(() => {
     loadPosts();
   }, [loadPosts]);
-  import_react15.useEffect(() => {
+  import_react16.useEffect(() => {
     loadMeta();
   }, [loadMeta]);
   const toggleTag = async (tag, follow) => {
@@ -25760,7 +26042,7 @@ function useSocialFeed() {
 }
 
 // frontend/pages/SocialPage.tsx
-var jsx_dev_runtime31 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime32 = __toESM(require_jsx_dev_runtime(), 1);
 var SUB_TABS = [
   { id: "feed", label: "Feed", icon: "\uD83C\uDFE0" },
   { id: "trending", label: "Tendencias", icon: "\uD83D\uDD25" },
@@ -25787,149 +26069,197 @@ function SocialPage({ onToast }) {
     removePost
   } = useSocialFeed();
   const mySessionId = document.cookie.split("; ").find((r) => r.startsWith("session_id="))?.split("=")[1] ?? "";
-  return /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(PageContainer, {
-    wide: true,
-    children: /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
-      className: "social-layout",
-      children: [
-        /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
-          className: "social-layout__main",
-          children: [
-            /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(Tabs, {
-              tabs: SUB_TABS,
-              active: subTab,
-              onChange: (id) => setSubTab(id),
-              variant: "sub"
-            }, undefined, false, undefined, this),
-            filterTag && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
-              className: "tag-filter-bar",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
-                  children: [
-                    "Filtrando por ",
-                    /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("strong", {
-                      children: [
-                        "#",
-                        filterTag
-                      ]
-                    }, undefined, true, undefined, this)
-                  ]
-                }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("button", {
-                  className: "tag-filter-bar__clear",
-                  onClick: () => setFilterTag(null),
-                  children: "✕ Quitar filtro"
-                }, undefined, false, undefined, this)
-              ]
-            }, undefined, true, undefined, this),
-            subTab !== "misposts" && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
-              className: "sort-bar",
-              children: SORT_OPTIONS.map((o) => /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("button", {
-                className: `sort-btn ${sortMode === o.id ? "sort-btn--active" : ""}`,
-                onClick: () => setSortMode(o.id),
-                children: o.label
-              }, o.id, false, undefined, this))
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(FeedList, {
-              posts,
-              loading,
-              followedTags,
-              onTagFilter: (tag) => {
-                setFilterTag(tag);
-                setSubTab("explorar");
-              },
-              onTagToggle: toggleTag,
-              ownSessionId: mySessionId,
-              onDelete: (id) => {
-                removePost(id);
-                onToast("Publicación eliminada");
-              },
-              onToast
-            }, undefined, false, undefined, this)
-          ]
-        }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(Sidebar, {
-          children: [
-            followedTags.size > 0 && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(SidebarSection, {
-              title: "Mis etiquetas",
-              children: /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
-                className: "sidebar-tags",
-                children: [...followedTags].map((t) => /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("button", {
-                  className: "tag-pill tag-pill--followed",
-                  onClick: () => {
-                    setFilterTag(t);
-                    setSubTab("explorar");
-                  },
-                  children: [
-                    "#",
-                    t
-                  ]
-                }, t, true, undefined, this))
+  const hasSidebarContent = followedTags.size > 0 || popularTags.length > 0;
+  return /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+    className: "social-page",
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+        className: "social-bg",
+        "aria-hidden": "true",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--1"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--2"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--3"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--4"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+            className: "social-bg__grid"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(PageContainer, {
+        wide: true,
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+            className: "social-page__hero",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("h1", {
+                className: "social-page__hero-title",
+                children: "Comunidad"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("p", {
+                className: "social-page__hero-sub",
+                children: "Descubre y comparte creaciones de la comunidad IndieForge"
               }, undefined, false, undefined, this)
-            }, undefined, false, undefined, this),
-            popularTags.length > 0 && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(SidebarSection, {
-              title: "Tendencias",
-              children: /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
-                className: "sidebar-tags",
-                children: popularTags.slice(0, 10).map((t) => /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("button", {
-                  className: `tag-pill ${followedTags.has(t.tag) ? "tag-pill--followed" : ""}`,
-                  onClick: () => {
-                    setFilterTag(t.tag);
-                    setSubTab("explorar");
-                  },
-                  title: `${t.count} posts`,
-                  children: [
-                    "#",
-                    t.tag,
-                    /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
-                      className: "tag-pill__count",
-                      children: t.count
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+            className: "social-layout",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+                className: "social-layout__main",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+                    className: "social-tabs-bar",
+                    children: /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(Tabs, {
+                      tabs: SUB_TABS,
+                      active: subTab,
+                      onChange: (id) => setSubTab(id),
+                      variant: "sub"
                     }, undefined, false, undefined, this)
-                  ]
-                }, t.tag, true, undefined, this))
-              }, undefined, false, undefined, this)
-            }, undefined, false, undefined, this)
-          ]
-        }, undefined, true, undefined, this)
-      ]
-    }, undefined, true, undefined, this)
-  }, undefined, false, undefined, this);
+                  }, undefined, false, undefined, this),
+                  filterTag && /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+                    className: "tag-filter-bar",
+                    children: [
+                      /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("span", {
+                        children: [
+                          "Filtrando por ",
+                          /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("strong", {
+                            children: [
+                              "#",
+                              filterTag
+                            ]
+                          }, undefined, true, undefined, this)
+                        ]
+                      }, undefined, true, undefined, this),
+                      /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("button", {
+                        className: "tag-filter-bar__clear",
+                        onClick: () => setFilterTag(null),
+                        children: "✕ Quitar filtro"
+                      }, undefined, false, undefined, this)
+                    ]
+                  }, undefined, true, undefined, this),
+                  subTab !== "misposts" && /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+                    className: "sort-bar",
+                    children: SORT_OPTIONS.map((o) => /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("button", {
+                      className: `sort-btn ${sortMode === o.id ? "sort-btn--active" : ""}`,
+                      onClick: () => setSortMode(o.id),
+                      children: o.label
+                    }, o.id, false, undefined, this))
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(FeedList, {
+                    posts,
+                    loading,
+                    followedTags,
+                    onTagFilter: (tag) => {
+                      setFilterTag(tag);
+                      setSubTab("explorar");
+                    },
+                    onTagToggle: toggleTag,
+                    ownSessionId: mySessionId,
+                    onDelete: (id) => {
+                      removePost(id);
+                      onToast("Publicación eliminada");
+                    },
+                    onToast
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this),
+              hasSidebarContent && /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(Sidebar, {
+                children: [
+                  followedTags.size > 0 && /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(SidebarSection, {
+                    title: "Mis etiquetas",
+                    children: /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+                      className: "sidebar-tags",
+                      children: [...followedTags].map((t) => /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("button", {
+                        className: "tag-pill tag-pill--followed",
+                        onClick: () => {
+                          setFilterTag(t);
+                          setSubTab("explorar");
+                        },
+                        children: [
+                          "#",
+                          t
+                        ]
+                      }, t, true, undefined, this))
+                    }, undefined, false, undefined, this)
+                  }, undefined, false, undefined, this),
+                  popularTags.length > 0 && /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(SidebarSection, {
+                    title: "Tendencias",
+                    children: /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+                      className: "sidebar-tags",
+                      children: popularTags.slice(0, 10).map((t) => /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("button", {
+                        className: `tag-pill ${followedTags.has(t.tag) ? "tag-pill--followed" : ""}`,
+                        onClick: () => {
+                          setFilterTag(t.tag);
+                          setSubTab("explorar");
+                        },
+                        title: `${t.count} posts`,
+                        children: [
+                          "#",
+                          t.tag,
+                          /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("span", {
+                            className: "tag-pill__count",
+                            children: t.count
+                          }, undefined, false, undefined, this)
+                        ]
+                      }, t.tag, true, undefined, this))
+                    }, undefined, false, undefined, this)
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this)
+            ]
+          }, undefined, true, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
 }
 
 // frontend/app.tsx
-var jsx_dev_runtime32 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime33 = __toESM(require_jsx_dev_runtime(), 1);
 function Pages() {
-  const { tab, toasts, showToast } = useAppState();
-  return /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(jsx_dev_runtime32.Fragment, {
+  const { tab, toasts, showToast, navCollapsed } = useAppState();
+  import_react17.default.useEffect(() => {
+    document.getElementById("root")?.classList.toggle("nav-collapsed", navCollapsed);
+  }, [navCollapsed]);
+  return /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(jsx_dev_runtime33.Fragment, {
     children: [
-      /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(Header, {}, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(LeftNav, {}, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("main", {
+      /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(Header, {}, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(LeftNav, {}, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime33.jsxDEV("main", {
         className: "app-main",
         children: [
-          tab === "generate" && /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(HomePage, {
+          tab === "generate" && /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(HomePage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "history" && /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(HistoryPage, {
+          tab === "history" && /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(HistoryPage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "favorites" && /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(FavoritesPage, {
+          tab === "favorites" && /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(FavoritesPage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "social" && /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(SocialPage, {
+          tab === "social" && /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(SocialPage, {
             onToast: showToast
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(ToastContainer, {
+      /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(ToastContainer, {
         toasts
       }, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this);
 }
 function App() {
-  return /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(AppProvider, {
-    children: /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(Pages, {}, undefined, false, undefined, this)
+  return /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(AppProvider, {
+    children: /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(Pages, {}, undefined, false, undefined, this)
   }, undefined, false, undefined, this);
 }
-import_client.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsx_dev_runtime32.jsxDEV(App, {}, undefined, false, undefined, this));
+import_client.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsx_dev_runtime33.jsxDEV(App, {}, undefined, false, undefined, this));

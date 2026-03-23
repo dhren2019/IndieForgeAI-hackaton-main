@@ -34,6 +34,7 @@ input, textarea, select {
   grid-template-columns: var(--nav-w) 1fr;
   height:   100vh;
   overflow: hidden;
+  min-width: 0;
 }
 
 /* === HEADER === */
@@ -51,7 +52,7 @@ input, textarea, select {
   position:  relative;
 }
 .app-header__brand { display: flex; align-items: center; gap: var(--sp-3); flex-shrink: 0; }
-.app-header__logo  { height: 66px; width: auto; object-fit: contain; }
+.app-header__logo  { height: 54px; width: auto; object-fit: contain; }
 .app-header__actions { display: flex; align-items: center; gap: var(--sp-3); margin-left: auto; }
 .app-header__badge {
   display: flex; align-items: center; gap: var(--sp-2);
@@ -112,6 +113,37 @@ input, textarea, select {
   font-size:  var(--text-xs); color: var(--muted); text-align: center;
 }
 
+/* Nav collapse toggle button — icon only, pinned to bottom */
+.app-nav__toggle {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           100%;
+  padding:         var(--sp-3);
+  border:          none;
+  border-top:      1px solid var(--border);
+  background:      transparent;
+  color:           var(--muted);
+  font-size:       1.35rem;    /* big enough to tap / see clearly */
+  line-height:     1;
+  font-family:     inherit;
+  cursor:          pointer;
+  flex-shrink:     0;
+  transition:      background var(--t-fast), color var(--t-fast);
+}
+.app-nav__toggle:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.app-nav__toggle-icon { display: block; }
+
+/* === Collapsed nav (class toggled on #root) === */
+#root.nav-collapsed {
+  grid-template-columns: var(--nav-w-sm) 1fr;
+}
+#root.nav-collapsed .nav-item {
+  justify-content: center;
+  padding: var(--sp-3);
+}
+#root.nav-collapsed .nav-item--active::before { display: none; }
+
 /* === MAIN === */
 .app-main { grid-area: main; overflow-y: auto; background: var(--bg); }
 
@@ -119,7 +151,7 @@ input, textarea, select {
 .page-container {
   max-width: var(--content-max);
   margin:    0 auto;
-  padding:   var(--sp-8);
+  padding:   var(--sp-6);
   width:     100%;
   animation: pageIn var(--t-slow) both;
 }
@@ -144,8 +176,8 @@ input, textarea, select {
 /* === Home Layout (Generate page) === */
 .home-layout {
   display: grid;
-  gap:     var(--sp-6);
-  grid-template-columns: minmax(0, 480px) 1fr;
+  gap:     var(--sp-5);
+  grid-template-columns: minmax(0, 400px) 1fr;
   align-items: start;
 }
 .home-layout__form   { min-width: 0; }
@@ -247,8 +279,10 @@ input, textarea, select {
 /* ============================================================
    RESPONSIVE
    ============================================================ */
+/* 1200px desktop sweet-spot */
 @media (max-width: 1280px) {
-  .home-layout { grid-template-columns: minmax(0, 440px) 1fr; }
+  .home-layout { grid-template-columns: minmax(0, 380px) 1fr; }
+  .split-layout { grid-template-columns: 240px 1fr; }
 }
 
 @media (max-width: 1024px) {
@@ -294,4 +328,91 @@ input, textarea, select {
 @media (max-width: 480px) {
   .app-header__badge { display: none; }
   .page-container    { padding: var(--sp-3); }
+}
+
+/* === Global animated background (all pages) === */
+.app-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.app-bg__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.11;
+}
+.app-bg__orb--1 {
+  width: 700px; height: 700px;
+  background: #7c3aed;
+  top: -180px; left: -200px;
+  animation: appOrbA 20s ease-in-out infinite;
+}
+.app-bg__orb--2 {
+  width: 560px; height: 560px;
+  background: #db2777;
+  bottom: -120px; right: -140px;
+  animation: appOrbB 25s ease-in-out infinite;
+}
+.app-bg__orb--3 {
+  width: 380px; height: 380px;
+  background: #3b82f6;
+  top: 45%; left: 50%;
+  animation: appOrbC 18s ease-in-out infinite;
+}
+.app-bg__orb--4 {
+  width: 300px; height: 300px;
+  background: #10b981;
+  top: 15%; right: 10%;
+  animation: appOrbA 28s ease-in-out infinite reverse;
+}
+@keyframes appOrbA {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%      { transform: translate(70px,-50px) scale(1.1); }
+  66%      { transform: translate(-40px,60px) scale(0.95); }
+}
+@keyframes appOrbB {
+  0%,100% { transform: translate(0,0) scale(1); }
+  40%      { transform: translate(-80px,35px) scale(1.08); }
+  70%      { transform: translate(50px,-70px) scale(0.93); }
+}
+@keyframes appOrbC {
+  0%,100% { transform: translate(-50%,-50%) scale(1); }
+  50%      { transform: translate(-50%,-50%) scale(1.18) rotate(12deg); }
+}
+.app-bg__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Ensure all shell surfaces sit above the fixed bg */
+.app-header,
+.app-nav,
+.app-main { position: relative; z-index: 1; }
+
+/* === Page hero header (Generador / Historial / Favoritos / Comunidad) === */
+.page-hero {
+  margin-bottom: var(--sp-6);
+  padding-top:   var(--sp-2);
+}
+.page-hero__title {
+  font-size:    var(--text-3xl);
+  font-weight:  900;
+  letter-spacing: -0.04em;
+  background:   var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height:  1.1;
+  margin-bottom: var(--sp-1);
+}
+.page-hero__sub {
+  font-size: var(--text-sm);
+  color:     var(--text-md);
 }

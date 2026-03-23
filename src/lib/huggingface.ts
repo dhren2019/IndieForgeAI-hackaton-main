@@ -76,14 +76,21 @@ export async function callImageModel(prompt: string): Promise<HFImageResponse> {
       },
       body: JSON.stringify({
         inputs:     prompt,
-        parameters: { num_inference_steps: 4 },
+        parameters: {
+          num_inference_steps: 4,
+          width:  1024,
+          height:  576,   // 16:9 ratio (1024 × 576)
+        },
       }),
       signal: AbortSignal.timeout(90_000),
     });
 
     if (!res.ok) {
       const body = await res.text();
-      return { base64: null, mimeType: "image/png", error: `HF API ${res.status}: ${body.slice(0, 300)}` };
+      const prefix = res.status === 401 || res.status === 403
+        ? `HF_AUTH_ERROR ${res.status}`
+        : `HF API ${res.status}`;
+      return { base64: null, mimeType: "image/png", error: `${prefix}: ${body.slice(0, 300)}` };
     }
 
     const contentType = res.headers.get("content-type") ?? "image/jpeg";

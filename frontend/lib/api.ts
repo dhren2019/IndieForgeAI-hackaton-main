@@ -38,6 +38,11 @@ export async function apiSaveGenerationImage(generationId: number, imageUrl: str
   return postJSON<{ saved: boolean }>(`/api/generations/${generationId}/image`, { image_url: imageUrl }, "PATCH");
 }
 
+// ── TRELLIS 3D generation ─────────────────────────────────────────
+export async function apiGenerate3D(imageUrl: string) {
+  return postJSON<{ glbUrl: string }>("/api/trellis", { imageUrl });
+}
+
 // ── Social Feed ───────────────────────────────────────────────────────────────
 export async function apiFeed(limit = 20) {
   return fetcher<Post[]>(`/api/social/feed?limit=${limit}`);

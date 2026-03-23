@@ -19,6 +19,7 @@ import { historyRoute }               from "./routes/history";
 import { favoritesRoute }             from "./routes/favorites";
 import { handleSocial }               from "./routes/social";
 import { saveGenerationImageRoute }   from "./routes/generation-image";
+import { trellisRoute }               from "./routes/trellis";
 import { healthRoute }                from "./routes/health";
 import { getDB }                      from "./db/client";
 import { logger }                     from "./utils/logger";
@@ -85,6 +86,9 @@ async function router(req: Request, sessionId: string): Promise<Response> {
   const genImgMatch = pathname.match(/^\/api\/generations\/(\d+)\/image$/);
   if (genImgMatch && method === "PATCH")
     return saveGenerationImageRoute(req, sessionId, Number(genImgMatch[1]));
+
+  // TRELLIS 3D generation
+  if (pathname === "/api/trellis" && method === "POST")    return trellisRoute(req, sessionId);
 
   // History
   if (pathname === "/api/history" && method === "GET")     return historyRoute(req, sessionId);

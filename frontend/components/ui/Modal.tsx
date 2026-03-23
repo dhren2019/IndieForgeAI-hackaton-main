@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createPortal }    from "react-dom";
 
 interface ModalProps {
   open:     boolean;
@@ -14,12 +15,17 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
     if (!open) return;
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    // prevent body scroll while modal open
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handler);
+      document.body.style.overflow = "";
+    };
   }, [open, onClose]);
 
   if (!open) return null;
 
-  return (
+  const content = (
     <div
       className="modal-overlay"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
@@ -36,4 +42,6 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }

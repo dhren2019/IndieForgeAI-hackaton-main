@@ -8,10 +8,12 @@ interface AppState {
   tab:              AppTab;
   latest:           Generation | null;
   selectedModel:    AiModelId;
+  navCollapsed:     boolean;
   showToast:        (msg: string, kind?: ToastMessage["kind"]) => void;
   setTab:           (tab: AppTab) => void;
   setLatest:        (gen: Generation) => void;
   setSelectedModel: (model: AiModelId) => void;
+  toggleNav:        () => void;
   toasts:           ToastMessage[];
 }
 
@@ -21,6 +23,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [tab, setTab]       = useState<AppTab>("generate");
   const [latest, setLatest] = useState<Generation | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [navCollapsed, setNavCollapsed] = useState(
+    () => localStorage.getItem("indieforge_nav_collapsed") === "true"
+  );
   const [selectedModel, setSelectedModelRaw] = useState<AiModelId>(
     () => (localStorage.getItem("indieforge_model") as AiModelId | null) ?? DEFAULT_MODEL
   );
@@ -30,6 +35,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSelectedModelRaw(model);
   }, []);
 
+  const toggleNav = useCallback(() => {
+    setNavCollapsed((v) => {
+      const next = !v;
+      localStorage.setItem("indieforge_nav_collapsed", String(next));
+      return next;
+    });
+  }, []);
+
   const showToast = useCallback((msg: string, kind: ToastMessage["kind"] = "ok") => {
     const id = crypto.randomUUID();
     setToasts((t) => [...t, { id, msg, kind }]);
@@ -37,7 +50,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AppContext.Provider value={{ tab, latest, toasts, selectedModel, showToast, setTab, setLatest, setSelectedModel }}>
+    <AppContext.Provider value={{ tab, latest, toasts, selectedModel, navCollapsed, showToast, setTab, setLatest, setSelectedModel, toggleNav }}>
       {children}
     </AppContext.Provider>
   );

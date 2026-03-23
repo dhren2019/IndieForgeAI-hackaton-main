@@ -22,7 +22,7 @@ export function PublishModal({ gen, onClose, onPublished, onToast }: PublishModa
   const [desc,     setDesc]     = useState("");
   const [tagInput, setTagInput] = useState("");
   const [tags,     setTags]     = useState<string[]>([]);
-  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+  const [imageUrl, setImageUrl] = useState<string | undefined>(gen.image_url ?? undefined);
   const [loading,  setLoading]  = useState(false);
 
   const meta = TYPE_META[gen.type];
@@ -119,10 +119,17 @@ export function PublishModal({ gen, onClose, onPublished, onToast }: PublishModa
         </div>
 
         <div className="form-field">
-          <span className="form-field__label">Imagen ilustrativa (opcional)</span>
+          <span className="form-field__label">Hoja de diseño</span>
+          {imageUrl && (
+            <div className="publish-design-preview">
+              <img src={imageUrl} alt="Hoja de diseño" className="publish-design-preview__img" />
+              <p className="publish-design-preview__hint">Se publicará esta imagen generada</p>
+            </div>
+          )}
           <ImagePreview
             type={gen.type}
             result={gen.result}
+            initialImageUrl={gen.image_url ?? null}
             onImageReady={(url) => setImageUrl(url)}
           />
         </div>

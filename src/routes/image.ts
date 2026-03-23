@@ -28,7 +28,18 @@ export async function imageRoute(req: Request): Promise<Response> {
   );
 
   if (!result.url) {
-    return err(result.error ?? "Error de generación", 503);
+    const msg    = result.error ?? "Error de generación";
+    // 401/403 from HF → 502 (bad gateway / upstream auth), not 503
+    const status = msg.startsWith("HF_AUTH_ERROR") ? 502 : 503;
+    return err(
+      status === 502
+        ? "HF_TOKEN inválido o expirado (HF devuelvió 401). " +
+          "1) Genera un nuevo token READ en huggingface.co/settings/tokens. " +
+          "2) Actualiza HF_TOKEN en tu archivo .env. " +
+          "3) REINICIA el servidor (bun run dev) para que cargue el nuevo valor."
+        : msg,
+      status
+    );
   }
 
   return ok({ url: result.url, prompt: result.prompt });

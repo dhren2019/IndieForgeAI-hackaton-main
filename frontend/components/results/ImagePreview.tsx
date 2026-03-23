@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Button } from "../ui/Button";
-import { Loader } from "../ui/Loader";
+import { Button }           from "../ui/Button";
+import { Loader }           from "../ui/Loader";
+import { Model3DPreview }   from "./Model3DPreview";
 import { apiGenerateImage, apiSaveGenerationImage } from "../../lib/api";
 import type { GenerationType } from "../../types/generate";
 
@@ -18,6 +19,7 @@ export function ImagePreview({
   const [loading, setLoading]   = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(initialImageUrl ?? null);
   const [error, setError]       = useState<string | null>(null);
+  const [show3D, setShow3D]     = useState(false);
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -26,8 +28,8 @@ export function ImagePreview({
     setLoading(false);
     if (data?.url) {
       setImageUrl(data.url);
+      setShow3D(false);   // reset 3D panel on new image
       onImageReady?.(data.url);
-      // Persist to DB if we have a generation id
       if (generationId) {
         apiSaveGenerationImage(generationId, data.url);
       }
@@ -54,10 +56,23 @@ export function ImagePreview({
       {imageUrl && (
         <div className="image-preview__wrap">
           <img src={imageUrl} alt="Hoja de diseño del personaje" className="image-preview__img" />
-          <a href={imageUrl} download="hoja-de-diseno.png" className="image-preview__download">
-            ⬇ Descargar
-          </a>
+          <div className="image-preview__actions">
+            <a href={imageUrl} download="hoja-de-diseno.png" className="image-preview__download">
+              ⬇ Descargar imagen
+            </a>
+            <button
+              className={`image-preview__3d-toggle${show3D ? " image-preview__3d-toggle--active" : ""}`}
+              onClick={() => setShow3D((v) => !v)}
+              title="Generar modelo 3D con TRELLIS"
+            >
+              🧊 {show3D ? "Ocultar 3D" : "Ver en 3D"}
+            </button>
+          </div>
         </div>
+      )}
+
+      {imageUrl && show3D && (
+        <Model3DPreview imageUrl={imageUrl} />
       )}
     </div>
   );

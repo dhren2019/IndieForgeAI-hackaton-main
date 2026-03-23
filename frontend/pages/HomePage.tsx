@@ -25,7 +25,19 @@ export function HomePage({ onToast }: HomePageProps) {
   };
 
   return (
-    <PageContainer>
+    <div className="page-bg-wrap">
+      <div className="social-bg" aria-hidden="true">
+        <div className="social-bg__orb social-bg__orb--1" />
+        <div className="social-bg__orb social-bg__orb--2" />
+        <div className="social-bg__orb social-bg__orb--3" />
+        <div className="social-bg__orb social-bg__orb--4" />
+        <div className="social-bg__grid" />
+      </div>
+      <PageContainer>
+      <div className="page-hero">
+        <h1 className="page-hero__title">Generador</h1>
+        <p className="page-hero__sub">Crea personajes, mazmorras, objetos y más con IA</p>
+      </div>
       <div className="home-layout">
         <section className="home-layout__form">
           <GenerateForm
@@ -60,5 +72,6 @@ export function HomePage({ onToast }: HomePageProps) {
         />
       )}
     </PageContainer>
+    </div>
   );
 }

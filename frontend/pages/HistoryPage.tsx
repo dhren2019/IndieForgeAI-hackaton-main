@@ -18,47 +18,59 @@ export function HistoryPage({ onToast }: HistoryPageProps) {
   const [publishing, setPublishing]    = useState(false);
 
   return (
-    <PageContainer>
-      <div className="split-layout">
-        <aside className="split-layout__list">
-          <h2 className="section-title">Historial de generaciones</h2>
-          <HistoryList
-            items={history}
-            loading={loading}
-            onSelect={(g) => { setSelected(g); setPublishing(false); }}
-            selectedId={selected?.id}
-            emptyMsg="No hay generaciones en el historial"
-          />
-        </aside>
-
-        <main className="split-layout__detail">
-          {selected ? (
-            <ResultCard
-              gen={selected}
-              isFav={favIds.has(selected.id)}
-              onFavToggle={(id, add) => {
-                toggleFav(id, add);
-                onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
-              }}
-              onShare={() => setPublishing(true)}
-            />
-          ) : (
-            <div className="empty-state">
-              <div className="empty-state__icon">📜</div>
-              <p className="empty-state__text">Selecciona una entrada del historial</p>
-            </div>
-          )}
-        </main>
+    <div className="page-bg-wrap">
+      <div className="social-bg" aria-hidden="true">
+        <div className="social-bg__orb social-bg__orb--1" />
+        <div className="social-bg__orb social-bg__orb--2" />
+        <div className="social-bg__orb social-bg__orb--3" />
+        <div className="social-bg__orb social-bg__orb--4" />
+        <div className="social-bg__grid" />
       </div>
+      <PageContainer>
+        <div className="page-hero">
+          <h1 className="page-hero__title">Historial</h1>
+          <p className="page-hero__sub">Todas tus generaciones anteriores</p>
+        </div>
+        <div className="split-layout">
+          <aside className="split-layout__list">
+            <HistoryList
+              items={history}
+              loading={loading}
+              onSelect={(g) => { setSelected(g); setPublishing(false); }}
+              selectedId={selected?.id}
+              emptyMsg="No hay generaciones en el historial"
+            />
+          </aside>
 
-      {publishing && selected && (
-        <PublishModal
-          gen={selected}
-          onClose={() => setPublishing(false)}
-          onPublished={() => onToast("Publicado ✨")}
-          onToast={onToast}
-        />
-      )}
-    </PageContainer>
+          <main className="split-layout__detail">
+            {selected ? (
+              <ResultCard
+                gen={selected}
+                isFav={favIds.has(selected.id)}
+                onFavToggle={(id, add) => {
+                  toggleFav(id, add);
+                  onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
+                }}
+                onShare={() => setPublishing(true)}
+              />
+            ) : (
+              <div className="empty-state">
+                <div className="empty-state__icon">📜</div>
+                <p className="empty-state__text">Selecciona una entrada del historial</p>
+              </div>
+            )}
+          </main>
+        </div>
+
+        {publishing && selected && (
+          <PublishModal
+            gen={selected}
+            onClose={() => setPublishing(false)}
+            onPublished={() => onToast("Publicado ✨")}
+            onToast={onToast}
+          />
+        )}
+      </PageContainer>
+    </div>
   );
 }

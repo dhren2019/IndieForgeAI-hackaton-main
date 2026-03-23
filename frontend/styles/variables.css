@@ -93,7 +93,7 @@
 
   /* Layout */
   --header-h:    80px;
-  --nav-w:       248px;
-  --nav-w-sm:    68px;
-  --content-max: 1200px;
+  --nav-w:       220px;
+  --nav-w-sm:    64px;
+  --content-max: 1110px;
 }
