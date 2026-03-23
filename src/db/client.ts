@@ -38,6 +38,7 @@ export interface Generation {
   result: Record<string, unknown>;
   raw_output: string | null;
   source: "model" | "fallback";
+  image_url: string | null;
   created_at: string;
 }
 
@@ -128,6 +129,7 @@ export function getFavorites(
 function deserializeGeneration(row: Generation): Generation {
   return {
     ...row,
+    image_url: row.image_url ?? null,
     prompt_meta:
       typeof row.prompt_meta === "string"
         ? JSON.parse(row.prompt_meta)
@@ -135,6 +137,16 @@ function deserializeGeneration(row: Generation): Generation {
     result:
       typeof row.result === "string" ? JSON.parse(row.result) : row.result,
   };
+}
+
+export function updateGenerationImage(
+  db: Database,
+  id: number,
+  image_url: string
+): void {
+  db.prepare(
+    `UPDATE generations SET image_url = ? WHERE id = ?`
+  ).run(image_url, id);
 }
 
 // ---------------------------------------------------------------------------

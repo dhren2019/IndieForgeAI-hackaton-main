@@ -1,54 +1,36 @@
 /**
- * POST /api/favorite   { generation_id }  — toggle add
- * DELETE /api/favorite { generation_id }  — remove
- * GET  /api/favorites                     — list
+ * POST   /api/favorite   { generation_id }  — add
+ * DELETE /api/favorite   { generation_id }  — remove
+ * GET    /api/favorites                     — list
  */
+import { addToFavorites, removeFromFavorites, getUserFavorites } from "../services/favorite.service";
+import { ok, err } from "../utils/response";
 
-import { getDB, addFavorite, removeFavorite, getFavorites } from "../db/client";
+export function favoritesRoute(req: Request, sessionId: string): Promise<Response> | Response {
+  if (req.method === "GET")    return ok(getUserFavorites(sessionId));
+  if (req.method === "POST")   return addFavoriteRoute(req, sessionId);
+  if (req.method === "DELETE") return removeFavoriteRoute(req, sessionId);
+  return err("Method not allowed", 405);
+}
 
+async function addFavoriteRoute(req: Request, sessionId: string): Promise<Response> {
+  const body = (await req.json().catch(() => null)) as { generation_id?: number } | null;
+  if (!body?.generation_id) return err("generation_id required");
+  addToFavorites(sessionId, body.generation_id);
+  return ok({ added: true });
+}
+
+async function removeFavoriteRoute(req: Request, sessionId: string): Promise<Response> {
+  const body = (await req.json().catch(() => null)) as { generation_id?: number } | null;
+  if (!body?.generation_id) return err("generation_id required");
+  removeFromFavorites(sessionId, body.generation_id);
+  return ok({ removed: true });
+}
+
+/** @deprecated */
 export function handleFavoriteToggle(req: Request): Promise<Response> | Response {
-  if (req.method === "GET") return handleGetFavorites(req);
-  if (req.method === "POST") return handleAddFavorite(req);
-  if (req.method === "DELETE") return handleRemoveFavorite(req);
-  return json({ error: "Method not allowed" }, 405);
-}
-
-async function handleAddFavorite(req: Request): Promise<Response> {
-  const body = (await req.json().catch(() => null)) as { generation_id?: number } | null;
-  if (!body?.generation_id) return json({ error: "generation_id required" }, 400);
-
-  const session_id = getSessionId(req);
-  const db = getDB();
-  addFavorite(db, session_id, body.generation_id);
-  return json({ success: true });
-}
-
-async function handleRemoveFavorite(req: Request): Promise<Response> {
-  const body = (await req.json().catch(() => null)) as { generation_id?: number } | null;
-  if (!body?.generation_id) return json({ error: "generation_id required" }, 400);
-
-  const session_id = getSessionId(req);
-  const db = getDB();
-  removeFavorite(db, session_id, body.generation_id);
-  return json({ success: true });
-}
-
-function handleGetFavorites(req: Request): Response {
-  const session_id = getSessionId(req);
-  const db   = getDB();
-  const rows = getFavorites(db, session_id);
-  return json({ success: true, data: rows });
-}
-
-function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
-function getSessionId(req: Request): string {
-  const cookie = req.headers.get("cookie") ?? "";
-  const match  = cookie.match(/session_id=([^;]+)/);
-  return match?.[1] ?? `anon-${crypto.randomUUID()}`;
+  const cookie    = req.headers.get("cookie") ?? "";
+  const match     = cookie.match(/session_id=([^;]+)/);
+  const sessionId = match?.[1] ?? `anon-${crypto.randomUUID()}`;
+  return favoritesRoute(req, sessionId);
 }

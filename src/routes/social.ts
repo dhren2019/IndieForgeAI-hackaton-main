@@ -1,32 +1,26 @@
 /**
  * Rutas sociales — /api/social/*
- * Publicaciones, etiquetas, likes y comentarios en español.
  */
-
 import {
-  getDB,
-  createPost,
-  getPostById,
-  getFeed,
-  explorePosts,
-  getTrendingPosts,
-  getMyPosts,
-  deletePost,
-  toggleLike,
-  addComment,
-  getComments,
-  followTag,
-  unfollowTag,
-  getFollowedTags,
-  getPopularTags,
-  recordInteraction,
-  type GenerationType,
-  type UserInteractionType,
-} from "../db/client";
-
-// ---------------------------------------------------------------------------
-// Dispatcher principal
-// ---------------------------------------------------------------------------
+  createSocialPost,
+  getSocialPost,
+  getSocialFeed,
+  exploreSocialPosts,
+  getTrending,
+  getOwnPosts,
+  deleteSocialPost,
+  togglePostLike,
+  getPostComments,
+  addPostComment,
+  followUserTag,
+  unfollowUserTag,
+  getUserFollowedTags,
+  getPopularTagsList,
+  recordUserInteraction,
+} from "../services/post.service";
+import { ok, err } from "../utils/response";
+import type { UserInteractionType } from "../types/social";
+import type { GenerationType } from "../types/generate";
 
 export async function handleSocial(req: Request): Promise<Response> {
   const url      = new URL(req.url);
@@ -97,7 +91,7 @@ export async function handleSocial(req: Request): Promise<Response> {
 async function handleCreatePost(req: Request, session: string): Promise<Response> {
   let body: Record<string, unknown>;
   try { body = await req.json() as Record<string, unknown>; }
-  catch { return json({ error: "JSON inválido" }, 400); }
+  catch { return err("JSON inválido"); }
 
   const title       = String(body.title ?? "").trim();
   const description = String(body.description ?? "").trim();
@@ -107,141 +101,109 @@ async function handleCreatePost(req: Request, session: string): Promise<Response
   const gen_id      = typeof body.generation_id === "number" ? body.generation_id : null;
   const image_url   = typeof body.image_url === "string" ? body.image_url : null;
 
-  if (!title)  return json({ error: "El título es obligatorio" }, 400);
+  if (!title)  return err("El título es obligatorio");
   if (!type || !["npc","quest","item","lore","weapon","enemy"].includes(type))
-    return json({ error: "Tipo inválido" }, 400);
+    return err("Tipo inválido");
   if (!result || typeof result !== "object")
-    return json({ error: "Resultado inválido" }, 400);
+    return err("Resultado inválido");
 
-  const db   = getDB();
-  const post = createPost(db, { session_id: session, generation_id: gen_id, title, description, type, result, tags, image_url });
-  return json({ success: true, data: post });
+  const post = createSocialPost({
+    session_id: session, generation_id: gen_id,
+    title, description, type, result, tags, image_url,
+  });
+  return ok(post);
 }
 
 function handleTrending(url: URL, session: string): Response {
-  const limit  = Math.min(Number(url.searchParams.get("limit")  ?? "20"), 50);
-  const offset = Number(url.searchParams.get("offset") ?? "0");
-  const db     = getDB();
-  const posts  = getTrendingPosts(db, session, limit, offset);
-  return json({ success: true, data: posts });
+  const limit = Math.min(Number(url.searchParams.get("limit") ?? "20"), 50);
+  return ok(getTrending(session, limit));
 }
 
 function handleFeed(url: URL, session: string): Response {
-  const limit  = Math.min(Number(url.searchParams.get("limit")  ?? "20"), 50);
-  const offset = Number(url.searchParams.get("offset") ?? "0");
-  const db     = getDB();
-  const posts  = getFeed(db, session, limit, offset);
-  return json({ success: true, data: posts });
+  const limit = Math.min(Number(url.searchParams.get("limit") ?? "20"), 50);
+  return ok(getSocialFeed(session, limit));
 }
 
 function handleExplore(url: URL, session: string): Response {
-  const limit  = Math.min(Number(url.searchParams.get("limit")  ?? "20"), 50);
-  const offset = Number(url.searchParams.get("offset") ?? "0");
-  const tag    = url.searchParams.get("tag") || null;
-  const sort   = url.searchParams.get("sort") || "reciente";
-  const db     = getDB();
-  const posts  = explorePosts(db, session, tag, sort, limit, offset);
-  return json({ success: true, data: posts });
+  const limit = Math.min(Number(url.searchParams.get("limit") ?? "20"), 50);
+  const tag   = url.searchParams.get("tag") || null;
+  const sort  = url.searchParams.get("sort") || "reciente";
+  return ok(exploreSocialPosts(session, tag, sort, limit));
 }
 
 function handleMyPosts(session: string): Response {
-  const db    = getDB();
-  const posts = getMyPosts(db, session);
-  return json({ success: true, data: posts });
+  return ok(getOwnPosts(session));
 }
 
 function handleGetPost(id: number, session: string): Response {
-  const db   = getDB();
-  const post = getPostById(db, id, session);
-  if (!post) return json({ error: "Publicación no encontrada" }, 404);
-  return json({ success: true, data: post });
+  const post = getSocialPost(id, session);
+  if (!post) return err("Publicación no encontrada", 404);
+  return ok(post);
 }
 
 function handleDeletePost(id: number, session: string): Response {
-  const db = getDB();
-  const ok = deletePost(db, id, session);
-  if (!ok) return json({ error: "No autorizado o no encontrado" }, 403);
-  return json({ success: true });
+  const deleted = deleteSocialPost(id, session);
+  if (!deleted) return err("No autorizado o no encontrado", 403);
+  return ok({ deleted: true });
 }
 
 function handleLike(postId: number, session: string): Response {
-  const db    = getDB();
-  const liked = toggleLike(db, session, postId);
-  // Registrar interacción 'like' para el algoritmo ML
-  if (liked) recordInteraction(db, session, postId, "like");
-  return json({ success: true, liked });
+  const liked = togglePostLike(postId, session);
+  if (liked) recordUserInteraction(session, postId, "like");
+  return ok({ liked });
 }
 
 function handleGetComments(postId: number): Response {
-  const db       = getDB();
-  const comments = getComments(db, postId);
-  return json({ success: true, data: comments });
+  return ok(getPostComments(postId));
 }
 
 async function handleAddComment(req: Request, postId: number, session: string): Promise<Response> {
   let body: Record<string, unknown>;
   try { body = await req.json() as Record<string, unknown>; }
-  catch { return json({ error: "JSON inválido" }, 400); }
+  catch { return err("JSON inválido"); }
 
   const content = String(body.content ?? "").trim();
-  if (!content) return json({ error: "El comentario no puede estar vacío" }, 400);
-  if (content.length > 300) return json({ error: "Máximo 300 caracteres" }, 400);
+  if (!content)         return err("El comentario no puede estar vacío");
+  if (content.length > 300) return err("Máximo 300 caracteres");
 
-  const db      = getDB();
-  const comment = addComment(db, session, postId, content);
-  // Registrar interacción 'comment' para el algoritmo ML
-  recordInteraction(db, session, postId, "comment");
-  return json({ success: true, data: comment });
+  const comment = addPostComment(postId, session, content);
+  recordUserInteraction(session, postId, "comment");
+  return ok(comment);
 }
 
 function handlePopularTags(): Response {
-  const db   = getDB();
-  const tags = getPopularTags(db, 40);
-  return json({ success: true, data: tags });
+  return ok(getPopularTagsList());
 }
 
 function handleFollowedTags(session: string): Response {
-  const db   = getDB();
-  const tags = getFollowedTags(db, session);
-  return json({ success: true, data: tags });
+  return ok(getUserFollowedTags(session));
 }
 
 async function handleFollowTag(req: Request, session: string): Promise<Response> {
   const body = await req.json().catch(() => null) as { tag?: string } | null;
   const tag  = body?.tag?.trim().toLowerCase();
-  if (!tag)  return json({ error: "Etiqueta requerida" }, 400);
-  followTag(getDB(), session, tag);
-  return json({ success: true });
+  if (!tag) return err("Etiqueta requerida");
+  followUserTag(session, tag);
+  return ok({ following: tag });
 }
 
 async function handleUnfollowTag(req: Request, session: string): Promise<Response> {
   const body = await req.json().catch(() => null) as { tag?: string } | null;
   const tag  = body?.tag?.trim().toLowerCase();
-  if (!tag)  return json({ error: "Etiqueta requerida" }, 400);
-  unfollowTag(getDB(), session, tag);
-  return json({ success: true });
+  if (!tag) return err("Etiqueta requerida");
+  unfollowUserTag(session, tag);
+  return ok({ unfollowed: tag });
 }
 
 async function handleRecordInteraction(req: Request, session: string): Promise<Response> {
-  const body = await req.json().catch(() => null) as { post_id?: number; action?: string } | null;
+  const body    = await req.json().catch(() => null) as { post_id?: number; action?: string } | null;
   const post_id = Number(body?.post_id);
   const action  = body?.action as UserInteractionType | undefined;
-  if (!post_id || isNaN(post_id)) return json({ error: "post_id inválido" }, 400);
+  if (!post_id || isNaN(post_id)) return err("post_id inválido");
   if (!action || !["view", "expand", "like", "comment"].includes(action))
-    return json({ error: "action inválida" }, 400);
-  recordInteraction(getDB(), session, post_id, action);
-  return json({ success: true });
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
+    return err("action inválida");
+  recordUserInteraction(session, post_id, action);
+  return ok({ recorded: true });
 }
 
 function getSessionId(req: Request): string {

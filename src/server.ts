@@ -1,132 +1,132 @@
 /**
- * IndieForge AI — Main server entry point
- * Runs with: bun run src/server.ts
- * Hot reload: bun run --hot src/server.ts
+ * IndieForge AI — Server entry point
+ *
+ * Responsibilities:
+ *  1. Run DB migration
+ *  2. Register middlewares (CORS, session, error handler)
+ *  3. Register routes
+ *  4. Serve compiled frontend
+ *  5. Health check
  */
 
-import { handleGenerate }       from "./routes/generate";
-import { handleHistory }        from "./routes/history";
-import { handleFavoriteToggle } from "./routes/favorites";
-import { handleSocial }         from "./routes/social";
-import { handleImageGen }       from "./routes/imagegen";
-import { getDB }                from "./db/client";
-import { readFileSync }         from "fs";
-import { join }                 from "path";
+import { ENV }                        from "./config/env";
+import { corsPreflightResponse, applyCors } from "./middleware/cors";
+import { resolveSession }             from "./middleware/session";
+import { handleError }                from "./middleware/error-handler";
+import { generateRoute }              from "./routes/generate";
+import { imageRoute }                 from "./routes/image";
+import { historyRoute }               from "./routes/history";
+import { favoritesRoute }             from "./routes/favorites";
+import { handleSocial }               from "./routes/social";
+import { saveGenerationImageRoute }   from "./routes/generation-image";
+import { healthRoute }                from "./routes/health";
+import { getDB }                      from "./db/client";
+import { logger }                     from "./utils/logger";
+import { readFileSync }               from "fs";
+import { join }                       from "path";
 
-const PORT = Number(process.env.PORT ?? 3000);
-
-// ---------------------------------------------------------------------------
-// Run DB migration on startup (idempotent — uses CREATE TABLE IF NOT EXISTS)
-// ---------------------------------------------------------------------------
-function runMigration() {
+// ── DB Migration ─────────────────────────────────────────────────────────────
+function runMigration(): void {
   const db  = getDB();
   const sql = readFileSync(join(import.meta.dir, "db/schema.sql"), "utf-8");
+
   const statements = sql
-    .replace(/--[^\n]*/g, "")   // strip line comments first
+    .replace(/--[^\n]*/g, "")
     .split(";")
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
 
   db.transaction(() => {
-    for (const stmt of statements) {
-      db.run(stmt);
-    }
+    for (const stmt of statements) db.run(stmt);
   })();
-  console.log("✅ DB ready");
+
+  // Ensure image_url column exists for older databases
+  try { db.run("ALTER TABLE posts ADD COLUMN image_url TEXT"); } catch {}
+  try { db.run("ALTER TABLE generations ADD COLUMN image_url TEXT"); } catch {}
+
+  logger.info("DB ready");
 }
 
+// ── Static file server ────────────────────────────────────────────────────────
+async function serveStatic(pathname: string): Promise<Response | null> {
+  const frontendBase = join(import.meta.dir, "../frontend");
+  const publicBase   = join(import.meta.dir, "../public");
+
+  // Public assets take priority (logos, images, fonts)
+  if (pathname !== "/") {
+    const pubFile = Bun.file(join(publicBase, pathname));
+    if (await pubFile.exists()) return new Response(pubFile);
+  }
+
+  // Frontend app files
+  const filePath = pathname === "/" ? join(frontendBase, "index.html") : join(frontendBase, pathname);
+  const file     = Bun.file(filePath);
+  if (await file.exists()) return new Response(file);
+
+  return null;
+}
+
+// ── Router ────────────────────────────────────────────────────────────────────
+async function router(req: Request, sessionId: string): Promise<Response> {
+  const url      = new URL(req.url);
+  const pathname = url.pathname;
+  const method   = req.method;
+
+  // Health check
+  if (pathname === "/api/health")                          return healthRoute();
+
+  // Generate
+  if (pathname === "/api/generate" && method === "POST")   return generateRoute(req, sessionId);
+
+  // Image generation
+  if (pathname === "/api/imagen" && method === "POST")     return imageRoute(req);
+
+  // Save generation image
+  const genImgMatch = pathname.match(/^\/api\/generations\/(\d+)\/image$/);
+  if (genImgMatch && method === "PATCH")
+    return saveGenerationImageRoute(req, sessionId, Number(genImgMatch[1]));
+
+  // History
+  if (pathname === "/api/history" && method === "GET")     return historyRoute(req, sessionId);
+
+  // Favorites
+  if (pathname.startsWith("/api/favorite"))                return favoritesRoute(req, sessionId);
+
+  // Social
+  if (pathname.startsWith("/api/social"))                  return handleSocial(req);
+
+  // Static files (compiled frontend)
+  const staticRes = await serveStatic(pathname);
+  return staticRes ?? new Response("Not Found", { status: 404 });
+}
+
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
 runMigration();
 
-// Ensure image_url column exists for databases created before this schema change
-try { getDB().run("ALTER TABLE posts ADD COLUMN image_url TEXT"); } catch { /* already exists */ }
-
-// ---------------------------------------------------------------------------
-// Static file helper — serves frontend/
-// ---------------------------------------------------------------------------
-async function serveStatic(pathname: string): Promise<Response | null> {
-  const base     = join(import.meta.dir, "../frontend");
-  const filePath = pathname === "/" ? join(base, "index.html") : join(base, pathname);
-
-  const file = Bun.file(filePath);
-  if (!(await file.exists())) return null;
-
-  return new Response(file);
-}
-
-// ---------------------------------------------------------------------------
-// Session cookie middleware
-// ---------------------------------------------------------------------------
-function ensureSession(req: Request): { sessionId: string; setCookie: string | null } {
-  const cookie  = req.headers.get("cookie") ?? "";
-  const match   = cookie.match(/session_id=([^;]+)/);
-  const existed = !!match?.[1];
-  const sessionId = existed ? match![1] : `sess-${crypto.randomUUID()}`;
-  const setCookie = existed
-    ? null
-    : `session_id=${sessionId}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`;
-  return { sessionId, setCookie };
-}
-
-function addSessionCookie(res: Response, setCookie: string | null): Response {
-  if (!setCookie) return res;
-  const headers = new Headers(res.headers);
-  headers.set("Set-Cookie", setCookie);
-  return new Response(res.body, { status: res.status, headers });
-}
-
-// ---------------------------------------------------------------------------
-// CORS headers for dev
-// ---------------------------------------------------------------------------
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
-
-// ---------------------------------------------------------------------------
-// Router
-// ---------------------------------------------------------------------------
 Bun.serve({
-  port: PORT,
+  port: ENV.PORT,
   async fetch(req) {
-    const url      = new URL(req.url);
-    const pathname = url.pathname;
+    if (req.method === "OPTIONS") return corsPreflightResponse();
 
-    // Preflight
-    if (req.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: CORS_HEADERS });
-    }
-
-    const { sessionId, setCookie } = ensureSession(req);
+    const { sessionId, setCookie } = resolveSession(req);
 
     let res: Response;
-
-    // API routes
-    if (pathname === "/api/generate" && req.method === "POST") {
-      res = await handleGenerate(req);
-    } else if (pathname === "/api/imagen" && req.method === "POST") {
-      res = await handleImageGen(req);
-    } else if (pathname === "/api/history" && req.method === "GET") {
-      res = handleHistory(req);
-    } else if (pathname.startsWith("/api/favorite")) {
-      res = await handleFavoriteToggle(req);
-    } else if (pathname.startsWith("/api/favorites") && req.method === "GET") {
-      res = await handleFavoriteToggle(req);
-    } else if (pathname.startsWith("/api/social")) {
-      res = await handleSocial(req);
-    } else {
-      // Static files
-      const staticRes = await serveStatic(pathname);
-      res = staticRes ?? new Response("Not Found", { status: 404 });
+    try {
+      res = await router(req, sessionId);
+    } catch (e) {
+      res = handleError(e);
     }
 
-    // Apply CORS + session cookie
-    const headers = new Headers(res.headers);
-    for (const [k, v] of Object.entries(CORS_HEADERS)) headers.set(k, v);
-    if (setCookie) headers.set("Set-Cookie", setCookie);
+    res = applyCors(res);
 
-    return new Response(res.body, { status: res.status, headers });
+    if (setCookie) {
+      const headers = new Headers(res.headers);
+      headers.set("Set-Cookie", setCookie);
+      res = new Response(res.body, { status: res.status, headers });
+    }
+
+    return res;
   },
 });
 
-console.log(`🚀 IndieForge AI running on http://localhost:${PORT}`);
+logger.info(`Server running on http://localhost:${ENV.PORT}`);

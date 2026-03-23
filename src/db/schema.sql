@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS generations (
   result      TEXT NOT NULL,
   raw_output  TEXT,
   source      TEXT NOT NULL DEFAULT 'model' CHECK (source IN ('model', 'fallback')),
+  image_url   TEXT,
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

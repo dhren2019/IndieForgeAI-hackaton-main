@@ -1,6 +1,47 @@
-.env
+﻿# Node / package managers
 node_modules/
+bun.lockb
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+
+
+# Build outputs
 dist/
-*.db
-*.db-shm
-*.db-wal
+build/
+frontend/app.js
+frontend/app.js.map
+public/build/
+
+# Cache
+.cache/
+.tmp/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+logs/
+
+
+
+# IDEs + OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Coverage and reports
+coverage/
+*.lcov
+
+# Misc
+
+
+# Ignore generated assets
+/public/assets/
+
+# Ignore editor history
+.history/

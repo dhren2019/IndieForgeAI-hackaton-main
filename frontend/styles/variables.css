@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Backgrounds */
+  --bg:           #07070c;
+  --surface:      #0f0f17;
+  --card:         #14141e;
+  --card-hover:   #1a1a26;
+  --border:       #1e1e2d;
+  --border-hover: #2d2d42;
+  --border-focus: #7c3aed;
+
+  /* Brand */
+  --accent:      #7c3aed;
+  --accent-hv:   #6d28d9;
+  --accent2:     #db2777;
+  --accent-glow: rgba(124,58,237,0.4);
+  --accent-dim:  rgba(124,58,237,0.15);
+
+  /* Gradient */
+  --gradient:      linear-gradient(135deg, #7c3aed, #db2777);
+  --gradient-soft: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(219,39,119,0.2));
+
+  /* Text */
+  --text:    #f0effe;
+  --text-md: #a09ab8;
+  --muted:   #605c7a;
+
+  /* Semantic */
+  --ok:     #10b981;
+  --warn:   #f59e0b;
+  --danger: #ef4444;
+  --info:   #3b82f6;
+
+  /* Content types */
+  --npc:    #f59e0b;
+  --quest:  #3b82f6;
+  --item:   #10b981;
+  --lore:   #8b5cf6;
+  --weapon: #ef4444;
+  --enemy:  #6b7280;
+
+  /* Spacing */
+  --sp-1:  0.25rem;
+  --sp-2:  0.5rem;
+  --sp-3:  0.75rem;
+  --sp-4:  1rem;
+  --sp-5:  1.25rem;
+  --sp-6:  1.5rem;
+  --sp-8:  2rem;
+  --sp-10: 2.5rem;
+  --sp-12: 3rem;
+
+  /* Radii */
+  --r-sm:   0.25rem;
+  --r-md:   0.5rem;
+  --r-lg:   0.75rem;
+  --r-xl:   1rem;
+  --r-2xl:  1.5rem;
+  --r-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm:   0 1px 3px 0 rgba(0,0,0,.7), 0 1px 2px -1px rgba(0,0,0,.7);
+  --shadow-md:   0 4px 6px -1px rgba(0,0,0,.7), 0 2px 4px -2px rgba(0,0,0,.7);
+  --shadow-lg:   0 10px 15px -3px rgba(0,0,0,.8), 0 4px 6px -4px rgba(0,0,0,.8);
+  --shadow-glow: 0 0 30px -5px var(--accent-glow);
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --text-xs:    0.7rem;
+  --text-sm:    0.82rem;
+  --text-base:  0.9rem;
+  --text-md-sz: 1rem;
+  --text-lg:    1.15rem;
+  --text-xl:    1.4rem;
+  --text-2xl:   1.75rem;
+  --text-3xl:   2.25rem;
+
+  /* Transitions */
+  --t-fast:   0.12s cubic-bezier(0.4, 0, 0.2, 1);
+  --t-base:   0.2s  cubic-bezier(0.4, 0, 0.2, 1);
+  --t-slow:   0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --t-bounce: 0.4s  cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Z-index */
+  --z-overlay: 40;
+  --z-header:  50;
+  --z-nav:     60;
+  --z-modal:   100;
+  --z-toast:   200;
+
+  /* Layout */
+  --header-h:    80px;
+  --nav-w:       248px;
+  --nav-w-sm:    68px;
+  --content-max: 1200px;
+}

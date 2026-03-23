@@ -1,84 +1,40 @@
 /**
  * POST /api/generate
- * Body: { type, ...meta }
- * Returns the generated + persisted object
  */
+import { generateContent }        from "../services/ai.service";
+import { ok, err }                from "../utils/response";
+import { isValidGenerationType }  from "../utils/validators";
+import { checkRateLimit, rateLimitResponse } from "../middleware/rate-limit";
+import type { PromptMeta }        from "../types/generate";
 
-import { getDB, insertGeneration, type GenerationType } from "../db/client";
-import { buildPrompt }          from "../lib/prompts";
-import { callModel }            from "../lib/hf";
-import { parseJSON, validateAndSanitize } from "../lib/parser";
-import { getFallback }          from "../lib/fallback";
-
-export async function handleGenerate(req: Request): Promise<Response> {
+export async function generateRoute(req: Request, sessionId: string): Promise<Response> {
   let body: Record<string, unknown>;
   try {
     body = (await req.json()) as Record<string, unknown>;
   } catch {
-    return json({ error: "Invalid JSON body" }, 400);
+    return err("Invalid JSON body");
   }
 
-  const type = body.type as GenerationType;
-  if (!["npc", "quest", "item", "lore", "weapon", "enemy"].includes(type)) {
-    return json({ error: "type must be one of: npc, quest, item, lore, weapon, enemy" }, 400);
+  const type = body.type;
+  if (!isValidGenerationType(type)) {
+    return err("type must be one of: npc, quest, item, lore, weapon, enemy");
   }
 
-  const session_id = getSessionId(req);
-  const meta = { ...body };
-  delete meta.type;
+  if (!checkRateLimit(sessionId)) return rateLimitResponse();
 
-  const prompt   = buildPrompt(type, meta as never);
-  const hfResult = await callModel(prompt);
+  const model = typeof body.model === "string" ? body.model : undefined;
+  const meta  = { ...body } as PromptMeta;
+  delete (meta as Record<string, unknown>).type;
+  delete (meta as Record<string, unknown>).model;
 
-  let result: Record<string, unknown>;
-  let source: "model" | "fallback" = "model";
-
-  if (hfResult.ok) {
-    const parsed = parseJSON(hfResult.raw);
-    if (parsed.ok && parsed.data) {
-      const { valid, data, missingFields } = validateAndSanitize(type, parsed.data);
-      if (valid) {
-        result = data;
-      } else {
-        console.warn(`[generate] Missing fields ${missingFields.join(",")} — using fallback`);
-        result = getFallback(type, meta);
-        source = "fallback";
-      }
-    } else {
-      console.warn(`[generate] Parse failed: ${parsed.error} — using fallback`);
-      result = getFallback(type, meta);
-      source = "fallback";
-    }
-  } else {
-    console.warn(`[generate] Model error: ${hfResult.error} — using fallback`);
-    result = getFallback(type, meta);
-    source = "fallback";
-  }
-
-  const db  = getDB();
-  const row = insertGeneration(db, {
-    session_id,
-    type,
-    prompt_meta: meta,
-    result,
-    raw_output: hfResult.raw || null,
-    source,
-  });
-
-  return json({ success: true, data: { ...row, result, prompt_meta: meta } });
+  const { generation } = await generateContent(sessionId, type, meta, model);
+  return ok(generation);
 }
 
-// ---------------------------------------------------------------------------
-
-function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
-function getSessionId(req: Request): string {
-  const cookie = req.headers.get("cookie") ?? "";
-  const match  = cookie.match(/session_id=([^;]+)/);
-  return match?.[1] ?? `anon-${crypto.randomUUID()}`;
+/** @deprecated use generateRoute — kept for backwards-compat during transition */
+export async function handleGenerate(req: Request): Promise<Response> {
+  const cookie    = req.headers.get("cookie") ?? "";
+  const match     = cookie.match(/session_id=([^;]+)/);
+  const sessionId = match?.[1] ?? `anon-${crypto.randomUUID()}`;
+  return generateRoute(req, sessionId);
 }

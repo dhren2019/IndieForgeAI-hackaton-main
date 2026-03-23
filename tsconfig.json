@@ -10,5 +10,5 @@
     "lib": ["ESNext", "DOM"],
     "types": ["bun-types"]
   },
-  "include": ["src/**/*", "frontend/**/*", "build.ts"]
+  "include": ["src/**/*", "frontend/**/*", "scripts/**/*", "build.ts"]
 }
