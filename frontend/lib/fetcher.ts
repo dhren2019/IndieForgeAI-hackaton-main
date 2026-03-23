@@ -10,7 +10,7 @@ export async function fetcher<T>(
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      return { data: null, error: `HTTP ${res.status}: ${text.slice(0, 200)}` };
+      return { data: null, error: `HTTP ${res.status}: ${text}` };
     }
 
     const json = await res.json() as { success: boolean; data?: T; error?: string };

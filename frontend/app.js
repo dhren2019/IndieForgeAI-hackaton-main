@@ -23907,7 +23907,14 @@ function PromptField({ label, name, type, placeholder, options, value, onChange 
             children: o
           }, o, false, undefined, this))
         ]
-      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("input", {
+      }, undefined, true, undefined, this) : type === "textarea" ? /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("textarea", {
+        id: name,
+        className: "form-field__textarea",
+        placeholder,
+        value,
+        rows: 3,
+        onChange: (e) => onChange(e.target.value)
+      }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("input", {
         id: name,
         className: "form-field__input",
         type: "text",
@@ -24158,6 +24165,30 @@ function GenerateForm({ onGenerate, loading, model, onModelChange }) {
                     onChange: (v) => set("difficulty", v)
                   }, undefined, false, undefined, this)
                 ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+                className: "form-field form-field--full",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("label", {
+                    className: "form-field__label",
+                    htmlFor: "userPrompt",
+                    children: [
+                      "\uD83C\uDFA8 Descripción visual (opcional)",
+                      /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("span", {
+                        className: "form-field__hint",
+                        children: " · guiará la ilustración generada"
+                      }, undefined, false, undefined, this)
+                    ]
+                  }, undefined, true, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("textarea", {
+                    id: "userPrompt",
+                    className: "form-field__textarea",
+                    placeholder: 'ej. "piel azul, cicatriz en mejilla izquierda, capa roja desgarrada, expresión feroz"',
+                    value: val("userPrompt"),
+                    rows: 3,
+                    onChange: (e) => set("userPrompt", e.target.value)
+                  }, undefined, false, undefined, this)
+                ]
               }, undefined, true, undefined, this)
             ]
           }, undefined, true, undefined, this),
@@ -24363,7 +24394,7 @@ async function fetcher(url, options) {
     const res = await fetch(url, options);
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      return { data: null, error: `HTTP ${res.status}: ${text.slice(0, 200)}` };
+      return { data: null, error: `HTTP ${res.status}: ${text}` };
     }
     const json = await res.json();
     if (!json.success)

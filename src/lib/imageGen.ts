@@ -37,28 +37,48 @@ export function buildImagePrompt(
 ): string {
   const name = String(result.name ?? result.title ?? "mysterious figure");
 
-  // Build a rich descriptor from available fields
+  // Build a rich descriptor from AI-generated fields
   const descriptors: string[] = [];
   if (result.race)        descriptors.push(String(result.race));
   if (result.role)        descriptors.push(String(result.role));
   if (result.type && type !== "npc") descriptors.push(String(result.type));
-  if (result.element)     descriptors.push(`${result.element} elemental`);
+  if (result.element)     descriptors.push(`${result.element} element`);
   if (result.class)       descriptors.push(String(result.class));
-  if (result.difficulty)  descriptors.push(`${result.difficulty} tier`);
+  if (result.difficulty)  descriptors.push(`${result.difficulty} difficulty`);
   if (result.rarity)      descriptors.push(String(result.rarity));
-  if (result.appearance)  descriptors.push(String(result.appearance).slice(0, 100));
-  else if (result.description) descriptors.push(String(result.description).slice(0, 100));
 
-  const desc   = descriptors.join(", ");
+  // Use the AI-generated visual description first, then fallback fields
+  const visualDesc =
+    result.appearance   ? String(result.appearance).slice(0, 140) :
+    result.description  ? String(result.description).slice(0, 140) :
+    null;
+  if (visualDesc) descriptors.push(visualDesc);
+
+  // Include backstory/lore for mood and context
+  const loreSnippet =
+    result.backstory ? String(result.backstory).slice(0, 80) :
+    result.lore      ? String(result.lore).slice(0, 80) :
+    result.summary   ? String(result.summary).slice(0, 80) :
+    null;
+  if (loreSnippet) descriptors.push(loreSnippet);
+
+  // User's own visual prompt overrides/extends everything else
+  const userHint = result.userPrompt ? String(result.userPrompt).trim() : null;
+
+  const desc   = descriptors.filter(Boolean).join(", ");
   const style  = TYPE_STYLE[type] ?? "fantasy RPG concept art";
 
-  // The key: request a design sheet with multiple views in ONE composition
-  const sheetInstructions = type === "item" || type === "lore" || type === "weapon"
-    ? "multiple angles and details, design reference sheet, white background panels"
-    : "character design sheet, THREE PANELS SIDE BY SIDE: [left panel: full body frontal view] [center panel: full body back view] [right panel: face and upper body close-up], white background, clean layout, professional concept art";
+  // Design sheet layout instructions per type
+  const sheetInstructions = type === "item" || type === "weapon"
+    ? "weapon/item design sheet, 16:9 horizontal layout, three detailed views side by side: [left: full object front view] [center: back and detail view] [right: close-up of special features and runes], clean white background panels, studio product lighting"
+    : type === "lore"
+    ? "world lore illustration, 16:9 horizontal panoramic, detailed environment and faction imagery, dramatic lighting, parchment and ancient scroll aesthetic"
+    : "character design reference sheet, 16:9 horizontal layout, three panels side by side: [left panel: full body front view standing pose] [center panel: full body back or 3/4 view] [right panel: bust portrait face close-up], white background, clean professional layout";
 
-  return `${name}, ${desc}, ${style}, ${sheetInstructions}, high quality, detailed linework, professional game concept art, vibrant colors, dramatic lighting`
-    .replace(/\s+/g, " ").trim();
+  const basePrompt = `${name}, ${desc}, ${style}, ${sheetInstructions}, high quality, detailed linework, professional game concept art, vibrant colors, dramatic lighting`;
+  const finalPrompt = userHint ? `${basePrompt}, ${userHint}` : basePrompt;
+
+  return finalPrompt.replace(/\s+/g, " ").trim();
 }
 
 /**
@@ -79,7 +99,11 @@ export async function generateImage(prompt: string): Promise<ImageGenResult> {
       },
       body: JSON.stringify({
         inputs: prompt,
-        parameters: { num_inference_steps: 4 }, // FLUX.1-schnell optimal
+        parameters: {
+          num_inference_steps: 4, // FLUX.1-schnell optimal
+          width:  1280,
+          height:  720,           // 16:9 aspect ratio
+        },
       }),
       signal: AbortSignal.timeout(90_000), // 90s — model can be cold
     });

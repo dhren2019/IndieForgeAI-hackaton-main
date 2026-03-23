@@ -86,6 +86,22 @@ export function GenerateForm({ onGenerate, loading, model, onModelChange }: Gene
             <PromptField label="Dificultad" name="difficulty" type="select" options={DIFS_ENEMIGO}
               value={val("difficulty")} onChange={(v) => set("difficulty", v)} />
           </>}
+
+          {/* Shared visual hint — always visible */}
+          <div className="form-field form-field--full">
+            <label className="form-field__label" htmlFor="userPrompt">
+              🎨 Descripción visual (opcional)
+              <span className="form-field__hint">&nbsp;· guiará la ilustración generada</span>
+            </label>
+            <textarea
+              id="userPrompt"
+              className="form-field__textarea"
+              placeholder='ej. "piel azul, cicatriz en mejilla izquierda, capa roja desgarrada, expresión feroz"'
+              value={val("userPrompt")}
+              rows={3}
+              onChange={(e) => set("userPrompt", e.target.value)}
+            />
+          </div>
         </div>
 
         <Button variant="primary" size="lg" fullWidth loading={loading} onClick={handleSubmit}>

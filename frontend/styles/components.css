@@ -399,6 +399,7 @@
   flex-direction: column;
   gap:            var(--sp-3);
 }
+.form-field--full { width: 100%; }
 
 .btn-generate {
   display:         flex;
@@ -470,6 +471,62 @@
   letter-spacing: -0.02em;
 }
 .result-card__body { padding: var(--sp-5); }
+
+/* ==================================
+   IMAGE PREVIEW (Design Sheet)
+   ================================== */
+.image-preview {
+  margin-top:    var(--sp-4);
+  display:       flex;
+  flex-direction: column;
+  gap:           var(--sp-3);
+}
+.image-preview__header {
+  font-size:   var(--text-sm);
+  font-weight: 700;
+  color:       #c4b5fd;
+  display:     flex;
+  align-items: center;
+  gap:         var(--sp-2);
+}
+.image-preview__error {
+  padding:       var(--sp-3) var(--sp-4);
+  border-radius: var(--r-lg);
+  background:    rgba(239,68,68,0.08);
+  border:        1px solid rgba(239,68,68,0.25);
+  color:         #fca5a5;
+  font-size:     var(--text-sm);
+  margin-top:    var(--sp-1);
+}
+.image-preview__wrap {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--sp-2);
+}
+/* 16:9 constrained container */
+.image-preview__img {
+  width:            100%;
+  aspect-ratio:     16 / 9;
+  object-fit:       contain;
+  border-radius:    var(--r-xl);
+  border:           1px solid var(--border);
+  background:       #0d0d18;
+  display:          block;
+  box-shadow:       var(--shadow-lg);
+}
+.image-preview__download {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           var(--sp-2);
+  font-size:     var(--text-xs);
+  color:         #c4b5fd;
+  padding:       4px 14px;
+  border:        1px solid rgba(124,58,237,.35);
+  border-radius: var(--r-full);
+  align-self:    flex-start;
+  transition:    background var(--t-fast);
+}
+.image-preview__download:hover { background: var(--accent-dim); }
 
 /* ==================================
    FIELDS GRID

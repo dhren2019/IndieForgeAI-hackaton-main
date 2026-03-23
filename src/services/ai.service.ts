@@ -58,6 +58,10 @@ export async function generateContent(
   }
 
   const db         = getDB();
+  // Preserve user visual hint in the stored result so ImagePreview can use it
+  if ((meta as Record<string, unknown>).userPrompt) {
+    result.userPrompt = (meta as Record<string, unknown>).userPrompt;
+  }
   const generation = insertGeneration(db, {
     session_id:  sessionId,
     type,
