@@ -9,6 +9,7 @@ export interface Post {
   type: GenerationType;
   result: Record<string, unknown>;
   image_url: string | null;
+  glb_url: string | null;
   created_at: string;
   like_count: number;
   comment_count: number;
@@ -34,6 +35,7 @@ export interface CreatePostInput {
   result: Record<string, unknown>;
   tags: string[];
   image_url: string | null;
+  glb_url?: string | null;
 }
 
 export type UserInteractionType = "view" | "expand" | "like" | "comment";

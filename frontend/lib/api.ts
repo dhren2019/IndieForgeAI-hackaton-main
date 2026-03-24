@@ -38,9 +38,21 @@ export async function apiSaveGenerationImage(generationId: number, imageUrl: str
   return postJSON<{ saved: boolean }>(`/api/generations/${generationId}/image`, { image_url: imageUrl }, "PATCH");
 }
 
-// ── TRELLIS 3D generation ─────────────────────────────────────────
-export async function apiGenerate3D(imageUrl: string) {
-  return postJSON<{ glbUrl: string }>("/api/trellis", { imageUrl });
+export async function apiSaveGenerationGlb(generationId: number, glbUrl: string) {
+  return postJSON<{ saved: boolean }>(`/api/generations/${generationId}/glb`, { glb_url: glbUrl }, "PATCH");
+}
+
+// ── 3D generation (TRELLIS · InstantMesh · Shap-E) ───────────────
+export type ThreeDModelId = "trellis" | "instant-mesh" | "shap-e";
+
+const THREE_D_ENDPOINTS: Record<ThreeDModelId, string> = {
+  "trellis":      "/api/trellis",
+  "instant-mesh": "/api/instant-mesh",
+  "shap-e":       "/api/shap-e",
+};
+
+export async function apiGenerate3D(imageUrl: string, model: ThreeDModelId = "trellis") {
+  return postJSON<{ glbUrl: string }>(THREE_D_ENDPOINTS[model], { imageUrl });
 }
 
 // ── Social Feed ───────────────────────────────────────────────────────────────
@@ -75,6 +87,7 @@ export async function apiCreatePost(data: {
   tags: string[];
   generation_id?: number;
   image_url?: string | null;
+  glb_url?: string | null;
 }) {
   return postJSON<Post>("/api/social/posts", data);
 }

@@ -69,8 +69,8 @@ export function validateAndSanitize(
     return { valid: false, data, missingFields };
   }
 
-  // Truncate long strings to stay clean
-  const sanitized = sanitizeStrings(data, 100);
+  // Truncate excessively long strings to keep responses clean
+  const sanitized = sanitizeStrings(data, 600);
   return { valid: true, data: sanitized, missingFields: [] };
 }
 

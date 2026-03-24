@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS posts (
   type          TEXT NOT NULL CHECK (type IN ('npc', 'quest', 'item', 'lore', 'weapon', 'enemy')),
   result        TEXT NOT NULL,
   image_url     TEXT,
+  glb_url       TEXT,
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

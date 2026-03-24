@@ -9,6 +9,7 @@ export interface Post {
   type: GenerationType;
   result: Record<string, unknown>;
   image_url: string | null;
+  glb_url: string | null;
   created_at: string;
   like_count: number;
   comment_count: number;

@@ -18,8 +18,10 @@ import { imageRoute }                 from "./routes/image";
 import { historyRoute }               from "./routes/history";
 import { favoritesRoute }             from "./routes/favorites";
 import { handleSocial }               from "./routes/social";
-import { saveGenerationImageRoute }   from "./routes/generation-image";
+import { saveGenerationImageRoute, saveGenerationGlbRoute } from "./routes/generation-image";
 import { trellisRoute }               from "./routes/trellis";
+import { instantMeshRoute }           from "./routes/instant-mesh";
+import { shapERoute }                 from "./routes/shap-e";
 import { healthRoute }                from "./routes/health";
 import { getDB }                      from "./db/client";
 import { logger }                     from "./utils/logger";
@@ -44,6 +46,8 @@ function runMigration(): void {
   // Ensure image_url column exists for older databases
   try { db.run("ALTER TABLE posts ADD COLUMN image_url TEXT"); } catch {}
   try { db.run("ALTER TABLE generations ADD COLUMN image_url TEXT"); } catch {}
+  try { db.run("ALTER TABLE posts ADD COLUMN glb_url TEXT"); } catch {}
+  try { db.run("ALTER TABLE generations ADD COLUMN glb_url TEXT"); } catch {}
 
   logger.info("DB ready");
 }
@@ -87,8 +91,15 @@ async function router(req: Request, sessionId: string): Promise<Response> {
   if (genImgMatch && method === "PATCH")
     return saveGenerationImageRoute(req, sessionId, Number(genImgMatch[1]));
 
-  // TRELLIS 3D generation
-  if (pathname === "/api/trellis" && method === "POST")    return trellisRoute(req, sessionId);
+  // Save generation GLB
+  const genGlbMatch = pathname.match(/^\/api\/generations\/(\d+)\/glb$/);
+  if (genGlbMatch && method === "PATCH")
+    return saveGenerationGlbRoute(req, sessionId, Number(genGlbMatch[1]));
+
+  // 3D generation
+  if (pathname === "/api/trellis"       && method === "POST") return trellisRoute(req, sessionId);
+  if (pathname === "/api/instant-mesh" && method === "POST") return instantMeshRoute(req, sessionId);
+  if (pathname === "/api/shap-e"       && method === "POST") return shapERoute(req, sessionId);
 
   // History
   if (pathname === "/api/history" && method === "GET")     return historyRoute(req, sessionId);

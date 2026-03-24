@@ -11,10 +11,11 @@ interface ImagePreviewProps {
   generationId?:     number;
   initialImageUrl?:  string | null;
   onImageReady?:     (url: string) => void;
+  onGlbReady?:       (url: string) => void;
 }
 
 export function ImagePreview({
-  type, result, generationId, initialImageUrl, onImageReady,
+  type, result, generationId, initialImageUrl, onImageReady, onGlbReady,
 }: ImagePreviewProps) {
   const [loading, setLoading]   = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(initialImageUrl ?? null);
@@ -72,7 +73,7 @@ export function ImagePreview({
       )}
 
       {imageUrl && show3D && (
-        <Model3DPreview imageUrl={imageUrl} />
+        <Model3DPreview imageUrl={imageUrl} generationId={generationId} onGlbReady={onGlbReady} />
       )}
     </div>
   );

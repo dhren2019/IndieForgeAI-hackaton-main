@@ -8,7 +8,7 @@ interface ResultJsonProps {
 export function ResultJson({ data }: ResultJsonProps) {
   return (
     <div
-      className="result-json"
+      className="json-display"
       dangerouslySetInnerHTML={{ __html: highlightJSON(JSON.stringify(data, null, 2)) }}
     />
   );

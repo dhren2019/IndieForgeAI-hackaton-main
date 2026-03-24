@@ -18,11 +18,18 @@ export function getFallback(
   // Merge user-supplied name/title if available
   const merged = { ...base };
   if (type === "npc"    && meta.name)  merged.name  = meta.name;
+  if (type === "npc"    && meta.role)  merged.role  = meta.role;
+  if (type === "npc"    && meta.race)  merged.race  = meta.race;
   if (type === "quest"  && meta.title) merged.title = meta.title;
   if (type === "item"   && meta.name)  merged.name  = meta.name;
+  if (type === "item"   && meta.rarity) merged.rarity = meta.rarity;
   if (type === "lore"   && meta.topic) merged.title = meta.topic;
   if (type === "weapon" && meta.name)  merged.name  = meta.name;
+  if (type === "weapon" && (meta as Record<string,unknown>).weaponClass) merged.class   = (meta as Record<string,unknown>).weaponClass;
+  if (type === "weapon" && meta.element) merged.element = meta.element;
   if (type === "enemy"  && meta.name)  merged.name  = meta.name;
+  if (type === "enemy"  && (meta as Record<string,unknown>).enemyType) merged.type = (meta as Record<string,unknown>).enemyType;
+  if (type === "enemy"  && (meta as Record<string,unknown>).difficulty) merged.difficulty = (meta as Record<string,unknown>).difficulty;
 
   return merged;
 }

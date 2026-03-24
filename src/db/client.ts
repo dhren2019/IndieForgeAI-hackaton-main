@@ -149,6 +149,16 @@ export function updateGenerationImage(
   ).run(image_url, id);
 }
 
+export function updateGenerationGlb(
+  db: Database,
+  id: number,
+  glb_url: string
+): void {
+  db.prepare(
+    `UPDATE generations SET glb_url = ? WHERE id = ?`
+  ).run(glb_url, id);
+}
+
 // ---------------------------------------------------------------------------
 // Social — Posts
 // ---------------------------------------------------------------------------
@@ -190,12 +200,13 @@ export function createPost(
     result: Record<string, unknown>;
     tags: string[];
     image_url?: string | null;
+    glb_url?: string | null;
   }
 ): Post {
   const post = db
-    .prepare<{ id: number; session_id: string; generation_id: number | null; title: string; description: string; type: string; result: string; image_url: string | null; created_at: string }, BindParams>(
-      `INSERT INTO posts (session_id, generation_id, title, description, type, result, image_url)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+    .prepare<{ id: number; session_id: string; generation_id: number | null; title: string; description: string; type: string; result: string; image_url: string | null; glb_url: string | null; created_at: string }, BindParams>(
+      `INSERT INTO posts (session_id, generation_id, title, description, type, result, image_url, glb_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING *`
     )
     .get(
@@ -205,7 +216,8 @@ export function createPost(
       params.description.slice(0, 500),
       params.type,
       JSON.stringify(params.result),
-      params.image_url ?? null
+      params.image_url ?? null,
+      params.glb_url ?? null
     )!;
 
   const tagStmt = db.prepare(`INSERT OR IGNORE INTO post_tags (post_id, tag) VALUES (?, ?)`);
@@ -219,7 +231,7 @@ export function createPost(
 /** Obtiene una publicación por ID con métricas */
 export function getPostById(db: Database, id: number, session_id: string): Post | null {
   const row = db
-    .prepare<{ id: number; session_id: string; generation_id: number | null; title: string; description: string; type: string; result: string; image_url: string | null; created_at: string }, BindParams>(
+    .prepare<{ id: number; session_id: string; generation_id: number | null; title: string; description: string; type: string; result: string; image_url: string | null; glb_url: string | null; created_at: string }, BindParams>(
       `SELECT * FROM posts WHERE id = ?`
     )
     .get(id);
@@ -547,7 +559,7 @@ export function getTrendingPosts(
 
 function enrichPost(
   db: Database,
-  row: { id: number; session_id: string; generation_id: number | null; title: string; description: string; type: string; result: string; image_url: string | null; created_at: string },
+  row: { id: number; session_id: string; generation_id: number | null; title: string; description: string; type: string; result: string; image_url: string | null; glb_url: string | null; created_at: string },
   viewer_session: string
 ): Post {
   const like_count = (db
@@ -578,6 +590,7 @@ function enrichPost(
     type: row.type as GenerationType,
     result: typeof row.result === "string" ? JSON.parse(row.result) : row.result,
     image_url: row.image_url,
+    glb_url: row.glb_url ?? null,
     created_at: row.created_at,
     like_count,
     comment_count,

@@ -17,8 +17,12 @@ export function HomePage({ onToast }: HomePageProps) {
   const { generate, loading, error }    = useGenerate();
   const { favIds, toggle: toggleFav }   = useFavorites();
   const [publishing, setPublishing]     = useState(false);
+  const [glbUrl,     setGlbUrl]         = useState<string | undefined>(undefined);
+  const [imageUrl,   setImageUrl]       = useState<string | undefined>(undefined);
 
   const handleGenerate = async (type: GenerationType, meta: Record<string, string>, model: string) => {
+    setGlbUrl(undefined);   // reset on new generation
+    setImageUrl(undefined);
     const result = await generate(type, meta, model);
     if (result) { setLatest(result); onToast("\u00a1Generado exitosamente! \u2728"); }
     else         onToast(error ?? "Error al generar", "error");
@@ -58,6 +62,8 @@ export function HomePage({ onToast }: HomePageProps) {
                 onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
               }}
               onShare={() => setPublishing(true)}
+              onGlbGenerated={setGlbUrl}
+              onImageGenerated={setImageUrl}
             />
           </section>
         )}
@@ -66,6 +72,8 @@ export function HomePage({ onToast }: HomePageProps) {
       {publishing && latest && (
         <PublishModal
           gen={latest}
+          initialGlbUrl={glbUrl}
+          initialImageUrl={imageUrl}
           onClose={() => setPublishing(false)}
           onPublished={() => setTab("social")}
           onToast={onToast}

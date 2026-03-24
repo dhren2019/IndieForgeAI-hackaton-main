@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "AI-powered content generator for indie game developers",
   "scripts": {
-    "build":      "bun run scripts/build.ts",
-    "dev":        "bun run scripts/dev.ts",
-    "start":      "bun run scripts/build.ts && bun run src/server.ts",
+    "build": "bun run scripts/build.ts",
+    "dev": "bun run scripts/dev.ts",
+    "start": "bun run scripts/build.ts && bun run src/server.ts",
     "db:migrate": "bun run scripts/migrate.ts"
   },
   "dependencies": {
+    "@gradio/client": "^2.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

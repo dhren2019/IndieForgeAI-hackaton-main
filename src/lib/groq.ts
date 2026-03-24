@@ -32,10 +32,10 @@ export async function callGroq(prompt: string, model: string): Promise<GroqTextR
           { role: "user", content: prompt },
         ],
         temperature:     0.85,
-        max_tokens:      1024,
+        max_tokens:      2048,
         response_format: { type: "json_object" },
       }),
-      signal: AbortSignal.timeout(30_000),
+      signal: AbortSignal.timeout(60_000),
     });
 
     if (!res.ok) {

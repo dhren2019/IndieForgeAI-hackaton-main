@@ -105,6 +105,11 @@ export function FeedPost({
       {post.image_url && (
         <div className="post-image-wrap">
           <img src={post.image_url} alt="Hoja de diseño" className="post-image" />
+          {post.glb_url && (
+            <a href={post.glb_url} download="personaje-3d.glb" className="post-glb-download">
+              🧊 Descargar modelo 3D (.glb)
+            </a>
+          )}
         </div>
       )}
 

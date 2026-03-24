@@ -9,20 +9,23 @@ import { TYPE_META }     from "../../types/generate";
 import type { Generation } from "../../types/generate";
 
 interface PublishModalProps {
-  gen:         Generation;
-  onClose:     () => void;
-  onPublished: () => void;
-  onToast:     (msg: string, kind?: "ok" | "error") => void;
+  gen:             Generation;
+  onClose:         () => void;
+  onPublished:     () => void;
+  onToast:         (msg: string, kind?: "ok" | "error") => void;
+  initialGlbUrl?:   string;
+  initialImageUrl?: string;
 }
 
 const MAX_TAGS = 8;
 
-export function PublishModal({ gen, onClose, onPublished, onToast }: PublishModalProps) {
+export function PublishModal({ gen, onClose, onPublished, onToast, initialGlbUrl, initialImageUrl }: PublishModalProps) {
   const [title,    setTitle]    = useState(getGenerationTitle(gen.result, gen.type, gen.id));
   const [desc,     setDesc]     = useState("");
   const [tagInput, setTagInput] = useState("");
   const [tags,     setTags]     = useState<string[]>([]);
-  const [imageUrl, setImageUrl] = useState<string | undefined>(gen.image_url ?? undefined);
+  const [imageUrl, setImageUrl] = useState<string | undefined>(initialImageUrl ?? gen.image_url ?? undefined);
+  const [glbUrl,   setGlbUrl]   = useState<string | undefined>(initialGlbUrl);
   const [loading,  setLoading]  = useState(false);
 
   const meta = TYPE_META[gen.type];
@@ -55,6 +58,7 @@ export function PublishModal({ gen, onClose, onPublished, onToast }: PublishModa
       result:      gen.result,
       tags,
       image_url:   imageUrl ?? null,
+      glb_url:     glbUrl ?? null,
     });
     setLoading(false);
     if (error) { onToast("Error al publicar: " + error, "error"); return; }
@@ -129,10 +133,24 @@ export function PublishModal({ gen, onClose, onPublished, onToast }: PublishModa
           <ImagePreview
             type={gen.type}
             result={gen.result}
-            initialImageUrl={gen.image_url ?? null}
+            initialImageUrl={imageUrl ?? gen.image_url ?? null}
             onImageReady={(url) => setImageUrl(url)}
+            onGlbReady={(url) => setGlbUrl(url)}
           />
         </div>
+
+        {glbUrl && (
+          <div className="form-field">
+            <span className="form-field__label">Modelo 3D</span>
+            <div className="publish-glb-preview">
+              <span className="publish-glb-preview__icon">🧊</span>
+              <span className="publish-glb-preview__text">Modelo .glb generado — se publicará junto a la creación</span>
+              <a href={glbUrl} download="personaje-3d.glb" className="publish-glb-preview__download">
+                ⬇ Descargar .glb
+              </a>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="modal__footer">

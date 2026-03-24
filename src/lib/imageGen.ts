@@ -13,12 +13,37 @@ const IMAGE_API_URL = `https://router.huggingface.co/hf-inference/models/${IMAGE
 export type CharacterType = "npc" | "quest" | "item" | "lore" | "weapon" | "enemy";
 
 const TYPE_STYLE: Record<CharacterType, string> = {
-  npc:    "fantasy RPG character, detailed costume and accessories",
-  quest:  "fantasy RPG characters and scene, epic concept art",
-  item:   "fantasy magical item on pedestal, glowing, product concept art, dark studio background",
-  lore:   "fantasy world / faction emblem illustration, detailed, parchment style",
-  weapon: "fantasy weapon design sheet, multiple angles, detailed metalwork, glowing runes, dark background",
-  enemy:  "fantasy RPG monster or villain, terrifying, muscular, detailed armor",
+  npc:    "character full body, detailed costume and accessories worn on the character",
+  quest:  "adventure scene, epic concept art, characters in action",
+  item:   "single magical item, glowing, product concept art, dark studio background, no character, no hands",
+  lore:   "world / faction emblem illustration, detailed, parchment style",
+  weapon: "single weapon design, detailed metalwork, dark background, no character, no hands holding it",
+  enemy:  "monster or villain full body, terrifying, muscular, detailed armor",
+};
+
+// Genre-to-aesthetic mapping — applied on top of TYPE_STYLE
+const GENRE_AESTHETIC: Record<string, string> = {
+  "fantasía":          "high fantasy RPG art style, magical, medieval",
+  "fantasy":           "high fantasy RPG art style, magical, medieval",
+  "sci-fi":            "science fiction RPG, futuristic technology, sleek surfaces, neon accents",
+  "cyberpunk":         "cyberpunk aesthetic, neon-lit, cybernetic implants, rain-soaked urban, high-tech low-life",
+  "post-apocalíptico": "post-apocalyptic wasteland, rusted metal, torn cloth, makeshift armor, dust and debris, survivor aesthetic",
+  "post-apocaliptico": "post-apocalyptic wasteland, rusted metal, torn cloth, makeshift armor, dust and debris, survivor aesthetic",
+  "post apocalíptico": "post-apocalyptic wasteland, rusted metal, torn cloth, makeshift armor, dust and debris, survivor aesthetic",
+  "western":           "wild west frontier, leather duster, worn boots, desert setting, cowboy aesthetic",
+  "horror":            "dark horror, gothic shadows, unsettling details, desaturated palette",
+  "steampunk":         "steampunk aesthetic, brass gears, clockwork gadgets, Victorian industrial",
+  "medieval":          "dark ages medieval, realistic armor, historical details",
+};
+
+// Strict isolation instructions per type — prevent the model from mixing in other content
+const TYPE_ISOLATION: Record<CharacterType, string> = {
+  npc:    "ONLY the character's body in 2 orthographic views, no floating weapons, no item callout panels, no separate object sheets, character only",
+  quest:  "scene illustration only",
+  item:   "ONLY the item itself in 2 views, no character, no hands, no person, item only on clean background",
+  lore:   "world illustration only",
+  weapon: "ONLY the weapon itself in 2 views, no character, no hands, no person holding it, weapon only on clean background",
+  enemy:  "ONLY the enemy creature's body in 2 orthographic views, no floating weapons separate from creature, enemy character only",
 };
 
 export interface ImageGenResult {
@@ -36,6 +61,10 @@ export function buildImagePrompt(
   result: Record<string, unknown>
 ): string {
   const name = String(result.name ?? result.title ?? "mysterious figure");
+
+  // Resolve genre aesthetic
+  const rawGenre   = result._genre ? String(result._genre).toLowerCase().trim() : "";
+  const genreStyle = GENRE_AESTHETIC[rawGenre] ?? (rawGenre ? `${rawGenre} aesthetic` : "fantasy RPG art style");
 
   // Build a rich descriptor from AI-generated fields
   const descriptors: string[] = [];
@@ -65,17 +94,18 @@ export function buildImagePrompt(
   // User's own visual prompt overrides/extends everything else
   const userHint = result.userPrompt ? String(result.userPrompt).trim() : null;
 
-  const desc   = descriptors.filter(Boolean).join(", ");
-  const style  = TYPE_STYLE[type] ?? "fantasy RPG concept art";
+  const desc      = descriptors.filter(Boolean).join(", ");
+  const style     = TYPE_STYLE[type] ?? "concept art";
+  const isolation = TYPE_ISOLATION[type] ?? "";
 
-  // Design sheet layout instructions per type
+  // 2-view design sheet layout instructions per type
   const sheetInstructions = type === "item" || type === "weapon"
-    ? "weapon/item design sheet, 16:9 horizontal layout, three detailed views side by side: [left: full object front view] [center: back and detail view] [right: close-up of special features and runes], clean white background panels, studio product lighting"
+    ? "design sheet, 16:9 horizontal layout, exactly TWO views of the same object side by side: [left half: front view] [right half: back view], plain white background, no character, no hands, studio product lighting"
     : type === "lore"
-    ? "world lore illustration, 16:9 horizontal panoramic, detailed environment and faction imagery, dramatic lighting, parchment and ancient scroll aesthetic"
-    : "character design reference sheet, 16:9 horizontal layout, three panels side by side: [left panel: full body front view standing pose] [center panel: full body back or 3/4 view] [right panel: bust portrait face close-up], white background, clean professional layout";
+    ? "world lore illustration, 16:9 horizontal panoramic, detailed environment and faction imagery, dramatic lighting"
+    : "character design reference sheet, 16:9 horizontal layout, exactly TWO views of the same character: [left half: full body front view facing forward, neutral standing pose, arms slightly out] [right half: full body back view, same pose seen from behind], plain white background, no extra panels, no weapons floating separately";
 
-  const basePrompt = `${name}, ${desc}, ${style}, ${sheetInstructions}, high quality, detailed linework, professional game concept art, vibrant colors, dramatic lighting`;
+  const basePrompt = `${name}, ${desc}, ${style}, ${genreStyle}, ${sheetInstructions}, ${isolation}, high quality, detailed linework, professional game concept art, dramatic lighting`;
   const finalPrompt = userHint ? `${basePrompt}, ${userHint}` : basePrompt;
 
   return finalPrompt.replace(/\s+/g, " ").trim();

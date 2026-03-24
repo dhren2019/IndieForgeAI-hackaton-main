@@ -31,6 +31,7 @@ export interface Generation {
   result: Record<string, unknown>;
   source: GenerationSource;
   image_url: string | null;
+  glb_url?: string | null;
   created_at: string;
 }
 

@@ -100,6 +100,7 @@ async function handleCreatePost(req: Request, session: string): Promise<Response
   const tags        = Array.isArray(body.tags) ? body.tags.map(String) : [];
   const gen_id      = typeof body.generation_id === "number" ? body.generation_id : null;
   const image_url   = typeof body.image_url === "string" ? body.image_url : null;
+  const glb_url     = typeof body.glb_url === "string" ? body.glb_url : null;
 
   if (!title)  return err("El título es obligatorio");
   if (!type || !["npc","quest","item","lore","weapon","enemy"].includes(type))
@@ -109,7 +110,7 @@ async function handleCreatePost(req: Request, session: string): Promise<Response
 
   const post = createSocialPost({
     session_id: session, generation_id: gen_id,
-    title, description, type, result, tags, image_url,
+    title, description, type, result, tags, image_url, glb_url,
   });
   return ok(post);
 }

@@ -391,6 +391,15 @@ input, textarea, select {
   background-size: 60px 60px;
 }
 
+/* === 1920px+ — aprovechar espacio extra en pantallas muy anchas === */
+@media (min-width: 1920px) {
+  .page-container         { max-width: 1700px; padding: var(--sp-8) var(--sp-10); }
+  .page-container--wide   { max-width: 1820px; }
+  .home-layout            { grid-template-columns: minmax(0, 480px) 1fr; }
+  .split-layout           { grid-template-columns: 360px 1fr; }
+  .social-layout          { grid-template-columns: 1fr 320px; }
+}
+
 /* Ensure all shell surfaces sit above the fixed bg */
 .app-header,
 .app-nav,

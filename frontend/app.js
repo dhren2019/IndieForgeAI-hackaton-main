@@ -3,29 +3,15 @@ var __getProtoOf = Object.getPrototypeOf;
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-function __accessProp(key) {
-  return this[key];
-}
-var __toESMCache_node;
-var __toESMCache_esm;
 var __toESM = (mod, isNodeMode, target) => {
-  var canCache = mod != null && typeof mod === "object";
-  if (canCache) {
-    var cache = isNodeMode ? __toESMCache_node ??= new WeakMap : __toESMCache_esm ??= new WeakMap;
-    var cached = cache.get(mod);
-    if (cached)
-      return cached;
-  }
   target = mod != null ? __create(__getProtoOf(mod)) : {};
   const to = isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target;
   for (let key of __getOwnPropNames(mod))
     if (!__hasOwnProp.call(to, key))
       __defProp(to, key, {
-        get: __accessProp.bind(mod, key),
+        get: () => mod[key],
         enumerable: true
       });
-  if (canCache)
-    cache.set(mod, to);
   return to;
 };
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
@@ -1835,9 +1821,8 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/index.js
 var require_react = __commonJS((exports, module) => {
-  var react_development = __toESM(require_react_development());
   if (false) {} else {
-    module.exports = react_development;
+    module.exports = require_react_development();
   }
 });
 
@@ -2286,16 +2271,15 @@ var require_scheduler_development = __commonJS((exports) => {
 
 // node_modules/scheduler/index.js
 var require_scheduler = __commonJS((exports, module) => {
-  var scheduler_development = __toESM(require_scheduler_development());
   if (false) {} else {
-    module.exports = scheduler_development;
+    module.exports = require_scheduler_development();
   }
 });
 
 // node_modules/react-dom/cjs/react-dom.development.js
 var require_react_dom_development = __commonJS((exports) => {
-  var React = __toESM(require_react());
-  var Scheduler = __toESM(require_scheduler());
+  var React = __toESM(require_react(), 1);
+  var Scheduler = __toESM(require_scheduler(), 1);
   if (true) {
     (function() {
       if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
@@ -22741,15 +22725,14 @@ You might need to use a local HTTP server (instead of file://): ` + "https://rea
 
 // node_modules/react-dom/index.js
 var require_react_dom = __commonJS((exports, module) => {
-  var react_dom_development = __toESM(require_react_dom_development());
   if (false) {} else {
-    module.exports = react_dom_development;
+    module.exports = require_react_dom_development();
   }
 });
 
 // node_modules/react-dom/client.js
 var require_client = __commonJS((exports) => {
-  var m = __toESM(require_react_dom());
+  var m = __toESM(require_react_dom(), 1);
   if (false) {} else {
     i = m.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
     exports.createRoot = function(c, o) {
@@ -22774,7 +22757,7 @@ var require_client = __commonJS((exports) => {
 
 // node_modules/react/cjs/react-jsx-dev-runtime.development.js
 var require_react_jsx_dev_runtime_development = __commonJS((exports) => {
-  var React = __toESM(require_react());
+  var React = __toESM(require_react(), 1);
   if (true) {
     (function() {
       var REACT_ELEMENT_TYPE = Symbol.for("react.element");
@@ -23655,9 +23638,8 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/jsx-dev-runtime.js
 var require_jsx_dev_runtime = __commonJS((exports, module) => {
-  var react_jsx_dev_runtime_development = __toESM(require_react_jsx_dev_runtime_development());
   if (false) {} else {
-    module.exports = react_jsx_dev_runtime_development;
+    module.exports = require_react_jsx_dev_runtime_development();
   }
 });
 
@@ -24248,7 +24230,7 @@ function GenerateForm({ onGenerate, loading, model, onModelChange }) {
 }
 
 // frontend/components/results/ResultCard.tsx
-var import_react5 = __toESM(require_react(), 1);
+var import_react6 = __toESM(require_react(), 1);
 
 // frontend/components/ui/Card.tsx
 var jsx_dev_runtime10 = __toESM(require_jsx_dev_runtime(), 1);
@@ -24299,8 +24281,69 @@ function Badge({ type, icon, label, small = false }) {
   }, undefined, true, undefined, this);
 }
 
-// frontend/components/results/ResultActions.tsx
+// frontend/components/ui/Modal.tsx
+var import_react3 = __toESM(require_react(), 1);
+var import_react_dom = __toESM(require_react_dom(), 1);
 var jsx_dev_runtime12 = __toESM(require_jsx_dev_runtime(), 1);
+function Modal({ open, onClose, title, children, footer, size = "md" }) {
+  import_react3.useEffect(() => {
+    if (!open)
+      return;
+    const handler = (e) => {
+      if (e.key === "Escape")
+        onClose();
+    };
+    window.addEventListener("keydown", handler);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handler);
+      document.body.style.overflow = "";
+    };
+  }, [open, onClose]);
+  if (!open)
+    return null;
+  const content = /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+    className: "modal-overlay",
+    onClick: (e) => {
+      if (e.target === e.currentTarget)
+        onClose();
+    },
+    children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+      className: `modal modal--${size}`,
+      role: "dialog",
+      "aria-modal": "true",
+      children: [
+        title && /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+          className: "modal__header",
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("h3", {
+              className: "modal__title",
+              children: title
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("button", {
+              className: "modal__close",
+              onClick: onClose,
+              "aria-label": "Cerrar",
+              children: "✕"
+            }, undefined, false, undefined, this)
+          ]
+        }, undefined, true, undefined, this),
+        /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+          className: "modal__body",
+          children
+        }, undefined, false, undefined, this),
+        footer && /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+          className: "modal__footer",
+          children: footer
+        }, undefined, false, undefined, this)
+      ]
+    }, undefined, true, undefined, this)
+  }, undefined, false, undefined, this);
+  return import_react_dom.createPortal(content, document.body);
+}
+
+// frontend/components/results/ResultActions.tsx
+var jsx_dev_runtime13 = __toESM(require_jsx_dev_runtime(), 1);
 function ResultActions({
   isFav,
   onFavToggle,
@@ -24312,10 +24355,10 @@ function ResultActions({
   viewMode,
   onToggleView
 }) {
-  return /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
     className: "result-actions",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Button, {
+      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Button, {
         variant: isFav ? "primary" : "ghost",
         size: "sm",
         icon: isFav ? "★" : "☆",
@@ -24323,27 +24366,27 @@ function ResultActions({
         title: isFav ? "Quitar de favoritos" : "Guardar favorito",
         children: isFav ? "Guardado" : "Guardar"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Button, {
+      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Button, {
         variant: "ghost",
         size: "sm",
         onClick: onToggleView,
         children: viewMode === "fields" ? "</> JSON" : "⊞ Campos"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Button, {
+      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Button, {
         variant: "ghost",
         size: "sm",
         icon: "\uD83D\uDCCB",
         onClick: onCopy,
         title: "Copiar JSON"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Button, {
+      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Button, {
         variant: "ghost",
         size: "sm",
         icon: "⬇",
         onClick: onExport,
         title: "Exportar JSON"
       }, undefined, false, undefined, this),
-      onShare && /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Button, {
+      onShare && /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Button, {
         variant: "ghost",
         size: "sm",
         icon: "\uD83C\uDF10",
@@ -24351,7 +24394,7 @@ function ResultActions({
         title: "Compartir en la comunidad",
         children: "Compartir"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Button, {
+      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Button, {
         variant: showIllustrator ? "secondary" : "ghost",
         size: "sm",
         icon: "\uD83C\uDFA8",
@@ -24411,31 +24454,31 @@ function highlightJSON(str) {
 }
 
 // frontend/components/results/ResultJson.tsx
-var jsx_dev_runtime13 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime14 = __toESM(require_jsx_dev_runtime(), 1);
 function ResultJson({ data }) {
-  return /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
-    className: "result-json",
+  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+    className: "json-display",
     dangerouslySetInnerHTML: { __html: highlightJSON(JSON.stringify(data, null, 2)) }
   }, undefined, false, undefined, this);
 }
 
 // frontend/components/results/ImagePreview.tsx
-var import_react4 = __toESM(require_react(), 1);
+var import_react5 = __toESM(require_react(), 1);
 
 // frontend/components/results/Model3DPreview.tsx
-var import_react3 = __toESM(require_react(), 1);
+var import_react4 = __toESM(require_react(), 1);
 
 // frontend/components/ui/Loader.tsx
-var jsx_dev_runtime14 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime15 = __toESM(require_jsx_dev_runtime(), 1);
 function Loader({ size = "md", label, center = false }) {
-  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
     className: `loader-wrap ${center ? "loader-wrap--center" : ""}`,
     children: [
-      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("span", {
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
         className: `spinner spinner--${size}`,
         "aria-hidden": "true"
       }, undefined, false, undefined, this),
-      label && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("span", {
+      label && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
         className: "loader-label",
         children: label
       }, undefined, false, undefined, this)
@@ -24496,8 +24539,16 @@ async function apiGenerateImage(type, result) {
 async function apiSaveGenerationImage(generationId, imageUrl) {
   return postJSON(`/api/generations/${generationId}/image`, { image_url: imageUrl }, "PATCH");
 }
-async function apiGenerate3D(imageUrl) {
-  return postJSON("/api/trellis", { imageUrl });
+async function apiSaveGenerationGlb(generationId, glbUrl) {
+  return postJSON(`/api/generations/${generationId}/glb`, { glb_url: glbUrl }, "PATCH");
+}
+var THREE_D_ENDPOINTS = {
+  trellis: "/api/trellis",
+  "instant-mesh": "/api/instant-mesh",
+  "shap-e": "/api/shap-e"
+};
+async function apiGenerate3D(imageUrl, model = "trellis") {
+  return postJSON(THREE_D_ENDPOINTS[model], { imageUrl });
 }
 async function apiFeed(limit = 20) {
   return fetcher(`/api/social/feed?limit=${limit}`);
@@ -24546,78 +24597,180 @@ async function apiRecordInteraction(postId, action) {
 }
 
 // frontend/components/results/Model3DPreview.tsx
-var jsx_dev_runtime15 = __toESM(require_jsx_dev_runtime(), 1);
-function Model3DPreview({ imageUrl }) {
-  const [loading, setLoading] = import_react3.useState(false);
-  const [glbUrl, setGlbUrl] = import_react3.useState(null);
-  const [error, setError] = import_react3.useState(null);
+var jsx_dev_runtime16 = __toESM(require_jsx_dev_runtime(), 1);
+async function cropFrontHalf(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image;
+    img.onload = () => {
+      try {
+        const w = Math.floor(img.naturalWidth / 2);
+        const h = img.naturalHeight;
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, w, h, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/png"));
+      } catch {
+        resolve(dataUrl);
+      }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+var THREE_D_MODELS = [
+  {
+    id: "trellis",
+    label: "\uD83D\uDD2C TRELLIS.2 — Microsoft",
+    badge: "Microsoft",
+    time: "2-4 min",
+    pro: true,
+    hint: "La mayor calidad. ⚠️ Requiere cuenta Hugging Face PRO — excede la cuota gratuita de GPU (120 s)."
+  },
+  {
+    id: "instant-mesh",
+    label: "⚡ InstantMesh — Rápido",
+    badge: "InstantMesh",
+    time: "1-2 min",
+    pro: false,
+    hint: "Genera múltiples vistas y reconstruye el modelo. Buena precisión para personajes, objetos y armas."
+  },
+  {
+    id: "shap-e",
+    label: "\uD83D\uDCA8 Shap-E — Ligero",
+    badge: "OpenAI",
+    time: "30-60 seg",
+    pro: false,
+    hint: "Calidad básica pero muy rápido. Ideal para formas simples y pruebas rápidas."
+  }
+];
+function Model3DPreview({ imageUrl, generationId, onGlbReady }) {
+  const [model, setModel] = import_react4.useState("instant-mesh");
+  const [loading, setLoading] = import_react4.useState(false);
+  const [glbUrl, setGlbUrl] = import_react4.useState(null);
+  const [error, setError] = import_react4.useState(null);
+  const selected = THREE_D_MODELS.find((m) => m.id === model);
   const handleGenerate = async () => {
     setLoading(true);
     setError(null);
     setGlbUrl(null);
-    const { data, error: e } = await apiGenerate3D(imageUrl);
+    const frontView = await cropFrontHalf(imageUrl);
+    const { data, error: e } = await apiGenerate3D(frontView, model);
     setLoading(false);
     if (data?.glbUrl) {
       setGlbUrl(data.glbUrl);
+      onGlbReady?.(data.glbUrl);
+      if (generationId) {
+        apiSaveGenerationGlb(generationId, data.glbUrl);
+      }
     } else {
       setError(e ?? "Error al generar el modelo 3D");
     }
   };
-  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
     className: "model3d-preview",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
         className: "model3d-preview__header",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
             className: "model3d-preview__icon",
             children: "\uD83E\uDDCA"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
-            children: "Modelo 3D — TRELLIS"
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
+            children: "Modelo 3D"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
             className: "model3d-preview__badge",
-            children: "Microsoft"
+            children: selected.badge
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      !glbUrl && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-        className: "model3d-preview__hint",
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+        className: "model3d-preview__selector",
         children: [
-          "Convierte la hoja de diseño a un asset 3D interactivo usando ",
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("strong", {
-            children: "Microsoft TRELLIS"
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("label", {
+            className: "model3d-preview__selector-label",
+            children: "Motor 3D"
           }, undefined, false, undefined, this),
-          ". La generación puede tardar 1-3 minutos."
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("select", {
+            className: "form-field__select model3d-preview__select",
+            value: model,
+            onChange: (e) => {
+              setModel(e.target.value);
+              setGlbUrl(null);
+              setError(null);
+            },
+            disabled: loading,
+            children: THREE_D_MODELS.map((m) => /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("option", {
+              value: m.id,
+              children: [
+                m.label,
+                " — ",
+                m.time
+              ]
+            }, m.id, true, undefined, this))
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
+            className: "model3d-preview__hint model3d-preview__hint--selector",
+            children: selected.hint
+          }, undefined, false, undefined, this),
+          selected.pro && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
+            className: "model3d-preview__pro-warning",
+            children: [
+              "⚠️ ",
+              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("strong", {
+                children: "TRELLIS requiere HuggingFace PRO"
+              }, undefined, false, undefined, this),
+              " — la cuenta gratuita agota la cuota de GPU. Prueba InstantMesh o Shap-E si no tienes suscripción PRO."
+            ]
+          }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
+      !glbUrl && !selected.pro && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
+        className: "model3d-preview__hint",
+        children: [
+          "Convierte la hoja de diseño a un asset 3D interactivo. La generación puede tardar ",
+          selected.time,
+          "."
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Button, {
         variant: glbUrl ? "secondary" : "primary",
         size: "sm",
         loading,
         onClick: handleGenerate,
         children: loading ? "Generando modelo 3D…" : glbUrl ? "\uD83D\uDD04 Regenerar modelo 3D" : "\uD83E\uDDCA Generar modelo 3D"
       }, undefined, false, undefined, this),
-      error && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+      error && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
         className: "model3d-preview__error",
         children: error
       }, undefined, false, undefined, this),
-      loading && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+      loading && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
         className: "model3d-preview__loading",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Loader, {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Loader, {
             size: "md"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-            children: "TRELLIS está procesando la imagen. Puede tardar hasta 3 minutos…"
-          }, undefined, false, undefined, this)
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
+            children: [
+              selected.badge,
+              " está procesando la imagen. Puede tardar hasta ",
+              selected.time,
+              "…"
+            ]
+          }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      glbUrl && !loading && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+      glbUrl && !loading && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
         className: "model3d-preview__viewer-wrap",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("model-viewer", {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("model-viewer", {
             src: glbUrl,
             alt: "Modelo 3D del personaje",
             "auto-rotate": true,
@@ -24626,11 +24779,11 @@ function Model3DPreview({ imageUrl }) {
             "environment-image": "neutral",
             class: "model3d-preview__viewer"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
             className: "model3d-preview__controls-hint",
             children: "\uD83D\uDDB1 Arrasta para rotar · Scroll para zoom"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("a", {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("a", {
             href: glbUrl,
             download: "personaje-3d.glb",
             className: "model3d-preview__download",
@@ -24643,18 +24796,19 @@ function Model3DPreview({ imageUrl }) {
 }
 
 // frontend/components/results/ImagePreview.tsx
-var jsx_dev_runtime16 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime17 = __toESM(require_jsx_dev_runtime(), 1);
 function ImagePreview({
   type,
   result,
   generationId,
   initialImageUrl,
-  onImageReady
+  onImageReady,
+  onGlbReady
 }) {
-  const [loading, setLoading] = import_react4.useState(false);
-  const [imageUrl, setImageUrl] = import_react4.useState(initialImageUrl ?? null);
-  const [error, setError] = import_react4.useState(null);
-  const [show3D, setShow3D] = import_react4.useState(false);
+  const [loading, setLoading] = import_react5.useState(false);
+  const [imageUrl, setImageUrl] = import_react5.useState(initialImageUrl ?? null);
+  const [error, setError] = import_react5.useState(null);
+  const [show3D, setShow3D] = import_react5.useState(false);
   const handleGenerate = async () => {
     setLoading(true);
     setError(null);
@@ -24671,42 +24825,42 @@ function ImagePreview({
       setError(err ?? "Error de generación");
     }
   };
-  return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
     className: "image-preview",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
         className: "image-preview__header",
         children: "\uD83C\uDFA8 Hoja de diseño"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Button, {
+      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Button, {
         variant: imageUrl ? "secondary" : "primary",
         size: "sm",
         loading,
         onClick: handleGenerate,
         children: imageUrl ? "\uD83D\uDD04 Regenerar diseño" : "\uD83C\uDFA8 Generar hoja de diseño"
       }, undefined, false, undefined, this),
-      error && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
+      error && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("p", {
         className: "image-preview__error",
         children: error
       }, undefined, false, undefined, this),
-      imageUrl && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+      imageUrl && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
         className: "image-preview__wrap",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("img", {
+          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("img", {
             src: imageUrl,
             alt: "Hoja de diseño del personaje",
             className: "image-preview__img"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
             className: "image-preview__actions",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("a", {
+              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("a", {
                 href: imageUrl,
                 download: "hoja-de-diseno.png",
                 className: "image-preview__download",
                 children: "⬇ Descargar imagen"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("button", {
+              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("button", {
                 className: `image-preview__3d-toggle${show3D ? " image-preview__3d-toggle--active" : ""}`,
                 onClick: () => setShow3D((v) => !v),
                 title: "Generar modelo 3D con TRELLIS",
@@ -24719,34 +24873,84 @@ function ImagePreview({
           }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      imageUrl && show3D && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Model3DPreview, {
-        imageUrl
+      imageUrl && show3D && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Model3DPreview, {
+        imageUrl,
+        generationId,
+        onGlbReady
       }, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this);
 }
 
 // frontend/components/results/ResultCard.tsx
-var jsx_dev_runtime17 = __toESM(require_jsx_dev_runtime(), 1);
-function FieldsView({ data }) {
-  return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
+var jsx_dev_runtime18 = __toESM(require_jsx_dev_runtime(), 1);
+var EXPANDABLE_FIELDS = new Set([
+  "appearance",
+  "personality",
+  "backstory",
+  "secret",
+  "motivation",
+  "dialogue",
+  "combat_style",
+  "description",
+  "lore",
+  "summary",
+  "objective",
+  "twist",
+  "reward",
+  "special_ability",
+  "passive",
+  "attack_style",
+  "weakness",
+  "resistance",
+  "drops",
+  "impact"
+]);
+var FEATURED_FIELD_ICONS = {
+  appearance: "\uD83D\uDC41️",
+  backstory: "\uD83D\uDCD6",
+  dialogue: "\uD83D\uDCAC"
+};
+function FieldsView({
+  data,
+  onExpand
+}) {
+  return /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
     className: "fields-grid",
-    children: Object.entries(data).map(([k, v]) => /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
-      className: "field-item",
-      children: [
-        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
-          className: "field-item__key",
-          children: labelFor(k)
-        }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
-          className: "field-item__value",
-          children: Array.isArray(v) ? v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("span", {
-            className: "field-item__tag",
-            children: String(item)
-          }, i, false, undefined, this)) : String(v)
-        }, undefined, false, undefined, this)
-      ]
-    }, k, true, undefined, this))
+    children: Object.entries(data).map(([k, v]) => {
+      const strVal = Array.isArray(v) ? v.join(" · ") : String(v);
+      const featured = k in FEATURED_FIELD_ICONS;
+      const expandable = featured || EXPANDABLE_FIELDS.has(k) && strVal.length > 60;
+      const icon = FEATURED_FIELD_ICONS[k];
+      return /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
+        className: `field-item${expandable ? " field-item--expandable" : ""}${featured ? " field-item--featured" : ""}`,
+        onClick: expandable ? () => onExpand({ key: k, label: labelFor(k), value: strVal }) : undefined,
+        title: expandable ? "Haz clic para ver el texto completo" : undefined,
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
+            className: "field-item__key",
+            children: [
+              icon && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("span", {
+                className: "field-item__type-icon",
+                children: icon
+              }, undefined, false, undefined, this),
+              labelFor(k),
+              expandable && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("span", {
+                className: "field-item__expand-icon",
+                children: "⤢"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
+            className: "field-item__value",
+            children: Array.isArray(v) ? v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("span", {
+              className: "field-item__tag",
+              children: String(item)
+            }, i, false, undefined, this)) : String(v)
+          }, undefined, false, undefined, this)
+        ]
+      }, k, true, undefined, this);
+    })
   }, undefined, false, undefined, this);
 }
 function ResultCard({
@@ -24754,10 +24958,15 @@ function ResultCard({
   isFav,
   onFavToggle,
   onShare,
-  showActions = true
+  showActions = true,
+  onGlbGenerated
 }) {
-  const [view, setView] = import_react5.useState("fields");
-  const [showIllustrator, setShowIllustrator] = import_react5.useState(false);
+  const [view, setView] = import_react6.useState("fields");
+  const [showIllustrator, setShowIllustrator] = import_react6.useState(false);
+  const [fieldModal, setFieldModal] = import_react6.useState(null);
+  const handleImageReady = (url) => {
+    onImageGenerated?.(url);
+  };
   const meta = TYPE_META[gen.type];
   const title = getGenerationTitle(gen.result, gen.type, gen.id);
   const handleCopy = () => {
@@ -24772,27 +24981,27 @@ function ResultCard({
     a.click();
     URL.revokeObjectURL(url);
   };
-  return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Card, {
+  return /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Card, {
     className: "result-card",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
         className: "result-card__header",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Badge, {
+          /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Badge, {
             type: gen.type,
             icon: meta.icon,
             label: meta.label
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("span", {
             className: "result-card__title",
             children: title
           }, undefined, false, undefined, this),
-          gen.source === "fallback" && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Badge, {
+          gen.source === "fallback" && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Badge, {
             type: "fallback",
             label: "respaldo",
             small: true
           }, undefined, false, undefined, this),
-          showActions && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ResultActions, {
+          showActions && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(ResultActions, {
             isFav,
             onFavToggle: () => onFavToggle(gen.id, !isFav),
             onCopy: handleCopy,
@@ -24805,16 +25014,29 @@ function ResultCard({
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      view === "fields" ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(FieldsView, {
-        data: gen.result
-      }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ResultJson, {
+      view === "fields" ? /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(FieldsView, {
+        data: gen.result,
+        onExpand: setFieldModal
+      }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(ResultJson, {
         data: gen.result
       }, undefined, false, undefined, this),
-      showIllustrator && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ImagePreview, {
+      showIllustrator && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(ImagePreview, {
         type: gen.type,
         result: gen.result,
         generationId: gen.id,
-        initialImageUrl: gen.image_url
+        initialImageUrl: gen.image_url,
+        onImageReady: handleImageReady,
+        onGlbReady: onGlbGenerated
+      }, undefined, false, undefined, this),
+      fieldModal && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Modal, {
+        open: true,
+        onClose: () => setFieldModal(null),
+        title: fieldModal.label,
+        size: "md",
+        children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("p", {
+          className: "field-modal__text",
+          children: fieldModal.value
+        }, undefined, false, undefined, this)
       }, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this);
@@ -24822,77 +25044,15 @@ function ResultCard({
 
 // frontend/components/social/PublishModal.tsx
 var import_react7 = __toESM(require_react(), 1);
-
-// frontend/components/ui/Modal.tsx
-var import_react6 = __toESM(require_react(), 1);
-var import_react_dom = __toESM(require_react_dom(), 1);
-var jsx_dev_runtime18 = __toESM(require_jsx_dev_runtime(), 1);
-function Modal({ open, onClose, title, children, footer, size = "md" }) {
-  import_react6.useEffect(() => {
-    if (!open)
-      return;
-    const handler = (e) => {
-      if (e.key === "Escape")
-        onClose();
-    };
-    window.addEventListener("keydown", handler);
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", handler);
-      document.body.style.overflow = "";
-    };
-  }, [open, onClose]);
-  if (!open)
-    return null;
-  const content = /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
-    className: "modal-overlay",
-    onClick: (e) => {
-      if (e.target === e.currentTarget)
-        onClose();
-    },
-    children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
-      className: `modal modal--${size}`,
-      role: "dialog",
-      "aria-modal": "true",
-      children: [
-        title && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
-          className: "modal__header",
-          children: [
-            /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("h3", {
-              className: "modal__title",
-              children: title
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("button", {
-              className: "modal__close",
-              onClick: onClose,
-              "aria-label": "Cerrar",
-              children: "✕"
-            }, undefined, false, undefined, this)
-          ]
-        }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
-          className: "modal__body",
-          children
-        }, undefined, false, undefined, this),
-        footer && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
-          className: "modal__footer",
-          children: footer
-        }, undefined, false, undefined, this)
-      ]
-    }, undefined, true, undefined, this)
-  }, undefined, false, undefined, this);
-  return import_react_dom.createPortal(content, document.body);
-}
-
-// frontend/components/social/PublishModal.tsx
 var jsx_dev_runtime19 = __toESM(require_jsx_dev_runtime(), 1);
 var MAX_TAGS = 8;
-function PublishModal({ gen, onClose, onPublished, onToast }) {
+function PublishModal({ gen, onClose, onPublished, onToast, initialGlbUrl, initialImageUrl }) {
   const [title, setTitle] = import_react7.useState(getGenerationTitle(gen.result, gen.type, gen.id));
   const [desc, setDesc] = import_react7.useState("");
   const [tagInput, setTagInput] = import_react7.useState("");
   const [tags, setTags] = import_react7.useState([]);
-  const [imageUrl, setImageUrl] = import_react7.useState(gen.image_url ?? undefined);
+  const [imageUrl, setImageUrl] = import_react7.useState(initialImageUrl ?? gen.image_url ?? undefined);
+  const [glbUrl, setGlbUrl] = import_react7.useState(initialGlbUrl);
   const [loading, setLoading] = import_react7.useState(false);
   const meta = TYPE_META[gen.type];
   const addTag = (raw) => {
@@ -24923,7 +25083,8 @@ function PublishModal({ gen, onClose, onPublished, onToast }) {
       type: gen.type,
       result: gen.result,
       tags,
-      image_url: imageUrl ?? null
+      image_url: imageUrl ?? null,
+      glb_url: glbUrl ?? null
     });
     setLoading(false);
     if (error) {
@@ -25057,9 +25218,42 @@ function PublishModal({ gen, onClose, onPublished, onToast }) {
               /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(ImagePreview, {
                 type: gen.type,
                 result: gen.result,
-                initialImageUrl: gen.image_url ?? null,
-                onImageReady: (url) => setImageUrl(url)
+                initialImageUrl: imageUrl ?? gen.image_url ?? null,
+                onImageReady: (url) => setImageUrl(url),
+                onGlbReady: (url) => setGlbUrl(url)
               }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          glbUrl && /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
+            className: "form-field",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("span", {
+                className: "form-field__label",
+                children: "Modelo 3D"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
+                className: "publish-model3d-viewer",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("model-viewer", {
+                    src: glbUrl,
+                    alt: "Modelo 3D",
+                    "auto-rotate": true,
+                    "camera-controls": true,
+                    "shadow-intensity": "1",
+                    "environment-image": "neutral",
+                    class: "publish-model3d-viewer__canvas"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
+                    className: "publish-model3d-viewer__actions",
+                    children: /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("a", {
+                      href: glbUrl,
+                      download: "personaje-3d.glb",
+                      className: "publish-model3d-viewer__download",
+                      children: "⬇ Descargar .glb"
+                    }, undefined, false, undefined, this)
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this)
             ]
           }, undefined, true, undefined, this)
         ]
@@ -25156,7 +25350,11 @@ function HomePage({ onToast }) {
   const { generate, loading, error } = useGenerate();
   const { favIds, toggle: toggleFav } = useFavorites();
   const [publishing, setPublishing] = import_react10.useState(false);
+  const [glbUrl, setGlbUrl] = import_react10.useState(undefined);
+  const [imageUrl, setImageUrl] = import_react10.useState(undefined);
   const handleGenerate = async (type, meta, model) => {
+    setGlbUrl(undefined);
+    setImageUrl(undefined);
     const result = await generate(type, meta, model);
     if (result) {
       setLatest(result);
@@ -25224,13 +25422,17 @@ function HomePage({ onToast }) {
                     toggleFav(id, add);
                     onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
                   },
-                  onShare: () => setPublishing(true)
+                  onShare: () => setPublishing(true),
+                  onGlbGenerated: setGlbUrl,
+                  onImageGenerated: setImageUrl
                 }, undefined, false, undefined, this)
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
           publishing && latest && /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(PublishModal, {
             gen: latest,
+            initialGlbUrl: glbUrl,
+            initialImageUrl: imageUrl,
             onClose: () => setPublishing(false),
             onPublished: () => setTab("social"),
             onToast
@@ -25779,12 +25981,20 @@ function FeedPost({
       }, undefined, true, undefined, this),
       post.image_url && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
         className: "post-image-wrap",
-        children: /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("img", {
-          src: post.image_url,
-          alt: "Hoja de diseño",
-          className: "post-image"
-        }, undefined, false, undefined, this)
-      }, undefined, false, undefined, this),
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("img", {
+            src: post.image_url,
+            alt: "Hoja de diseño",
+            className: "post-image"
+          }, undefined, false, undefined, this),
+          post.glb_url && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("a", {
+            href: post.glb_url,
+            download: "personaje-3d.glb",
+            className: "post-glb-download",
+            children: "\uD83E\uDDCA Descargar modelo 3D (.glb)"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
       !expanded && preview && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("p", {
         className: "post-card__preview",
         children: preview
