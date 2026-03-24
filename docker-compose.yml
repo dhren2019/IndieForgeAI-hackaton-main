@@ -8,32 +8,37 @@ services:
     environment:
       PORT: "3000"
       NODE_ENV: production
-      # SQLite mode (no Postgres needed for quick demo)
-      DATABASE_FILE: /data/indieforge.db
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/indieforge
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL}
       HF_TOKEN: ${HF_TOKEN}
       HF_MODEL_URL: ${HF_MODEL_URL}
-    volumes:
-      - app_data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/history"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # Optional: Postgres service (uncomment if you switch to bun:postgres)
-  # postgres:
-  #   image: postgres:16-alpine
-  #   environment:
-  #     POSTGRES_DB: indieforge
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: postgres
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - pg_data:/var/lib/postgresql/data
-  #   restart: unless-stopped
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: indieforge
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d indieforge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  app_data:
-  # pg_data:
+  pg_data:

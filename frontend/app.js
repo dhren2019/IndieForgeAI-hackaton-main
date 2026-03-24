@@ -3,18 +3,45 @@ var __getProtoOf = Object.getPrototypeOf;
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+function __accessProp(key) {
+  return this[key];
+}
+var __toESMCache_node;
+var __toESMCache_esm;
 var __toESM = (mod, isNodeMode, target) => {
+  var canCache = mod != null && typeof mod === "object";
+  if (canCache) {
+    var cache = isNodeMode ? __toESMCache_node ??= new WeakMap : __toESMCache_esm ??= new WeakMap;
+    var cached = cache.get(mod);
+    if (cached)
+      return cached;
+  }
   target = mod != null ? __create(__getProtoOf(mod)) : {};
   const to = isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target;
   for (let key of __getOwnPropNames(mod))
     if (!__hasOwnProp.call(to, key))
       __defProp(to, key, {
-        get: () => mod[key],
+        get: __accessProp.bind(mod, key),
         enumerable: true
       });
+  if (canCache)
+    cache.set(mod, to);
   return to;
 };
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
+var __returnValue = (v) => v;
+function __exportSetter(name, newValue) {
+  this[name] = __returnValue.bind(null, newValue);
+}
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, {
+      get: all[name],
+      enumerable: true,
+      configurable: true,
+      set: __exportSetter.bind(all, name)
+    });
+};
 
 // node_modules/react/cjs/react.development.js
 var require_react_development = __commonJS((exports, module) => {
@@ -1821,8 +1848,9 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/index.js
 var require_react = __commonJS((exports, module) => {
+  var react_development = __toESM(require_react_development());
   if (false) {} else {
-    module.exports = require_react_development();
+    module.exports = react_development;
   }
 });
 
@@ -2271,15 +2299,16 @@ var require_scheduler_development = __commonJS((exports) => {
 
 // node_modules/scheduler/index.js
 var require_scheduler = __commonJS((exports, module) => {
+  var scheduler_development = __toESM(require_scheduler_development());
   if (false) {} else {
-    module.exports = require_scheduler_development();
+    module.exports = scheduler_development;
   }
 });
 
 // node_modules/react-dom/cjs/react-dom.development.js
 var require_react_dom_development = __commonJS((exports) => {
-  var React = __toESM(require_react(), 1);
-  var Scheduler = __toESM(require_scheduler(), 1);
+  var React = __toESM(require_react());
+  var Scheduler = __toESM(require_scheduler());
   if (true) {
     (function() {
       if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
@@ -22725,14 +22754,15 @@ You might need to use a local HTTP server (instead of file://): ` + "https://rea
 
 // node_modules/react-dom/index.js
 var require_react_dom = __commonJS((exports, module) => {
+  var react_dom_development = __toESM(require_react_dom_development());
   if (false) {} else {
-    module.exports = require_react_dom_development();
+    module.exports = react_dom_development;
   }
 });
 
 // node_modules/react-dom/client.js
 var require_client = __commonJS((exports) => {
-  var m = __toESM(require_react_dom(), 1);
+  var m = __toESM(require_react_dom());
   if (false) {} else {
     i = m.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
     exports.createRoot = function(c, o) {
@@ -22755,9 +22785,68 @@ var require_client = __commonJS((exports) => {
   var i;
 });
 
+// node_modules/use-sync-external-store/cjs/use-sync-external-store-shim.development.js
+var require_use_sync_external_store_shim_development = __commonJS((exports) => {
+  var React = __toESM(require_react());
+  (function() {
+    function is(x, y) {
+      return x === y && (x !== 0 || 1 / x === 1 / y) || x !== x && y !== y;
+    }
+    function useSyncExternalStore$2(subscribe, getSnapshot) {
+      didWarnOld18Alpha || React.startTransition === undefined || (didWarnOld18Alpha = true, console.error("You are using an outdated, pre-release alpha of React 18 that does not support useSyncExternalStore. The use-sync-external-store shim will not work correctly. Upgrade to a newer pre-release."));
+      var value = getSnapshot();
+      if (!didWarnUncachedGetSnapshot) {
+        var cachedValue = getSnapshot();
+        objectIs(value, cachedValue) || (console.error("The result of getSnapshot should be cached to avoid an infinite loop"), didWarnUncachedGetSnapshot = true);
+      }
+      cachedValue = useState2({
+        inst: { value, getSnapshot }
+      });
+      var inst = cachedValue[0].inst, forceUpdate = cachedValue[1];
+      useLayoutEffect2(function() {
+        inst.value = value;
+        inst.getSnapshot = getSnapshot;
+        checkIfSnapshotChanged(inst) && forceUpdate({ inst });
+      }, [subscribe, value, getSnapshot]);
+      useEffect2(function() {
+        checkIfSnapshotChanged(inst) && forceUpdate({ inst });
+        return subscribe(function() {
+          checkIfSnapshotChanged(inst) && forceUpdate({ inst });
+        });
+      }, [subscribe]);
+      useDebugValue2(value);
+      return value;
+    }
+    function checkIfSnapshotChanged(inst) {
+      var latestGetSnapshot = inst.getSnapshot;
+      inst = inst.value;
+      try {
+        var nextValue = latestGetSnapshot();
+        return !objectIs(inst, nextValue);
+      } catch (error) {
+        return true;
+      }
+    }
+    function useSyncExternalStore$1(subscribe, getSnapshot) {
+      return getSnapshot();
+    }
+    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function" && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
+    var objectIs = typeof Object.is === "function" ? Object.is : is, useState2 = React.useState, useEffect2 = React.useEffect, useLayoutEffect2 = React.useLayoutEffect, useDebugValue2 = React.useDebugValue, didWarnOld18Alpha = false, didWarnUncachedGetSnapshot = false, shim = typeof window === "undefined" || typeof window.document === "undefined" || typeof window.document.createElement === "undefined" ? useSyncExternalStore$1 : useSyncExternalStore$2;
+    exports.useSyncExternalStore = React.useSyncExternalStore !== undefined ? React.useSyncExternalStore : shim;
+    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop === "function" && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(Error());
+  })();
+});
+
+// node_modules/use-sync-external-store/shim/index.js
+var require_shim = __commonJS((exports, module) => {
+  if (false) {} else {
+    module.exports = require_use_sync_external_store_shim_development();
+  }
+});
+
 // node_modules/react/cjs/react-jsx-dev-runtime.development.js
 var require_react_jsx_dev_runtime_development = __commonJS((exports) => {
-  var React = __toESM(require_react(), 1);
+  var React9 = __toESM(require_react());
   if (true) {
     (function() {
       var REACT_ELEMENT_TYPE = Symbol.for("react.element");
@@ -22785,7 +22874,7 @@ var require_react_jsx_dev_runtime_development = __commonJS((exports) => {
         }
         return null;
       }
-      var ReactSharedInternals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+      var ReactSharedInternals = React9.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
       function error(format) {
         {
           {
@@ -23171,9 +23260,9 @@ var require_react_jsx_dev_runtime_development = __commonJS((exports) => {
       }
       function checkPropTypes(typeSpecs, values, location, componentName, element) {
         {
-          var has = Function.call.bind(hasOwnProperty);
+          var has3 = Function.call.bind(hasOwnProperty);
           for (var typeSpecName in typeSpecs) {
-            if (has(typeSpecs, typeSpecName)) {
+            if (has3(typeSpecs, typeSpecName)) {
               var error$1 = undefined;
               try {
                 if (typeof typeSpecs[typeSpecName] !== "function") {
@@ -23638,17 +23727,6079 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/jsx-dev-runtime.js
 var require_jsx_dev_runtime = __commonJS((exports, module) => {
+  var react_jsx_dev_runtime_development = __toESM(require_react_jsx_dev_runtime_development());
   if (false) {} else {
-    module.exports = require_react_jsx_dev_runtime_development();
+    module.exports = react_jsx_dev_runtime_development;
   }
 });
 
 // frontend/app.tsx
-var import_react17 = __toESM(require_react(), 1);
+var import_react50 = __toESM(require_react(), 1);
 var import_client = __toESM(require_client(), 1);
 
-// frontend/state/app-state.tsx
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/error-Dl9xmUf3.mjs
+function createErrorTypeGuard(ErrorClass) {
+  function typeGuard(error) {
+    const target = error ?? this;
+    if (!target)
+      throw new TypeError(`${ErrorClass.kind || ErrorClass.name} type guard requires an error object`);
+    if (ErrorClass.kind && typeof target === "object" && target !== null && "constructor" in target) {
+      if (target.constructor?.kind === ErrorClass.kind)
+        return true;
+    }
+    return target instanceof ErrorClass;
+  }
+  return typeGuard;
+}
+var ClerkAPIError = class {
+  static kind = "ClerkApiError";
+  code;
+  message;
+  longMessage;
+  meta;
+  constructor(json) {
+    const parsedError = {
+      code: json.code,
+      message: json.message,
+      longMessage: json.long_message,
+      meta: {
+        paramName: json.meta?.param_name,
+        sessionId: json.meta?.session_id,
+        emailAddresses: json.meta?.email_addresses,
+        identifiers: json.meta?.identifiers,
+        zxcvbn: json.meta?.zxcvbn,
+        plan: json.meta?.plan,
+        isPlanUpgradePossible: json.meta?.is_plan_upgrade_possible
+      }
+    };
+    this.code = parsedError.code;
+    this.message = parsedError.message;
+    this.longMessage = parsedError.longMessage;
+    this.meta = parsedError.meta;
+  }
+};
+var isClerkAPIError = createErrorTypeGuard(ClerkAPIError);
+var ClerkError = class ClerkError2 extends Error {
+  static kind = "ClerkError";
+  clerkError = true;
+  code;
+  longMessage;
+  docsUrl;
+  cause;
+  get name() {
+    return this.constructor.name;
+  }
+  constructor(opts) {
+    super(new.target.formatMessage(new.target.kind, opts.message, opts.code, opts.docsUrl), { cause: opts.cause });
+    Object.setPrototypeOf(this, ClerkError2.prototype);
+    this.code = opts.code;
+    this.docsUrl = opts.docsUrl;
+    this.longMessage = opts.longMessage;
+    this.cause = opts.cause;
+  }
+  toString() {
+    return `[${this.name}]
+Message:${this.message}`;
+  }
+  static formatMessage(name, msg, code, docsUrl) {
+    const prefix = "Clerk:";
+    const regex = new RegExp(prefix.replace(" ", "\\s*"), "i");
+    msg = msg.replace(regex, "");
+    msg = `${prefix} ${msg.trim()}
+
+(code="${code}")
+
+`;
+    if (docsUrl)
+      msg += `
+
+Docs: ${docsUrl}`;
+    return msg;
+  }
+};
+var ClerkAPIResponseError = class ClerkAPIResponseError2 extends ClerkError {
+  static kind = "ClerkAPIResponseError";
+  status;
+  clerkTraceId;
+  retryAfter;
+  errors;
+  constructor(message, options) {
+    const { data: errorsJson, status, clerkTraceId, retryAfter } = options;
+    super({
+      ...options,
+      message,
+      code: "api_response_error"
+    });
+    Object.setPrototypeOf(this, ClerkAPIResponseError2.prototype);
+    this.status = status;
+    this.clerkTraceId = clerkTraceId;
+    this.retryAfter = retryAfter;
+    this.errors = (errorsJson || []).map((e) => new ClerkAPIError(e));
+  }
+  toString() {
+    let message = `[${this.name}]
+Message:${this.message}
+Status:${this.status}
+Serialized errors: ${this.errors.map((e) => JSON.stringify(e))}`;
+    if (this.clerkTraceId)
+      message += `
+Clerk Trace ID: ${this.clerkTraceId}`;
+    return message;
+  }
+  static formatMessage(name, msg, _, __) {
+    return msg;
+  }
+};
+var isClerkAPIResponseError = createErrorTypeGuard(ClerkAPIResponseError);
+var DefaultMessages = Object.freeze({
+  InvalidProxyUrlErrorMessage: `The proxyUrl passed to Clerk is invalid. The expected value for proxyUrl is an absolute URL or a relative path with a leading '/'. (key={{url}})`,
+  InvalidPublishableKeyErrorMessage: `The publishableKey passed to Clerk is invalid. You can get your Publishable key at https://dashboard.clerk.com/last-active?path=api-keys. (key={{key}})`,
+  MissingPublishableKeyErrorMessage: `Missing publishableKey. You can get your key at https://dashboard.clerk.com/last-active?path=api-keys.`,
+  MissingSecretKeyErrorMessage: `Missing secretKey. You can get your key at https://dashboard.clerk.com/last-active?path=api-keys.`,
+  MissingClerkProvider: `{{source}} can only be used within the <ClerkProvider /> component. Learn more: https://clerk.com/docs/components/clerk-provider`
+});
+function buildErrorThrower({ packageName, customMessages }) {
+  let pkg = packageName;
+  function buildMessage(rawMessage, replacements) {
+    if (!replacements)
+      return `${pkg}: ${rawMessage}`;
+    let msg = rawMessage;
+    const matches = rawMessage.matchAll(/{{([a-zA-Z0-9-_]+)}}/g);
+    for (const match of matches) {
+      const replacement = (replacements[match[1]] || "").toString();
+      msg = msg.replace(`{{${match[1]}}}`, replacement);
+    }
+    return `${pkg}: ${msg}`;
+  }
+  const messages = {
+    ...DefaultMessages,
+    ...customMessages
+  };
+  return {
+    setPackageName({ packageName: packageName$1 }) {
+      if (typeof packageName$1 === "string")
+        pkg = packageName$1;
+      return this;
+    },
+    setMessages({ customMessages: customMessages$1 }) {
+      Object.assign(messages, customMessages$1 || {});
+      return this;
+    },
+    throwInvalidPublishableKeyError(params) {
+      throw new Error(buildMessage(messages.InvalidPublishableKeyErrorMessage, params));
+    },
+    throwInvalidProxyUrl(params) {
+      throw new Error(buildMessage(messages.InvalidProxyUrlErrorMessage, params));
+    },
+    throwMissingPublishableKeyError() {
+      throw new Error(buildMessage(messages.MissingPublishableKeyErrorMessage));
+    },
+    throwMissingSecretKeyError() {
+      throw new Error(buildMessage(messages.MissingSecretKeyErrorMessage));
+    },
+    throwMissingClerkProviderError(params) {
+      throw new Error(buildMessage(messages.MissingClerkProvider, params));
+    },
+    throw(message) {
+      throw new Error(buildMessage(message));
+    }
+  };
+}
+var ClerkRuntimeError = class ClerkRuntimeError2 extends ClerkError {
+  static kind = "ClerkRuntimeError";
+  clerkRuntimeError = true;
+  constructor(message, options) {
+    super({
+      ...options,
+      message
+    });
+    Object.setPrototypeOf(this, ClerkRuntimeError2.prototype);
+  }
+};
+var isClerkRuntimeError = createErrorTypeGuard(ClerkRuntimeError);
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/authorization-D2ans7vW.mjs
+var TYPES_TO_OBJECTS = {
+  strict_mfa: {
+    afterMinutes: 10,
+    level: "multi_factor"
+  },
+  strict: {
+    afterMinutes: 10,
+    level: "second_factor"
+  },
+  moderate: {
+    afterMinutes: 60,
+    level: "second_factor"
+  },
+  lax: {
+    afterMinutes: 1440,
+    level: "second_factor"
+  }
+};
+var ALLOWED_LEVELS = new Set([
+  "first_factor",
+  "second_factor",
+  "multi_factor"
+]);
+var ALLOWED_TYPES = new Set([
+  "strict_mfa",
+  "strict",
+  "moderate",
+  "lax"
+]);
+var isValidMaxAge = (maxAge) => typeof maxAge === "number" && maxAge > 0;
+var isValidLevel = (level) => ALLOWED_LEVELS.has(level);
+var isValidVerificationType = (type) => ALLOWED_TYPES.has(type);
+var prefixWithOrg = (value) => value.replace(/^(org:)*/, "org:");
+var checkOrgAuthorization = (params, options) => {
+  const { orgId, orgRole, orgPermissions } = options;
+  if (!params.role && !params.permission)
+    return null;
+  if (!orgId || !orgRole || !orgPermissions)
+    return null;
+  if (params.permission)
+    return orgPermissions.includes(prefixWithOrg(params.permission));
+  if (params.role)
+    return prefixWithOrg(orgRole) === prefixWithOrg(params.role);
+  return null;
+};
+var checkForFeatureOrPlan = (claim, featureOrPlan) => {
+  const { org: orgFeatures, user: userFeatures } = splitByScope(claim);
+  const [scope, _id] = featureOrPlan.split(":");
+  const id = _id || scope;
+  if (scope === "org")
+    return orgFeatures.includes(id);
+  else if (scope === "user")
+    return userFeatures.includes(id);
+  else
+    return [...orgFeatures, ...userFeatures].includes(id);
+};
+var checkBillingAuthorization = (params, options) => {
+  const { features, plans } = options;
+  if (params.feature && features)
+    return checkForFeatureOrPlan(features, params.feature);
+  if (params.plan && plans)
+    return checkForFeatureOrPlan(plans, params.plan);
+  return null;
+};
+var splitByScope = (fea) => {
+  const features = fea ? fea.split(",").map((f) => f.trim()) : [];
+  return {
+    org: features.filter((f) => f.split(":")[0].includes("o")).map((f) => f.split(":")[1]),
+    user: features.filter((f) => f.split(":")[0].includes("u")).map((f) => f.split(":")[1])
+  };
+};
+var validateReverificationConfig = (config) => {
+  if (!config)
+    return false;
+  const convertConfigToObject = (config$1) => {
+    if (typeof config$1 === "string")
+      return TYPES_TO_OBJECTS[config$1];
+    return config$1;
+  };
+  const isValidStringValue = typeof config === "string" && isValidVerificationType(config);
+  const isValidObjectValue = typeof config === "object" && isValidLevel(config.level) && isValidMaxAge(config.afterMinutes);
+  if (isValidStringValue || isValidObjectValue)
+    return convertConfigToObject.bind(null, config);
+  return false;
+};
+var checkReverificationAuthorization = (params, { factorVerificationAge }) => {
+  if (!params.reverification || !factorVerificationAge)
+    return null;
+  const isValidReverification = validateReverificationConfig(params.reverification);
+  if (!isValidReverification)
+    return null;
+  const { level, afterMinutes } = isValidReverification();
+  const [factor1Age, factor2Age] = factorVerificationAge;
+  const isValidFactor1 = factor1Age !== -1 ? afterMinutes > factor1Age : null;
+  const isValidFactor2 = factor2Age !== -1 ? afterMinutes > factor2Age : null;
+  switch (level) {
+    case "first_factor":
+      return isValidFactor1;
+    case "second_factor":
+      return factor2Age !== -1 ? isValidFactor2 : isValidFactor1;
+    case "multi_factor":
+      return factor2Age === -1 ? isValidFactor1 : isValidFactor1 && isValidFactor2;
+  }
+};
+var createCheckAuthorization = (options) => {
+  return (params) => {
+    if (!options.userId)
+      return false;
+    const billingAuthorization = checkBillingAuthorization(params, options);
+    const orgAuthorization = checkOrgAuthorization(params, options);
+    const reverificationAuthorization = checkReverificationAuthorization(params, options);
+    if ([billingAuthorization || orgAuthorization, reverificationAuthorization].some((a) => a === null))
+      return [billingAuthorization || orgAuthorization, reverificationAuthorization].some((a) => a === true);
+    return [billingAuthorization || orgAuthorization, reverificationAuthorization].every((a) => a === true);
+  };
+};
+var resolveAuthState = ({ authObject: { sessionId, sessionStatus, userId, actor, orgId, orgRole, orgSlug, signOut, getToken, has, sessionClaims }, options: { treatPendingAsSignedOut = true } }) => {
+  if (sessionId === undefined && userId === undefined)
+    return {
+      isLoaded: false,
+      isSignedIn: undefined,
+      sessionId,
+      sessionClaims: undefined,
+      userId,
+      actor: undefined,
+      orgId: undefined,
+      orgRole: undefined,
+      orgSlug: undefined,
+      has: undefined,
+      signOut,
+      getToken
+    };
+  if (sessionId === null && userId === null)
+    return {
+      isLoaded: true,
+      isSignedIn: false,
+      sessionId,
+      userId,
+      sessionClaims: null,
+      actor: null,
+      orgId: null,
+      orgRole: null,
+      orgSlug: null,
+      has: () => false,
+      signOut,
+      getToken
+    };
+  if (treatPendingAsSignedOut && sessionStatus === "pending")
+    return {
+      isLoaded: true,
+      isSignedIn: false,
+      sessionId: null,
+      userId: null,
+      sessionClaims: null,
+      actor: null,
+      orgId: null,
+      orgRole: null,
+      orgSlug: null,
+      has: () => false,
+      signOut,
+      getToken
+    };
+  if (!!sessionId && !!sessionClaims && !!userId && !!orgId && !!orgRole)
+    return {
+      isLoaded: true,
+      isSignedIn: true,
+      sessionId,
+      sessionClaims,
+      userId,
+      actor: actor || null,
+      orgId,
+      orgRole,
+      orgSlug: orgSlug || null,
+      has,
+      signOut,
+      getToken
+    };
+  if (!!sessionId && !!sessionClaims && !!userId && !orgId)
+    return {
+      isLoaded: true,
+      isSignedIn: true,
+      sessionId,
+      sessionClaims,
+      userId,
+      actor: actor || null,
+      orgId: null,
+      orgRole: null,
+      orgSlug: null,
+      has,
+      signOut,
+      getToken
+    };
+};
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/constants-ByUssRbE.mjs
+var DEV_OR_STAGING_SUFFIXES = [
+  ".lcl.dev",
+  ".stg.dev",
+  ".lclstage.dev",
+  ".stgstage.dev",
+  ".dev.lclclerk.com",
+  ".stg.lclclerk.com",
+  ".accounts.lclclerk.com",
+  "accountsstage.dev",
+  "accounts.dev"
+];
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/isomorphicAtob-DybBXGFR.mjs
+var isomorphicAtob = (data) => {
+  if (typeof atob !== "undefined" && typeof atob === "function")
+    return atob(data);
+  else if (typeof global !== "undefined" && global.Buffer)
+    return new global.Buffer(data, "base64").toString();
+  return data;
+};
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/keys-YNv6yjKk.mjs
+var PUBLISHABLE_KEY_LIVE_PREFIX = "pk_live_";
+var PUBLISHABLE_KEY_TEST_PREFIX = "pk_test_";
+function isValidDecodedPublishableKey(decoded) {
+  if (!decoded.endsWith("$"))
+    return false;
+  const withoutTrailing = decoded.slice(0, -1);
+  if (withoutTrailing.includes("$"))
+    return false;
+  return withoutTrailing.includes(".");
+}
+function parsePublishableKey(key, options = {}) {
+  key = key || "";
+  if (!key || !isPublishableKey(key)) {
+    if (options.fatal && !key)
+      throw new Error("Publishable key is missing. Ensure that your publishable key is correctly configured. Double-check your environment configuration for your keys, or access them here: https://dashboard.clerk.com/last-active?path=api-keys");
+    if (options.fatal && !isPublishableKey(key))
+      throw new Error("Publishable key not valid.");
+    return null;
+  }
+  const instanceType = key.startsWith(PUBLISHABLE_KEY_LIVE_PREFIX) ? "production" : "development";
+  let decodedFrontendApi;
+  try {
+    decodedFrontendApi = isomorphicAtob(key.split("_")[2]);
+  } catch {
+    if (options.fatal)
+      throw new Error("Publishable key not valid: Failed to decode key.");
+    return null;
+  }
+  if (!isValidDecodedPublishableKey(decodedFrontendApi)) {
+    if (options.fatal)
+      throw new Error("Publishable key not valid: Decoded key has invalid format.");
+    return null;
+  }
+  let frontendApi = decodedFrontendApi.slice(0, -1);
+  if (options.proxyUrl)
+    frontendApi = options.proxyUrl;
+  else if (instanceType !== "development" && options.domain && options.isSatellite)
+    frontendApi = `clerk.${options.domain}`;
+  return {
+    instanceType,
+    frontendApi
+  };
+}
+function isPublishableKey(key = "") {
+  try {
+    if (!(key.startsWith(PUBLISHABLE_KEY_LIVE_PREFIX) || key.startsWith(PUBLISHABLE_KEY_TEST_PREFIX)))
+      return false;
+    const parts = key.split("_");
+    if (parts.length !== 3)
+      return false;
+    const encodedPart = parts[2];
+    if (!encodedPart)
+      return false;
+    return isValidDecodedPublishableKey(isomorphicAtob(encodedPart));
+  } catch {
+    return false;
+  }
+}
+function createDevOrStagingUrlCache() {
+  const devOrStagingUrlCache = /* @__PURE__ */ new Map;
+  return { isDevOrStagingUrl: (url) => {
+    if (!url)
+      return false;
+    const hostname = typeof url === "string" ? url : url.hostname;
+    let res = devOrStagingUrlCache.get(hostname);
+    if (res === undefined) {
+      res = DEV_OR_STAGING_SUFFIXES.some((s) => hostname.endsWith(s));
+      devOrStagingUrlCache.set(hostname, res);
+    }
+    return res;
+  } };
+}
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/underscore-DjQrhefX.mjs
+function snakeToCamel(str) {
+  return str ? str.replace(/([-_][a-z])/g, (match) => match.toUpperCase().replace(/-|_/, "")) : "";
+}
+function camelToSnake(str) {
+  return str ? str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`) : "";
+}
+var createDeepObjectTransformer = (transform) => {
+  const deepTransform = (obj) => {
+    if (!obj)
+      return obj;
+    if (Array.isArray(obj))
+      return obj.map((el) => {
+        if (typeof el === "object" || Array.isArray(el))
+          return deepTransform(el);
+        return el;
+      });
+    const copy = { ...obj };
+    const keys = Object.keys(copy);
+    for (const oldName of keys) {
+      const newName = transform(oldName.toString());
+      if (newName !== oldName) {
+        copy[newName] = copy[oldName];
+        delete copy[oldName];
+      }
+      if (typeof copy[newName] === "object")
+        copy[newName] = deepTransform(copy[newName]);
+    }
+    return copy;
+  };
+  return deepTransform;
+};
+var deepCamelToSnake = createDeepObjectTransformer(camelToSnake);
+var deepSnakeToCamel = createDeepObjectTransformer(snakeToCamel);
+function isTruthy(value) {
+  if (typeof value === `boolean`)
+    return value;
+  if (value === undefined || value === null)
+    return false;
+  if (typeof value === `string`) {
+    if (value.toLowerCase() === `true`)
+      return true;
+    if (value.toLowerCase() === `false`)
+      return false;
+  }
+  const number = parseInt(value, 10);
+  if (isNaN(number))
+    return false;
+  if (number > 0)
+    return true;
+  return false;
+}
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/telemetry-wqMDWlvR.mjs
+var DEFAULT_CACHE_TTL_MS = 86400000;
+var TelemetryEventThrottler = class {
+  #cache;
+  #cacheTtl = DEFAULT_CACHE_TTL_MS;
+  constructor(cache) {
+    this.#cache = cache;
+  }
+  isEventThrottled(payload) {
+    const now = Date.now();
+    const key = this.#generateKey(payload);
+    const entry = this.#cache.getItem(key);
+    if (!entry) {
+      this.#cache.setItem(key, now);
+      return false;
+    }
+    if (now - entry > this.#cacheTtl) {
+      this.#cache.setItem(key, now);
+      return false;
+    }
+    return true;
+  }
+  #generateKey(event) {
+    const { sk: _sk, pk: _pk, payload, ...rest } = event;
+    const sanitizedEvent = {
+      ...payload,
+      ...rest
+    };
+    return JSON.stringify(Object.keys({
+      ...payload,
+      ...rest
+    }).sort().map((key) => sanitizedEvent[key]));
+  }
+};
+var LocalStorageThrottlerCache = class {
+  #storageKey = "clerk_telemetry_throttler";
+  getItem(key) {
+    return this.#getCache()[key];
+  }
+  setItem(key, value) {
+    try {
+      const cache = this.#getCache();
+      cache[key] = value;
+      localStorage.setItem(this.#storageKey, JSON.stringify(cache));
+    } catch (err) {
+      if (err instanceof DOMException && (err.name === "QuotaExceededError" || err.name === "NS_ERROR_DOM_QUOTA_REACHED") && localStorage.length > 0)
+        localStorage.removeItem(this.#storageKey);
+    }
+  }
+  removeItem(key) {
+    try {
+      const cache = this.#getCache();
+      delete cache[key];
+      localStorage.setItem(this.#storageKey, JSON.stringify(cache));
+    } catch {}
+  }
+  #getCache() {
+    try {
+      const cacheString = localStorage.getItem(this.#storageKey);
+      if (!cacheString)
+        return {};
+      return JSON.parse(cacheString);
+    } catch {
+      return {};
+    }
+  }
+  static isSupported() {
+    return typeof window !== "undefined" && !!window.localStorage;
+  }
+};
+var InMemoryThrottlerCache = class {
+  #cache = /* @__PURE__ */ new Map;
+  #maxSize = 1e4;
+  getItem(key) {
+    if (this.#cache.size > this.#maxSize) {
+      this.#cache.clear();
+      return;
+    }
+    return this.#cache.get(key);
+  }
+  setItem(key, value) {
+    this.#cache.set(key, value);
+  }
+  removeItem(key) {
+    this.#cache.delete(key);
+  }
+};
+function isWindowClerkWithMetadata(clerk) {
+  return typeof clerk === "object" && clerk !== null && "constructor" in clerk && typeof clerk.constructor === "function";
+}
+var VALID_LOG_LEVELS = new Set([
+  "error",
+  "warn",
+  "info",
+  "debug",
+  "trace"
+]);
+var DEFAULT_CONFIG = {
+  samplingRate: 1,
+  maxBufferSize: 5,
+  endpoint: "https://clerk-telemetry.com"
+};
+var TelemetryCollector = class {
+  #config;
+  #eventThrottler;
+  #metadata = {};
+  #buffer = [];
+  #pendingFlush = null;
+  constructor(options) {
+    this.#config = {
+      maxBufferSize: options.maxBufferSize ?? DEFAULT_CONFIG.maxBufferSize,
+      samplingRate: options.samplingRate ?? DEFAULT_CONFIG.samplingRate,
+      perEventSampling: options.perEventSampling ?? true,
+      disabled: options.disabled ?? false,
+      debug: options.debug ?? false,
+      endpoint: DEFAULT_CONFIG.endpoint
+    };
+    if (!options.clerkVersion && typeof window === "undefined")
+      this.#metadata.clerkVersion = "";
+    else
+      this.#metadata.clerkVersion = options.clerkVersion ?? "";
+    this.#metadata.sdk = options.sdk;
+    this.#metadata.sdkVersion = options.sdkVersion;
+    this.#metadata.publishableKey = options.publishableKey ?? "";
+    const parsedKey = parsePublishableKey(options.publishableKey);
+    if (parsedKey)
+      this.#metadata.instanceType = parsedKey.instanceType;
+    if (options.secretKey)
+      this.#metadata.secretKey = options.secretKey.substring(0, 16);
+    this.#eventThrottler = new TelemetryEventThrottler(LocalStorageThrottlerCache.isSupported() ? new LocalStorageThrottlerCache : new InMemoryThrottlerCache);
+  }
+  get isEnabled() {
+    if (this.#metadata.instanceType !== "development")
+      return false;
+    if (this.#config.disabled || typeof process !== "undefined" && process.env && isTruthy(process.env.CLERK_TELEMETRY_DISABLED))
+      return false;
+    if (typeof window !== "undefined" && !!window?.navigator?.webdriver)
+      return false;
+    return true;
+  }
+  get isDebug() {
+    return this.#config.debug || typeof process !== "undefined" && process.env && isTruthy(process.env.CLERK_TELEMETRY_DEBUG);
+  }
+  record(event) {
+    try {
+      const preparedPayload = this.#preparePayload(event.event, event.payload);
+      this.#logEvent(preparedPayload.event, preparedPayload);
+      if (!this.#shouldRecord(preparedPayload, event.eventSamplingRate))
+        return;
+      this.#buffer.push({
+        kind: "event",
+        value: preparedPayload
+      });
+      this.#scheduleFlush();
+    } catch (error) {
+      console.error("[clerk/telemetry] Error recording telemetry event", error);
+    }
+  }
+  recordLog(entry) {
+    try {
+      if (!this.#shouldRecordLog(entry))
+        return;
+      const levelIsValid = typeof entry?.level === "string" && VALID_LOG_LEVELS.has(entry.level);
+      const messageIsValid = typeof entry?.message === "string" && entry.message.trim().length > 0;
+      let normalizedTimestamp = null;
+      const timestampInput = entry?.timestamp;
+      if (typeof timestampInput === "number" || typeof timestampInput === "string") {
+        const candidate = new Date(timestampInput);
+        if (!Number.isNaN(candidate.getTime()))
+          normalizedTimestamp = candidate;
+      }
+      if (!levelIsValid || !messageIsValid || normalizedTimestamp === null) {
+        if (this.isDebug && typeof console !== "undefined")
+          console.warn("[clerk/telemetry] Dropping invalid telemetry log entry", {
+            levelIsValid,
+            messageIsValid,
+            timestampIsValid: normalizedTimestamp !== null
+          });
+        return;
+      }
+      const sdkMetadata = this.#getSDKMetadata();
+      const logData = {
+        sdk: sdkMetadata.name,
+        sdkv: sdkMetadata.version,
+        cv: this.#metadata.clerkVersion ?? "",
+        lvl: entry.level,
+        msg: entry.message,
+        ts: normalizedTimestamp.toISOString(),
+        pk: this.#metadata.publishableKey || null,
+        payload: this.#sanitizeContext(entry.context)
+      };
+      this.#buffer.push({
+        kind: "log",
+        value: logData
+      });
+      this.#scheduleFlush();
+    } catch (error) {
+      console.error("[clerk/telemetry] Error recording telemetry log entry", error);
+    }
+  }
+  #shouldRecord(preparedPayload, eventSamplingRate) {
+    return this.isEnabled && !this.isDebug && this.#shouldBeSampled(preparedPayload, eventSamplingRate);
+  }
+  #shouldRecordLog(_entry) {
+    return true;
+  }
+  #shouldBeSampled(preparedPayload, eventSamplingRate) {
+    const randomSeed = Math.random();
+    if (!(randomSeed <= this.#config.samplingRate && (this.#config.perEventSampling === false || typeof eventSamplingRate === "undefined" || randomSeed <= eventSamplingRate)))
+      return false;
+    return !this.#eventThrottler.isEventThrottled(preparedPayload);
+  }
+  #scheduleFlush() {
+    if (typeof window === "undefined") {
+      this.#flush();
+      return;
+    }
+    if (this.#buffer.length >= this.#config.maxBufferSize) {
+      if (this.#pendingFlush)
+        if (typeof cancelIdleCallback !== "undefined")
+          cancelIdleCallback(Number(this.#pendingFlush));
+        else
+          clearTimeout(Number(this.#pendingFlush));
+      this.#flush();
+      return;
+    }
+    if (this.#pendingFlush)
+      return;
+    if ("requestIdleCallback" in window)
+      this.#pendingFlush = requestIdleCallback(() => {
+        this.#flush();
+        this.#pendingFlush = null;
+      });
+    else
+      this.#pendingFlush = setTimeout(() => {
+        this.#flush();
+        this.#pendingFlush = null;
+      }, 0);
+  }
+  #flush() {
+    const itemsToSend = [...this.#buffer];
+    this.#buffer = [];
+    this.#pendingFlush = null;
+    if (itemsToSend.length === 0)
+      return;
+    const eventsToSend = itemsToSend.filter((item) => item.kind === "event").map((item) => item.value);
+    const logsToSend = itemsToSend.filter((item) => item.kind === "log").map((item) => item.value);
+    if (eventsToSend.length > 0) {
+      const eventsUrl = new URL("/v1/event", this.#config.endpoint);
+      fetch(eventsUrl, {
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        method: "POST",
+        body: JSON.stringify({ events: eventsToSend })
+      }).catch(() => {
+        return;
+      });
+    }
+    if (logsToSend.length > 0) {
+      const logsUrl = new URL("/v1/logs", this.#config.endpoint);
+      fetch(logsUrl, {
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        method: "POST",
+        body: JSON.stringify({ logs: logsToSend })
+      }).catch(() => {
+        return;
+      });
+    }
+  }
+  #logEvent(event, payload) {
+    if (!this.isDebug)
+      return;
+    if (typeof console.groupCollapsed !== "undefined") {
+      console.groupCollapsed("[clerk/telemetry]", event);
+      console.log(payload);
+      console.groupEnd();
+    } else
+      console.log("[clerk/telemetry]", event, payload);
+  }
+  #getSDKMetadata() {
+    const sdkMetadata = {
+      name: this.#metadata.sdk,
+      version: this.#metadata.sdkVersion
+    };
+    if (typeof window !== "undefined") {
+      const windowWithClerk = window;
+      if (windowWithClerk.Clerk) {
+        const windowClerk = windowWithClerk.Clerk;
+        if (isWindowClerkWithMetadata(windowClerk) && windowClerk.constructor.sdkMetadata) {
+          const { name, version } = windowClerk.constructor.sdkMetadata;
+          if (name !== undefined)
+            sdkMetadata.name = name;
+          if (version !== undefined)
+            sdkMetadata.version = version;
+        }
+      }
+    }
+    return sdkMetadata;
+  }
+  #preparePayload(event, payload) {
+    const sdkMetadata = this.#getSDKMetadata();
+    return {
+      event,
+      cv: this.#metadata.clerkVersion ?? "",
+      it: this.#metadata.instanceType ?? "",
+      sdk: sdkMetadata.name,
+      sdkv: sdkMetadata.version,
+      ...this.#metadata.publishableKey ? { pk: this.#metadata.publishableKey } : {},
+      ...this.#metadata.secretKey ? { sk: this.#metadata.secretKey } : {},
+      payload
+    };
+  }
+  #sanitizeContext(context) {
+    if (context === null || typeof context === "undefined")
+      return null;
+    if (typeof context !== "object")
+      return null;
+    try {
+      const cleaned = JSON.parse(JSON.stringify(context));
+      if (cleaned && typeof cleaned === "object" && !Array.isArray(cleaned))
+        return cleaned;
+      return null;
+    } catch {
+      return null;
+    }
+  }
+};
+var AUTH_COMPONENTS = new Set(["SignIn", "SignUp"]);
+var EVENT_METHOD_CALLED = "METHOD_CALLED";
+var EVENT_SAMPLING_RATE$2 = 0.1;
+function eventMethodCalled(method, payload) {
+  return {
+    event: EVENT_METHOD_CALLED,
+    eventSamplingRate: EVENT_SAMPLING_RATE$2,
+    payload: {
+      method,
+      ...payload
+    }
+  };
+}
+
+// node_modules/@clerk/clerk-react/dist/chunk-3EQWAEPK.mjs
+var import_react6 = __toESM(require_react(), 1);
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/react/index.mjs
+var import_react5 = __toESM(require_react(), 1);
+
+// node_modules/swr/dist/index/index.mjs
+var import_react3 = __toESM(require_react(), 1);
+var import_shim = __toESM(require_shim(), 1);
+
+// node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs
 var import_react = __toESM(require_react(), 1);
+
+// node_modules/swr/dist/_internal/events.mjs
+var exports_events = {};
+__export(exports_events, {
+  RECONNECT_EVENT: () => RECONNECT_EVENT,
+  MUTATE_EVENT: () => MUTATE_EVENT,
+  FOCUS_EVENT: () => FOCUS_EVENT,
+  ERROR_REVALIDATE_EVENT: () => ERROR_REVALIDATE_EVENT
+});
+var FOCUS_EVENT = 0;
+var RECONNECT_EVENT = 1;
+var MUTATE_EVENT = 2;
+var ERROR_REVALIDATE_EVENT = 3;
+
+// node_modules/dequal/lite/index.mjs
+var has = Object.prototype.hasOwnProperty;
+function dequal(foo, bar) {
+  var ctor, len;
+  if (foo === bar)
+    return true;
+  if (foo && bar && (ctor = foo.constructor) === bar.constructor) {
+    if (ctor === Date)
+      return foo.getTime() === bar.getTime();
+    if (ctor === RegExp)
+      return foo.toString() === bar.toString();
+    if (ctor === Array) {
+      if ((len = foo.length) === bar.length) {
+        while (len-- && dequal(foo[len], bar[len]))
+          ;
+      }
+      return len === -1;
+    }
+    if (!ctor || typeof foo === "object") {
+      len = 0;
+      for (ctor in foo) {
+        if (has.call(foo, ctor) && ++len && !has.call(bar, ctor))
+          return false;
+        if (!(ctor in bar) || !dequal(foo[ctor], bar[ctor]))
+          return false;
+      }
+      return Object.keys(bar).length === len;
+    }
+  }
+  return foo !== foo && bar !== bar;
+}
+
+// node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs
+"use client";
+var SWRGlobalState = new WeakMap;
+var noop2 = () => {};
+var UNDEFINED = noop2();
+var OBJECT = Object;
+var isUndefined = (v) => v === UNDEFINED;
+var isFunction = (v) => typeof v == "function";
+var mergeObjects = (a, b) => ({
+  ...a,
+  ...b
+});
+var isPromiseLike = (x) => isFunction(x.then);
+var EMPTY_CACHE = {};
+var INITIAL_CACHE = {};
+var STR_UNDEFINED = "undefined";
+var isWindowDefined = typeof window != STR_UNDEFINED;
+var isDocumentDefined = typeof document != STR_UNDEFINED;
+var isLegacyDeno = isWindowDefined && "Deno" in window;
+var hasRequestAnimationFrame = () => isWindowDefined && typeof window["requestAnimationFrame"] != STR_UNDEFINED;
+var createCacheHelper = (cache, key) => {
+  const state = SWRGlobalState.get(cache);
+  return [
+    () => !isUndefined(key) && cache.get(key) || EMPTY_CACHE,
+    (info) => {
+      if (!isUndefined(key)) {
+        const prev = cache.get(key);
+        if (!(key in INITIAL_CACHE)) {
+          INITIAL_CACHE[key] = prev;
+        }
+        state[5](key, mergeObjects(prev, info), prev || EMPTY_CACHE);
+      }
+    },
+    state[6],
+    () => {
+      if (!isUndefined(key)) {
+        if (key in INITIAL_CACHE)
+          return INITIAL_CACHE[key];
+      }
+      return !isUndefined(key) && cache.get(key) || EMPTY_CACHE;
+    }
+  ];
+};
+var online = true;
+var isOnline = () => online;
+var [onWindowEvent, offWindowEvent] = isWindowDefined && window.addEventListener ? [
+  window.addEventListener.bind(window),
+  window.removeEventListener.bind(window)
+] : [
+  noop2,
+  noop2
+];
+var isVisible = () => {
+  const visibilityState = isDocumentDefined && document.visibilityState;
+  return isUndefined(visibilityState) || visibilityState !== "hidden";
+};
+var initFocus = (callback) => {
+  if (isDocumentDefined) {
+    document.addEventListener("visibilitychange", callback);
+  }
+  onWindowEvent("focus", callback);
+  return () => {
+    if (isDocumentDefined) {
+      document.removeEventListener("visibilitychange", callback);
+    }
+    offWindowEvent("focus", callback);
+  };
+};
+var initReconnect = (callback) => {
+  const onOnline = () => {
+    online = true;
+    callback();
+  };
+  const onOffline = () => {
+    online = false;
+  };
+  onWindowEvent("online", onOnline);
+  onWindowEvent("offline", onOffline);
+  return () => {
+    offWindowEvent("online", onOnline);
+    offWindowEvent("offline", onOffline);
+  };
+};
+var preset = {
+  isOnline,
+  isVisible
+};
+var defaultConfigOptions = {
+  initFocus,
+  initReconnect
+};
+var IS_REACT_LEGACY = !import_react.default.useId;
+var IS_SERVER = !isWindowDefined || isLegacyDeno;
+var rAF = (f) => hasRequestAnimationFrame() ? window["requestAnimationFrame"](f) : setTimeout(f, 1);
+var useIsomorphicLayoutEffect = IS_SERVER ? import_react.useEffect : import_react.useLayoutEffect;
+var navigatorConnection = typeof navigator !== "undefined" && navigator.connection;
+var slowConnection = !IS_SERVER && navigatorConnection && ([
+  "slow-2g",
+  "2g"
+].includes(navigatorConnection.effectiveType) || navigatorConnection.saveData);
+var table = new WeakMap;
+var getTypeName = (value) => OBJECT.prototype.toString.call(value);
+var isObjectTypeName = (typeName, type) => typeName === `[object ${type}]`;
+var counter = 0;
+var stableHash = (arg) => {
+  const type = typeof arg;
+  const typeName = getTypeName(arg);
+  const isDate = isObjectTypeName(typeName, "Date");
+  const isRegex = isObjectTypeName(typeName, "RegExp");
+  const isPlainObject = isObjectTypeName(typeName, "Object");
+  let result;
+  let index;
+  if (OBJECT(arg) === arg && !isDate && !isRegex) {
+    result = table.get(arg);
+    if (result)
+      return result;
+    result = ++counter + "~";
+    table.set(arg, result);
+    if (Array.isArray(arg)) {
+      result = "@";
+      for (index = 0;index < arg.length; index++) {
+        result += stableHash(arg[index]) + ",";
+      }
+      table.set(arg, result);
+    }
+    if (isPlainObject) {
+      result = "#";
+      const keys = OBJECT.keys(arg).sort();
+      while (!isUndefined(index = keys.pop())) {
+        if (!isUndefined(arg[index])) {
+          result += index + ":" + stableHash(arg[index]) + ",";
+        }
+      }
+      table.set(arg, result);
+    }
+  } else {
+    result = isDate ? arg.toJSON() : type == "symbol" ? arg.toString() : type == "string" ? JSON.stringify(arg) : "" + arg;
+  }
+  return result;
+};
+var serialize = (key) => {
+  if (isFunction(key)) {
+    try {
+      key = key();
+    } catch (err) {
+      key = "";
+    }
+  }
+  const args = key;
+  key = typeof key == "string" ? key : (Array.isArray(key) ? key.length : key) ? stableHash(key) : "";
+  return [
+    key,
+    args
+  ];
+};
+var __timestamp = 0;
+var getTimestamp = () => ++__timestamp;
+async function internalMutate(...args) {
+  const [cache, _key, _data, _opts] = args;
+  const options = mergeObjects({
+    populateCache: true,
+    throwOnError: true
+  }, typeof _opts === "boolean" ? {
+    revalidate: _opts
+  } : _opts || {});
+  let populateCache = options.populateCache;
+  const rollbackOnErrorOption = options.rollbackOnError;
+  let optimisticData = options.optimisticData;
+  const rollbackOnError = (error) => {
+    return typeof rollbackOnErrorOption === "function" ? rollbackOnErrorOption(error) : rollbackOnErrorOption !== false;
+  };
+  const throwOnError = options.throwOnError;
+  if (isFunction(_key)) {
+    const keyFilter = _key;
+    const matchedKeys = [];
+    const it = cache.keys();
+    for (const key of it) {
+      if (!/^\$(inf|sub)\$/.test(key) && keyFilter(cache.get(key)._k)) {
+        matchedKeys.push(key);
+      }
+    }
+    return Promise.all(matchedKeys.map(mutateByKey));
+  }
+  return mutateByKey(_key);
+  async function mutateByKey(_k) {
+    const [key] = serialize(_k);
+    if (!key)
+      return;
+    const [get, set] = createCacheHelper(cache, key);
+    const [EVENT_REVALIDATORS, MUTATION, FETCH, PRELOAD] = SWRGlobalState.get(cache);
+    const startRevalidate = () => {
+      const revalidators = EVENT_REVALIDATORS[key];
+      const revalidate = isFunction(options.revalidate) ? options.revalidate(get().data, _k) : options.revalidate !== false;
+      if (revalidate) {
+        delete FETCH[key];
+        delete PRELOAD[key];
+        if (revalidators && revalidators[0]) {
+          return revalidators[0](MUTATE_EVENT).then(() => get().data);
+        }
+      }
+      return get().data;
+    };
+    if (args.length < 3) {
+      return startRevalidate();
+    }
+    let data = _data;
+    let error;
+    let isError = false;
+    const beforeMutationTs = getTimestamp();
+    MUTATION[key] = [
+      beforeMutationTs,
+      0
+    ];
+    const hasOptimisticData = !isUndefined(optimisticData);
+    const state = get();
+    const displayedData = state.data;
+    const currentData = state._c;
+    const committedData = isUndefined(currentData) ? displayedData : currentData;
+    if (hasOptimisticData) {
+      optimisticData = isFunction(optimisticData) ? optimisticData(committedData, displayedData) : optimisticData;
+      set({
+        data: optimisticData,
+        _c: committedData
+      });
+    }
+    if (isFunction(data)) {
+      try {
+        data = data(committedData);
+      } catch (err) {
+        error = err;
+        isError = true;
+      }
+    }
+    if (data && isPromiseLike(data)) {
+      data = await data.catch((err) => {
+        error = err;
+        isError = true;
+      });
+      if (beforeMutationTs !== MUTATION[key][0]) {
+        if (isError)
+          throw error;
+        return data;
+      } else if (isError && hasOptimisticData && rollbackOnError(error)) {
+        populateCache = true;
+        set({
+          data: committedData,
+          _c: UNDEFINED
+        });
+      }
+    }
+    if (populateCache) {
+      if (!isError) {
+        if (isFunction(populateCache)) {
+          const populateCachedData = populateCache(data, committedData);
+          set({
+            data: populateCachedData,
+            error: UNDEFINED,
+            _c: UNDEFINED
+          });
+        } else {
+          set({
+            data,
+            error: UNDEFINED,
+            _c: UNDEFINED
+          });
+        }
+      }
+    }
+    MUTATION[key][1] = getTimestamp();
+    Promise.resolve(startRevalidate()).then(() => {
+      set({
+        _c: UNDEFINED
+      });
+    });
+    if (isError) {
+      if (throwOnError)
+        throw error;
+      return;
+    }
+    return data;
+  }
+}
+var revalidateAllKeys = (revalidators, type) => {
+  for (const key in revalidators) {
+    if (revalidators[key][0])
+      revalidators[key][0](type);
+  }
+};
+var initCache = (provider, options) => {
+  if (!SWRGlobalState.has(provider)) {
+    const opts = mergeObjects(defaultConfigOptions, options);
+    const EVENT_REVALIDATORS = Object.create(null);
+    const mutate = internalMutate.bind(UNDEFINED, provider);
+    let unmount = noop2;
+    const subscriptions = Object.create(null);
+    const subscribe = (key, callback) => {
+      const subs = subscriptions[key] || [];
+      subscriptions[key] = subs;
+      subs.push(callback);
+      return () => subs.splice(subs.indexOf(callback), 1);
+    };
+    const setter = (key, value, prev) => {
+      provider.set(key, value);
+      const subs = subscriptions[key];
+      if (subs) {
+        for (const fn of subs) {
+          fn(value, prev);
+        }
+      }
+    };
+    const initProvider = () => {
+      if (!SWRGlobalState.has(provider)) {
+        SWRGlobalState.set(provider, [
+          EVENT_REVALIDATORS,
+          Object.create(null),
+          Object.create(null),
+          Object.create(null),
+          mutate,
+          setter,
+          subscribe
+        ]);
+        if (!IS_SERVER) {
+          const releaseFocus = opts.initFocus(setTimeout.bind(UNDEFINED, revalidateAllKeys.bind(UNDEFINED, EVENT_REVALIDATORS, FOCUS_EVENT)));
+          const releaseReconnect = opts.initReconnect(setTimeout.bind(UNDEFINED, revalidateAllKeys.bind(UNDEFINED, EVENT_REVALIDATORS, RECONNECT_EVENT)));
+          unmount = () => {
+            releaseFocus && releaseFocus();
+            releaseReconnect && releaseReconnect();
+            SWRGlobalState.delete(provider);
+          };
+        }
+      }
+    };
+    initProvider();
+    return [
+      provider,
+      mutate,
+      initProvider,
+      unmount
+    ];
+  }
+  return [
+    provider,
+    SWRGlobalState.get(provider)[4]
+  ];
+};
+var onErrorRetry = (_, __, config, revalidate, opts) => {
+  const maxRetryCount = config.errorRetryCount;
+  const currentRetryCount = opts.retryCount;
+  const timeout = ~~((Math.random() + 0.5) * (1 << (currentRetryCount < 8 ? currentRetryCount : 8))) * config.errorRetryInterval;
+  if (!isUndefined(maxRetryCount) && currentRetryCount > maxRetryCount) {
+    return;
+  }
+  setTimeout(revalidate, timeout, opts);
+};
+var compare = dequal;
+var [cache, mutate] = initCache(new Map);
+var defaultConfig = mergeObjects({
+  onLoadingSlow: noop2,
+  onSuccess: noop2,
+  onError: noop2,
+  onErrorRetry,
+  onDiscarded: noop2,
+  revalidateOnFocus: true,
+  revalidateOnReconnect: true,
+  revalidateIfStale: true,
+  shouldRetryOnError: true,
+  errorRetryInterval: slowConnection ? 1e4 : 5000,
+  focusThrottleInterval: 5 * 1000,
+  dedupingInterval: 2 * 1000,
+  loadingTimeout: slowConnection ? 5000 : 3000,
+  compare,
+  isPaused: () => false,
+  cache,
+  mutate,
+  fallback: {}
+}, preset);
+var mergeConfigs = (a, b) => {
+  const v = mergeObjects(a, b);
+  if (b) {
+    const { use: u1, fallback: f1 } = a;
+    const { use: u2, fallback: f2 } = b;
+    if (u1 && u2) {
+      v.use = u1.concat(u2);
+    }
+    if (f1 && f2) {
+      v.fallback = mergeObjects(f1, f2);
+    }
+  }
+  return v;
+};
+var SWRConfigContext = import_react.createContext({});
+var SWRConfig = (props) => {
+  const { value } = props;
+  const parentConfig = import_react.useContext(SWRConfigContext);
+  const isFunctionalConfig = isFunction(value);
+  const config = import_react.useMemo(() => isFunctionalConfig ? value(parentConfig) : value, [
+    isFunctionalConfig,
+    parentConfig,
+    value
+  ]);
+  const extendedConfig = import_react.useMemo(() => isFunctionalConfig ? config : mergeConfigs(parentConfig, config), [
+    isFunctionalConfig,
+    parentConfig,
+    config
+  ]);
+  const provider = config && config.provider;
+  const cacheContextRef = import_react.useRef(UNDEFINED);
+  if (provider && !cacheContextRef.current) {
+    cacheContextRef.current = initCache(provider(extendedConfig.cache || cache), config);
+  }
+  const cacheContext = cacheContextRef.current;
+  if (cacheContext) {
+    extendedConfig.cache = cacheContext[0];
+    extendedConfig.mutate = cacheContext[1];
+  }
+  useIsomorphicLayoutEffect(() => {
+    if (cacheContext) {
+      cacheContext[2] && cacheContext[2]();
+      return cacheContext[3];
+    }
+  }, []);
+  return import_react.createElement(SWRConfigContext.Provider, mergeObjects(props, {
+    value: extendedConfig
+  }));
+};
+// node_modules/swr/dist/_internal/constants.mjs
+var INFINITE_PREFIX = "$inf$";
+
+// node_modules/swr/dist/_internal/index.mjs
+var import_react2 = __toESM(require_react(), 1);
+var enableDevtools = isWindowDefined && window.__SWR_DEVTOOLS_USE__;
+var use = enableDevtools ? window.__SWR_DEVTOOLS_USE__ : [];
+var setupDevTools = () => {
+  if (enableDevtools) {
+    window.__SWR_DEVTOOLS_REACT__ = import_react2.default;
+  }
+};
+var normalize = (args) => {
+  return isFunction(args[1]) ? [
+    args[0],
+    args[1],
+    args[2] || {}
+  ] : [
+    args[0],
+    null,
+    (args[1] === null ? args[2] : args[1]) || {}
+  ];
+};
+var useSWRConfig = () => {
+  return mergeObjects(defaultConfig, import_react2.useContext(SWRConfigContext));
+};
+var middleware = (useSWRNext) => (key_, fetcher_, config) => {
+  const fetcher = fetcher_ && ((...args) => {
+    const [key] = serialize(key_);
+    const [, , , PRELOAD] = SWRGlobalState.get(cache);
+    if (key.startsWith(INFINITE_PREFIX)) {
+      return fetcher_(...args);
+    }
+    const req = PRELOAD[key];
+    if (isUndefined(req))
+      return fetcher_(...args);
+    delete PRELOAD[key];
+    return req;
+  });
+  return useSWRNext(key_, fetcher, config);
+};
+var BUILT_IN_MIDDLEWARE = use.concat(middleware);
+var withArgs = (hook) => {
+  return function useSWRArgs(...args) {
+    const fallbackConfig = useSWRConfig();
+    const [key, fn, _config] = normalize(args);
+    const config = mergeConfigs(fallbackConfig, _config);
+    let next = hook;
+    const { use: use2 } = config;
+    const middleware2 = (use2 || []).concat(BUILT_IN_MIDDLEWARE);
+    for (let i = middleware2.length;i--; ) {
+      next = middleware2[i](next);
+    }
+    return next(key, fn || config.fetcher || null, config);
+  };
+};
+var subscribeCallback = (key, callbacks, callback) => {
+  const keyedRevalidators = callbacks[key] || (callbacks[key] = []);
+  keyedRevalidators.push(callback);
+  return () => {
+    const index = keyedRevalidators.indexOf(callback);
+    if (index >= 0) {
+      keyedRevalidators[index] = keyedRevalidators[keyedRevalidators.length - 1];
+      keyedRevalidators.pop();
+    }
+  };
+};
+var withMiddleware = (useSWR, middleware2) => {
+  return (...args) => {
+    const [key, fn, config] = normalize(args);
+    const uses = (config.use || []).concat(middleware2);
+    return useSWR(key, fn, {
+      ...config,
+      use: uses
+    });
+  };
+};
+setupDevTools();
+
+// node_modules/swr/dist/index/index.mjs
+var noop3 = () => {};
+var UNDEFINED2 = noop3();
+var table2 = new WeakMap;
+var use2 = import_react3.default.use || ((thenable) => {
+  switch (thenable.status) {
+    case "pending":
+      throw thenable;
+    case "fulfilled":
+      return thenable.value;
+    case "rejected":
+      throw thenable.reason;
+    default:
+      thenable.status = "pending";
+      thenable.then((v) => {
+        thenable.status = "fulfilled";
+        thenable.value = v;
+      }, (e) => {
+        thenable.status = "rejected";
+        thenable.reason = e;
+      });
+      throw thenable;
+  }
+});
+var WITH_DEDUPE = {
+  dedupe: true
+};
+var useSWRHandler = (_key, fetcher, config) => {
+  const { cache: cache2, compare: compare2, suspense, fallbackData, revalidateOnMount, revalidateIfStale, refreshInterval, refreshWhenHidden, refreshWhenOffline, keepPreviousData } = config;
+  const [EVENT_REVALIDATORS, MUTATION, FETCH, PRELOAD] = SWRGlobalState.get(cache2);
+  const [key, fnArg] = serialize(_key);
+  const initialMountedRef = import_react3.useRef(false);
+  const unmountedRef = import_react3.useRef(false);
+  const keyRef = import_react3.useRef(key);
+  const fetcherRef = import_react3.useRef(fetcher);
+  const configRef = import_react3.useRef(config);
+  const getConfig = () => configRef.current;
+  const isActive = () => getConfig().isVisible() && getConfig().isOnline();
+  const [getCache, setCache, subscribeCache, getInitialCache] = createCacheHelper(cache2, key);
+  const stateDependencies = import_react3.useRef({}).current;
+  const fallback = isUndefined(fallbackData) ? isUndefined(config.fallback) ? UNDEFINED : config.fallback[key] : fallbackData;
+  const isEqual = (prev, current) => {
+    for (const _ in stateDependencies) {
+      const t = _;
+      if (t === "data") {
+        if (!compare2(prev[t], current[t])) {
+          if (!isUndefined(prev[t])) {
+            return false;
+          }
+          if (!compare2(returnedData, current[t])) {
+            return false;
+          }
+        }
+      } else {
+        if (current[t] !== prev[t]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+  const getSnapshot = import_react3.useMemo(() => {
+    const shouldStartRequest = (() => {
+      if (!key)
+        return false;
+      if (!fetcher)
+        return false;
+      if (!isUndefined(revalidateOnMount))
+        return revalidateOnMount;
+      if (getConfig().isPaused())
+        return false;
+      if (suspense)
+        return false;
+      return revalidateIfStale !== false;
+    })();
+    const getSelectedCache = (state) => {
+      const snapshot = mergeObjects(state);
+      delete snapshot._k;
+      if (!shouldStartRequest) {
+        return snapshot;
+      }
+      return {
+        isValidating: true,
+        isLoading: true,
+        ...snapshot
+      };
+    };
+    const cachedData2 = getCache();
+    const initialData = getInitialCache();
+    const clientSnapshot = getSelectedCache(cachedData2);
+    const serverSnapshot = cachedData2 === initialData ? clientSnapshot : getSelectedCache(initialData);
+    let memorizedSnapshot = clientSnapshot;
+    return [
+      () => {
+        const newSnapshot = getSelectedCache(getCache());
+        const compareResult = isEqual(newSnapshot, memorizedSnapshot);
+        if (compareResult) {
+          memorizedSnapshot.data = newSnapshot.data;
+          memorizedSnapshot.isLoading = newSnapshot.isLoading;
+          memorizedSnapshot.isValidating = newSnapshot.isValidating;
+          memorizedSnapshot.error = newSnapshot.error;
+          return memorizedSnapshot;
+        } else {
+          memorizedSnapshot = newSnapshot;
+          return newSnapshot;
+        }
+      },
+      () => serverSnapshot
+    ];
+  }, [
+    cache2,
+    key
+  ]);
+  const cached = import_shim.useSyncExternalStore(import_react3.useCallback((callback) => subscribeCache(key, (current, prev) => {
+    if (!isEqual(prev, current))
+      callback();
+  }), [
+    cache2,
+    key
+  ]), getSnapshot[0], getSnapshot[1]);
+  const isInitialMount = !initialMountedRef.current;
+  const hasRevalidator = EVENT_REVALIDATORS[key] && EVENT_REVALIDATORS[key].length > 0;
+  const cachedData = cached.data;
+  const data = isUndefined(cachedData) ? fallback && isPromiseLike(fallback) ? use2(fallback) : fallback : cachedData;
+  const error = cached.error;
+  const laggyDataRef = import_react3.useRef(data);
+  const returnedData = keepPreviousData ? isUndefined(cachedData) ? isUndefined(laggyDataRef.current) ? data : laggyDataRef.current : cachedData : data;
+  const shouldDoInitialRevalidation = (() => {
+    if (hasRevalidator && !isUndefined(error))
+      return false;
+    if (isInitialMount && !isUndefined(revalidateOnMount))
+      return revalidateOnMount;
+    if (getConfig().isPaused())
+      return false;
+    if (suspense)
+      return isUndefined(data) ? false : revalidateIfStale;
+    return isUndefined(data) || revalidateIfStale;
+  })();
+  const defaultValidatingState = !!(key && fetcher && isInitialMount && shouldDoInitialRevalidation);
+  const isValidating = isUndefined(cached.isValidating) ? defaultValidatingState : cached.isValidating;
+  const isLoading = isUndefined(cached.isLoading) ? defaultValidatingState : cached.isLoading;
+  const revalidate = import_react3.useCallback(async (revalidateOpts) => {
+    const currentFetcher = fetcherRef.current;
+    if (!key || !currentFetcher || unmountedRef.current || getConfig().isPaused()) {
+      return false;
+    }
+    let newData;
+    let startAt;
+    let loading = true;
+    const opts = revalidateOpts || {};
+    const shouldStartNewRequest = !FETCH[key] || !opts.dedupe;
+    const callbackSafeguard = () => {
+      if (IS_REACT_LEGACY) {
+        return !unmountedRef.current && key === keyRef.current && initialMountedRef.current;
+      }
+      return key === keyRef.current;
+    };
+    const finalState = {
+      isValidating: false,
+      isLoading: false
+    };
+    const finishRequestAndUpdateState = () => {
+      setCache(finalState);
+    };
+    const cleanupState = () => {
+      const requestInfo = FETCH[key];
+      if (requestInfo && requestInfo[1] === startAt) {
+        delete FETCH[key];
+      }
+    };
+    const initialState = {
+      isValidating: true
+    };
+    if (isUndefined(getCache().data)) {
+      initialState.isLoading = true;
+    }
+    try {
+      if (shouldStartNewRequest) {
+        setCache(initialState);
+        if (config.loadingTimeout && isUndefined(getCache().data)) {
+          setTimeout(() => {
+            if (loading && callbackSafeguard()) {
+              getConfig().onLoadingSlow(key, config);
+            }
+          }, config.loadingTimeout);
+        }
+        FETCH[key] = [
+          currentFetcher(fnArg),
+          getTimestamp()
+        ];
+      }
+      [newData, startAt] = FETCH[key];
+      newData = await newData;
+      if (shouldStartNewRequest) {
+        setTimeout(cleanupState, config.dedupingInterval);
+      }
+      if (!FETCH[key] || FETCH[key][1] !== startAt) {
+        if (shouldStartNewRequest) {
+          if (callbackSafeguard()) {
+            getConfig().onDiscarded(key);
+          }
+        }
+        return false;
+      }
+      finalState.error = UNDEFINED;
+      const mutationInfo = MUTATION[key];
+      if (!isUndefined(mutationInfo) && (startAt <= mutationInfo[0] || startAt <= mutationInfo[1] || mutationInfo[1] === 0)) {
+        finishRequestAndUpdateState();
+        if (shouldStartNewRequest) {
+          if (callbackSafeguard()) {
+            getConfig().onDiscarded(key);
+          }
+        }
+        return false;
+      }
+      const cacheData = getCache().data;
+      finalState.data = compare2(cacheData, newData) ? cacheData : newData;
+      if (shouldStartNewRequest) {
+        if (callbackSafeguard()) {
+          getConfig().onSuccess(newData, key, config);
+        }
+      }
+    } catch (err) {
+      cleanupState();
+      const currentConfig = getConfig();
+      const { shouldRetryOnError } = currentConfig;
+      if (!currentConfig.isPaused()) {
+        finalState.error = err;
+        if (shouldStartNewRequest && callbackSafeguard()) {
+          currentConfig.onError(err, key, currentConfig);
+          if (shouldRetryOnError === true || isFunction(shouldRetryOnError) && shouldRetryOnError(err)) {
+            if (!getConfig().revalidateOnFocus || !getConfig().revalidateOnReconnect || isActive()) {
+              currentConfig.onErrorRetry(err, key, currentConfig, (_opts) => {
+                const revalidators = EVENT_REVALIDATORS[key];
+                if (revalidators && revalidators[0]) {
+                  revalidators[0](exports_events.ERROR_REVALIDATE_EVENT, _opts);
+                }
+              }, {
+                retryCount: (opts.retryCount || 0) + 1,
+                dedupe: true
+              });
+            }
+          }
+        }
+      }
+    }
+    loading = false;
+    finishRequestAndUpdateState();
+    return true;
+  }, [
+    key,
+    cache2
+  ]);
+  const boundMutate = import_react3.useCallback((...args) => {
+    return internalMutate(cache2, keyRef.current, ...args);
+  }, []);
+  useIsomorphicLayoutEffect(() => {
+    fetcherRef.current = fetcher;
+    configRef.current = config;
+    if (!isUndefined(cachedData)) {
+      laggyDataRef.current = cachedData;
+    }
+  });
+  useIsomorphicLayoutEffect(() => {
+    if (!key)
+      return;
+    const softRevalidate = revalidate.bind(UNDEFINED, WITH_DEDUPE);
+    let nextFocusRevalidatedAt = 0;
+    if (getConfig().revalidateOnFocus) {
+      const initNow = Date.now();
+      nextFocusRevalidatedAt = initNow + getConfig().focusThrottleInterval;
+    }
+    const onRevalidate = (type, opts = {}) => {
+      if (type == exports_events.FOCUS_EVENT) {
+        const now = Date.now();
+        if (getConfig().revalidateOnFocus && now > nextFocusRevalidatedAt && isActive()) {
+          nextFocusRevalidatedAt = now + getConfig().focusThrottleInterval;
+          softRevalidate();
+        }
+      } else if (type == exports_events.RECONNECT_EVENT) {
+        if (getConfig().revalidateOnReconnect && isActive()) {
+          softRevalidate();
+        }
+      } else if (type == exports_events.MUTATE_EVENT) {
+        return revalidate();
+      } else if (type == exports_events.ERROR_REVALIDATE_EVENT) {
+        return revalidate(opts);
+      }
+      return;
+    };
+    const unsubEvents = subscribeCallback(key, EVENT_REVALIDATORS, onRevalidate);
+    unmountedRef.current = false;
+    keyRef.current = key;
+    initialMountedRef.current = true;
+    setCache({
+      _k: fnArg
+    });
+    if (shouldDoInitialRevalidation) {
+      if (!FETCH[key]) {
+        if (isUndefined(data) || IS_SERVER) {
+          softRevalidate();
+        } else {
+          rAF(softRevalidate);
+        }
+      }
+    }
+    return () => {
+      unmountedRef.current = true;
+      unsubEvents();
+    };
+  }, [
+    key
+  ]);
+  useIsomorphicLayoutEffect(() => {
+    let timer;
+    function next() {
+      const interval = isFunction(refreshInterval) ? refreshInterval(getCache().data) : refreshInterval;
+      if (interval && timer !== -1) {
+        timer = setTimeout(execute, interval);
+      }
+    }
+    function execute() {
+      if (!getCache().error && (refreshWhenHidden || getConfig().isVisible()) && (refreshWhenOffline || getConfig().isOnline())) {
+        revalidate(WITH_DEDUPE).then(next);
+      } else {
+        next();
+      }
+    }
+    next();
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+        timer = -1;
+      }
+    };
+  }, [
+    refreshInterval,
+    refreshWhenHidden,
+    refreshWhenOffline,
+    key
+  ]);
+  import_react3.useDebugValue(returnedData);
+  if (suspense && isUndefined(data) && key) {
+    if (!IS_REACT_LEGACY && IS_SERVER) {
+      throw new Error("Fallback data is required when using Suspense in SSR.");
+    }
+    fetcherRef.current = fetcher;
+    configRef.current = config;
+    unmountedRef.current = false;
+    const req = PRELOAD[key];
+    if (!isUndefined(req)) {
+      const promise = boundMutate(req);
+      use2(promise);
+    }
+    if (isUndefined(error)) {
+      const promise = revalidate(WITH_DEDUPE);
+      if (!isUndefined(returnedData)) {
+        promise.status = "fulfilled";
+        promise.value = true;
+      }
+      use2(promise);
+    } else {
+      throw error;
+    }
+  }
+  const swrResponse = {
+    mutate: boundMutate,
+    get data() {
+      stateDependencies.data = true;
+      return returnedData;
+    },
+    get error() {
+      stateDependencies.error = true;
+      return error;
+    },
+    get isValidating() {
+      stateDependencies.isValidating = true;
+      return isValidating;
+    },
+    get isLoading() {
+      stateDependencies.isLoading = true;
+      return isLoading;
+    }
+  };
+  return swrResponse;
+};
+var SWRConfig2 = OBJECT.defineProperty(SWRConfig, "defaultValue", {
+  value: defaultConfig
+});
+var useSWR = withArgs(useSWRHandler);
+
+// node_modules/swr/dist/infinite/index.mjs
+var import_react4 = __toESM(require_react(), 1);
+var import_shim2 = __toESM(require_shim(), 1);
+var noop4 = () => {};
+var UNDEFINED3 = noop4();
+var OBJECT2 = Object;
+var isUndefined2 = (v) => v === UNDEFINED3;
+var isFunction2 = (v) => typeof v == "function";
+var table3 = new WeakMap;
+var getTypeName2 = (value) => OBJECT2.prototype.toString.call(value);
+var isObjectTypeName2 = (typeName, type) => typeName === `[object ${type}]`;
+var counter2 = 0;
+var stableHash2 = (arg) => {
+  const type = typeof arg;
+  const typeName = getTypeName2(arg);
+  const isDate = isObjectTypeName2(typeName, "Date");
+  const isRegex = isObjectTypeName2(typeName, "RegExp");
+  const isPlainObject = isObjectTypeName2(typeName, "Object");
+  let result;
+  let index;
+  if (OBJECT2(arg) === arg && !isDate && !isRegex) {
+    result = table3.get(arg);
+    if (result)
+      return result;
+    result = ++counter2 + "~";
+    table3.set(arg, result);
+    if (Array.isArray(arg)) {
+      result = "@";
+      for (index = 0;index < arg.length; index++) {
+        result += stableHash2(arg[index]) + ",";
+      }
+      table3.set(arg, result);
+    }
+    if (isPlainObject) {
+      result = "#";
+      const keys = OBJECT2.keys(arg).sort();
+      while (!isUndefined2(index = keys.pop())) {
+        if (!isUndefined2(arg[index])) {
+          result += index + ":" + stableHash2(arg[index]) + ",";
+        }
+      }
+      table3.set(arg, result);
+    }
+  } else {
+    result = isDate ? arg.toJSON() : type == "symbol" ? arg.toString() : type == "string" ? JSON.stringify(arg) : "" + arg;
+  }
+  return result;
+};
+var serialize2 = (key) => {
+  if (isFunction2(key)) {
+    try {
+      key = key();
+    } catch (err) {
+      key = "";
+    }
+  }
+  const args = key;
+  key = typeof key == "string" ? key : (Array.isArray(key) ? key.length : key) ? stableHash2(key) : "";
+  return [
+    key,
+    args
+  ];
+};
+var getFirstPageKey = (getKey) => {
+  return serialize2(getKey ? getKey(0, null) : null)[0];
+};
+var EMPTY_PROMISE = Promise.resolve();
+var infinite = (useSWRNext) => (getKey, fn, config) => {
+  const didMountRef = import_react4.useRef(false);
+  const { cache: cache$1, initialSize = 1, revalidateAll = false, persistSize = false, revalidateFirstPage = true, revalidateOnMount = false, parallel = false } = config;
+  const [, , , PRELOAD] = SWRGlobalState.get(cache);
+  let infiniteKey;
+  try {
+    infiniteKey = getFirstPageKey(getKey);
+    if (infiniteKey)
+      infiniteKey = INFINITE_PREFIX + infiniteKey;
+  } catch (err) {}
+  const [get, set, subscribeCache] = createCacheHelper(cache$1, infiniteKey);
+  const getSnapshot = import_react4.useCallback(() => {
+    const size = isUndefined(get()._l) ? initialSize : get()._l;
+    return size;
+  }, [
+    cache$1,
+    infiniteKey,
+    initialSize
+  ]);
+  import_shim2.useSyncExternalStore(import_react4.useCallback((callback) => {
+    if (infiniteKey)
+      return subscribeCache(infiniteKey, () => {
+        callback();
+      });
+    return () => {};
+  }, [
+    cache$1,
+    infiniteKey
+  ]), getSnapshot, getSnapshot);
+  const resolvePageSize = import_react4.useCallback(() => {
+    const cachedPageSize = get()._l;
+    return isUndefined(cachedPageSize) ? initialSize : cachedPageSize;
+  }, [
+    infiniteKey,
+    initialSize
+  ]);
+  const lastPageSizeRef = import_react4.useRef(resolvePageSize());
+  useIsomorphicLayoutEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    if (infiniteKey) {
+      set({
+        _l: persistSize ? lastPageSizeRef.current : resolvePageSize()
+      });
+    }
+  }, [
+    infiniteKey,
+    cache$1
+  ]);
+  const shouldRevalidateOnMount = revalidateOnMount && !didMountRef.current;
+  const swr = useSWRNext(infiniteKey, async (key) => {
+    const forceRevalidateAll = get()._i;
+    const shouldRevalidatePage = get()._r;
+    set({
+      _r: UNDEFINED
+    });
+    const data = [];
+    const pageSize = resolvePageSize();
+    const [getCache] = createCacheHelper(cache$1, key);
+    const cacheData = getCache().data;
+    const revalidators = [];
+    let previousPageData = null;
+    for (let i = 0;i < pageSize; ++i) {
+      const [pageKey, pageArg] = serialize(getKey(i, parallel ? null : previousPageData));
+      if (!pageKey) {
+        break;
+      }
+      const [getSWRCache, setSWRCache] = createCacheHelper(cache$1, pageKey);
+      let pageData = getSWRCache().data;
+      const shouldFetchPage = revalidateAll || forceRevalidateAll || isUndefined(pageData) || revalidateFirstPage && !i && !isUndefined(cacheData) || shouldRevalidateOnMount || cacheData && !isUndefined(cacheData[i]) && !config.compare(cacheData[i], pageData);
+      if (fn && (typeof shouldRevalidatePage === "function" ? shouldRevalidatePage(pageData, pageArg) : shouldFetchPage)) {
+        const revalidate = async () => {
+          const hasPreloadedRequest = pageKey in PRELOAD;
+          if (!hasPreloadedRequest) {
+            pageData = await fn(pageArg);
+          } else {
+            const req = PRELOAD[pageKey];
+            delete PRELOAD[pageKey];
+            pageData = await req;
+          }
+          setSWRCache({
+            data: pageData,
+            _k: pageArg
+          });
+          data[i] = pageData;
+        };
+        if (parallel) {
+          revalidators.push(revalidate);
+        } else {
+          await revalidate();
+        }
+      } else {
+        data[i] = pageData;
+      }
+      if (!parallel) {
+        previousPageData = pageData;
+      }
+    }
+    if (parallel) {
+      await Promise.all(revalidators.map((r) => r()));
+    }
+    set({
+      _i: UNDEFINED
+    });
+    return data;
+  }, config);
+  const mutate2 = import_react4.useCallback(function(data, opts) {
+    const options = typeof opts === "boolean" ? {
+      revalidate: opts
+    } : opts || {};
+    const shouldRevalidate = options.revalidate !== false;
+    if (!infiniteKey)
+      return EMPTY_PROMISE;
+    if (shouldRevalidate) {
+      if (!isUndefined(data)) {
+        set({
+          _i: false,
+          _r: options.revalidate
+        });
+      } else {
+        set({
+          _i: true,
+          _r: options.revalidate
+        });
+      }
+    }
+    return arguments.length ? swr.mutate(data, {
+      ...options,
+      revalidate: shouldRevalidate
+    }) : swr.mutate();
+  }, [
+    infiniteKey,
+    cache$1
+  ]);
+  const setSize = import_react4.useCallback((arg) => {
+    if (!infiniteKey)
+      return EMPTY_PROMISE;
+    const [, changeSize] = createCacheHelper(cache$1, infiniteKey);
+    let size;
+    if (isFunction(arg)) {
+      size = arg(resolvePageSize());
+    } else if (typeof arg == "number") {
+      size = arg;
+    }
+    if (typeof size != "number")
+      return EMPTY_PROMISE;
+    changeSize({
+      _l: size
+    });
+    lastPageSizeRef.current = size;
+    const data = [];
+    const [getInfiniteCache] = createCacheHelper(cache$1, infiniteKey);
+    let previousPageData = null;
+    for (let i = 0;i < size; ++i) {
+      const [pageKey] = serialize(getKey(i, previousPageData));
+      const [getCache] = createCacheHelper(cache$1, pageKey);
+      const pageData = pageKey ? getCache().data : UNDEFINED;
+      if (isUndefined(pageData)) {
+        return mutate2(getInfiniteCache().data);
+      }
+      data.push(pageData);
+      previousPageData = pageData;
+    }
+    return mutate2(data);
+  }, [
+    infiniteKey,
+    cache$1,
+    mutate2,
+    resolvePageSize
+  ]);
+  return {
+    size: resolvePageSize(),
+    setSize,
+    mutate: mutate2,
+    get data() {
+      return swr.data;
+    },
+    get error() {
+      return swr.error;
+    },
+    get isValidating() {
+      return swr.isValidating;
+    },
+    get isLoading() {
+      return swr.isLoading;
+    }
+  };
+};
+var useSWRInfinite = withMiddleware(useSWR, infinite);
+
+// node_modules/dequal/dist/index.mjs
+var has2 = Object.prototype.hasOwnProperty;
+function find(iter, tar, key) {
+  for (key of iter.keys()) {
+    if (dequal2(key, tar))
+      return key;
+  }
+}
+function dequal2(foo, bar) {
+  var ctor, len, tmp;
+  if (foo === bar)
+    return true;
+  if (foo && bar && (ctor = foo.constructor) === bar.constructor) {
+    if (ctor === Date)
+      return foo.getTime() === bar.getTime();
+    if (ctor === RegExp)
+      return foo.toString() === bar.toString();
+    if (ctor === Array) {
+      if ((len = foo.length) === bar.length) {
+        while (len-- && dequal2(foo[len], bar[len]))
+          ;
+      }
+      return len === -1;
+    }
+    if (ctor === Set) {
+      if (foo.size !== bar.size) {
+        return false;
+      }
+      for (len of foo) {
+        tmp = len;
+        if (tmp && typeof tmp === "object") {
+          tmp = find(bar, tmp);
+          if (!tmp)
+            return false;
+        }
+        if (!bar.has(tmp))
+          return false;
+      }
+      return true;
+    }
+    if (ctor === Map) {
+      if (foo.size !== bar.size) {
+        return false;
+      }
+      for (len of foo) {
+        tmp = len[0];
+        if (tmp && typeof tmp === "object") {
+          tmp = find(bar, tmp);
+          if (!tmp)
+            return false;
+        }
+        if (!dequal2(len[1], bar.get(tmp))) {
+          return false;
+        }
+      }
+      return true;
+    }
+    if (ctor === ArrayBuffer) {
+      foo = new Uint8Array(foo);
+      bar = new Uint8Array(bar);
+    } else if (ctor === DataView) {
+      if ((len = foo.byteLength) === bar.byteLength) {
+        while (len-- && foo.getInt8(len) === bar.getInt8(len))
+          ;
+      }
+      return len === -1;
+    }
+    if (ArrayBuffer.isView(foo)) {
+      if ((len = foo.byteLength) === bar.byteLength) {
+        while (len-- && foo[len] === bar[len])
+          ;
+      }
+      return len === -1;
+    }
+    if (!ctor || typeof foo === "object") {
+      len = 0;
+      for (ctor in foo) {
+        if (has2.call(foo, ctor) && ++len && !has2.call(bar, ctor))
+          return false;
+        if (!(ctor in bar) || !dequal2(foo[ctor], bar[ctor]))
+          return false;
+      }
+      return Object.keys(bar).length === len;
+    }
+  }
+  return foo !== foo && bar !== bar;
+}
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/react/index.mjs
+function assertContextExists(contextVal, msgOrCtx) {
+  if (!contextVal)
+    throw typeof msgOrCtx === "string" ? new Error(msgOrCtx) : /* @__PURE__ */ new Error(`${msgOrCtx.displayName} not found`);
+}
+var createContextAndHook = (displayName, options) => {
+  const { assertCtxFn = assertContextExists } = options || {};
+  const Ctx = import_react5.default.createContext(undefined);
+  Ctx.displayName = displayName;
+  const useCtx = () => {
+    const ctx = import_react5.default.useContext(Ctx);
+    assertCtxFn(ctx, `${displayName} not found`);
+    return ctx.value;
+  };
+  const useCtxWithoutGuarantee = () => {
+    const ctx = import_react5.default.useContext(Ctx);
+    return ctx ? ctx.value : {};
+  };
+  return [
+    Ctx,
+    useCtx,
+    useCtxWithoutGuarantee
+  ];
+};
+function SWRConfigCompat({ swrConfig, children }) {
+  return /* @__PURE__ */ import_react5.default.createElement(SWRConfig2, { value: swrConfig }, children);
+}
+var [ClerkInstanceContext, useClerkInstanceContext] = createContextAndHook("ClerkInstanceContext");
+var [UserContext, useUserContext] = createContextAndHook("UserContext");
+var [ClientContext, useClientContext] = createContextAndHook("ClientContext");
+var [SessionContext, useSessionContext] = createContextAndHook("SessionContext");
+var OptionsContext = import_react5.default.createContext({});
+var [CheckoutContext, useCheckoutContext] = createContextAndHook("CheckoutContext");
+var __experimental_CheckoutProvider = ({ children, ...rest }) => {
+  return /* @__PURE__ */ import_react5.default.createElement(CheckoutContext.Provider, { value: { value: rest } }, children);
+};
+var [OrganizationContextInternal, useOrganizationContext] = createContextAndHook("OrganizationContext");
+var OrganizationProvider = ({ children, organization, swrConfig }) => {
+  return /* @__PURE__ */ import_react5.default.createElement(SWRConfigCompat, { swrConfig }, /* @__PURE__ */ import_react5.default.createElement(OrganizationContextInternal.Provider, { value: { value: { organization } } }, children));
+};
+function useAssertWrappedByClerkProvider(displayNameOrFn) {
+  if (!import_react5.default.useContext(ClerkInstanceContext)) {
+    if (typeof displayNameOrFn === "function") {
+      displayNameOrFn();
+      return;
+    }
+    throw new Error(`${displayNameOrFn} can only be used within the <ClerkProvider /> component.
+
+Possible fixes:
+1. Ensure that the <ClerkProvider /> is correctly wrapping your application where this component is used.
+2. Check for multiple versions of the \`@clerk/shared\` package in your project. Use a tool like \`npm ls @clerk/shared\` to identify multiple versions, and update your dependencies to only rely on one.
+
+Learn more: https://clerk.com/docs/components/clerk-provider`.trim());
+  }
+}
+var USER_MEMBERSHIPS_KEY = "userMemberships";
+var USER_INVITATIONS_KEY = "userInvitations";
+var USER_SUGGESTIONS_KEY = "userSuggestions";
+var DOMAINS_KEY = "domains";
+var MEMBERSHIP_REQUESTS_KEY = "membershipRequests";
+var MEMBERSHIPS_KEY = "memberships";
+var INVITATIONS_KEY = "invitations";
+var API_KEYS_KEY = "apiKeys";
+var ORGANIZATION_CREATION_DEFAULTS_KEY = "organizationCreationDefaults";
+var PLANS_KEY = "billing-plans";
+var SUBSCRIPTION_KEY = "billing-subscription";
+var PAYMENT_METHODS_KEY = "billing-payment-methods";
+var PAYMENT_ATTEMPTS_KEY = "billing-payment-attempts";
+var STATEMENTS_KEY = "billing-statements";
+var STABLE_KEYS = {
+  USER_MEMBERSHIPS_KEY,
+  USER_INVITATIONS_KEY,
+  USER_SUGGESTIONS_KEY,
+  DOMAINS_KEY,
+  MEMBERSHIP_REQUESTS_KEY,
+  MEMBERSHIPS_KEY,
+  INVITATIONS_KEY,
+  PLANS_KEY,
+  SUBSCRIPTION_KEY,
+  PAYMENT_METHODS_KEY,
+  PAYMENT_ATTEMPTS_KEY,
+  STATEMENTS_KEY,
+  API_KEYS_KEY,
+  ORGANIZATION_CREATION_DEFAULTS_KEY
+};
+function createCacheKeys(params) {
+  return {
+    queryKey: [
+      params.stablePrefix,
+      params.authenticated,
+      params.tracked,
+      params.untracked
+    ],
+    invalidationKey: [
+      params.stablePrefix,
+      params.authenticated,
+      params.tracked
+    ],
+    stableKey: params.stablePrefix,
+    authenticated: params.authenticated
+  };
+}
+function toSWRQuery(keys) {
+  const { queryKey } = keys;
+  return {
+    type: queryKey[0],
+    ...queryKey[2],
+    ...queryKey[3].args
+  };
+}
+var useWithSafeValues = (params, defaultValues) => {
+  const shouldUseDefaults = typeof params === "boolean" && params;
+  const initialPageRef = import_react5.useRef(shouldUseDefaults ? defaultValues.initialPage : params?.initialPage ?? defaultValues.initialPage);
+  const pageSizeRef = import_react5.useRef(shouldUseDefaults ? defaultValues.pageSize : params?.pageSize ?? defaultValues.pageSize);
+  const newObj = {};
+  for (const key of Object.keys(defaultValues))
+    newObj[key] = shouldUseDefaults ? defaultValues[key] : params?.[key] ?? defaultValues[key];
+  return {
+    ...newObj,
+    initialPage: initialPageRef.current,
+    pageSize: pageSizeRef.current
+  };
+};
+function getDifferentKeys(obj1, obj2) {
+  const keysSet = new Set(Object.keys(obj2));
+  const differentKeysObject = {};
+  for (const key1 of Object.keys(obj1))
+    if (!keysSet.has(key1))
+      differentKeysObject[key1] = obj1[key1];
+  return differentKeysObject;
+}
+function usePreviousValue(value) {
+  const currentRef = import_react5.useRef(value);
+  const previousRef = import_react5.useRef(null);
+  if (currentRef.current !== value) {
+    previousRef.current = currentRef.current;
+    currentRef.current = value;
+  }
+  return previousRef.current;
+}
+var cachingSWROptions = {
+  dedupingInterval: 1000 * 60,
+  focusThrottleInterval: 1000 * 60 * 2
+};
+var cachingSWRInfiniteOptions = {
+  ...cachingSWROptions,
+  revalidateFirstPage: false
+};
+var usePagesOrInfinite = (params) => {
+  const { fetcher, config, keys } = params;
+  const [paginatedPage, setPaginatedPage] = import_react5.useState(config.initialPage ?? 1);
+  const initialPageRef = import_react5.useRef(config.initialPage ?? 1);
+  const pageSizeRef = import_react5.useRef(config.pageSize ?? 10);
+  const enabled = config.enabled ?? true;
+  const cacheMode = config.__experimental_mode === "cache";
+  const triggerInfinite = config.infinite ?? false;
+  const keepPreviousData = config.keepPreviousData ?? false;
+  const isSignedIn = config.isSignedIn;
+  const pagesCacheKey = {
+    ...toSWRQuery(keys),
+    initialPage: paginatedPage,
+    pageSize: pageSizeRef.current
+  };
+  const previousIsSignedIn = usePreviousValue(isSignedIn);
+  const shouldFetch = !triggerInfinite && enabled && (!cacheMode ? !!fetcher : true);
+  const { data: swrData, isValidating: swrIsValidating, isLoading: swrIsLoading, error: swrError, mutate: swrMutate } = useSWR(typeof isSignedIn === "boolean" ? previousIsSignedIn === true && isSignedIn === false ? pagesCacheKey : isSignedIn ? shouldFetch ? pagesCacheKey : null : null : shouldFetch ? pagesCacheKey : null, !cacheMode && !!fetcher ? (cacheKeyParams) => {
+    if (isSignedIn === false || shouldFetch === false)
+      return null;
+    return fetcher(getDifferentKeys(cacheKeyParams, {
+      type: keys.queryKey[0],
+      ...keys.queryKey[2]
+    }));
+  } : null, {
+    keepPreviousData,
+    ...cachingSWROptions
+  });
+  const { data: swrInfiniteData, isLoading: swrInfiniteIsLoading, isValidating: swrInfiniteIsValidating, error: swrInfiniteError, size, setSize, mutate: swrInfiniteMutate } = useSWRInfinite((pageIndex) => {
+    if (!triggerInfinite || !enabled || isSignedIn === false)
+      return null;
+    return {
+      ...toSWRQuery(keys),
+      initialPage: initialPageRef.current + pageIndex,
+      pageSize: pageSizeRef.current
+    };
+  }, (cacheKeyParams) => {
+    const requestParams = getDifferentKeys(cacheKeyParams, {
+      type: keys.queryKey[0],
+      ...keys.queryKey[2]
+    });
+    return fetcher?.(requestParams);
+  }, cachingSWRInfiniteOptions);
+  const page = import_react5.useMemo(() => {
+    if (triggerInfinite)
+      return size;
+    return paginatedPage;
+  }, [
+    triggerInfinite,
+    size,
+    paginatedPage
+  ]);
+  const fetchPage = import_react5.useCallback((numberOrgFn) => {
+    if (triggerInfinite) {
+      setSize(numberOrgFn);
+      return;
+    }
+    return setPaginatedPage(numberOrgFn);
+  }, [setSize, triggerInfinite]);
+  const data = import_react5.useMemo(() => {
+    if (triggerInfinite)
+      return swrInfiniteData?.map((a) => a?.data).flat() ?? [];
+    return swrData?.data ?? [];
+  }, [
+    triggerInfinite,
+    swrData,
+    swrInfiniteData
+  ]);
+  const count = import_react5.useMemo(() => {
+    if (triggerInfinite)
+      return swrInfiniteData?.[swrInfiniteData?.length - 1]?.total_count || 0;
+    return swrData?.total_count ?? 0;
+  }, [
+    triggerInfinite,
+    swrData,
+    swrInfiniteData
+  ]);
+  const isLoading = triggerInfinite ? swrInfiniteIsLoading : swrIsLoading;
+  const isFetching = triggerInfinite ? swrInfiniteIsValidating : swrIsValidating;
+  const error = (triggerInfinite ? swrInfiniteError : swrError) ?? null;
+  const isError = !!error;
+  const fetchNext = import_react5.useCallback(() => {
+    fetchPage((n) => Math.max(0, n + 1));
+  }, [fetchPage]);
+  const fetchPrevious = import_react5.useCallback(() => {
+    fetchPage((n) => Math.max(0, n - 1));
+  }, [fetchPage]);
+  const offsetCount = (initialPageRef.current - 1) * pageSizeRef.current;
+  return {
+    data,
+    count,
+    error,
+    isLoading,
+    isFetching,
+    isError,
+    page,
+    pageCount: Math.ceil((count - offsetCount) / pageSizeRef.current),
+    fetchPage,
+    fetchNext,
+    fetchPrevious,
+    hasNextPage: count - offsetCount * pageSizeRef.current > page * pageSizeRef.current,
+    hasPreviousPage: (page - 1) * pageSizeRef.current > offsetCount * pageSizeRef.current,
+    revalidate: triggerInfinite ? () => swrInfiniteMutate() : () => swrMutate(),
+    setData: triggerInfinite ? (value) => swrInfiniteMutate(value, { revalidate: false }) : (value) => swrMutate(value, { revalidate: false })
+  };
+};
+var useSafeLayoutEffect = typeof window !== "undefined" ? import_react5.default.useLayoutEffect : import_react5.default.useEffect;
+var isDeeplyEqual = dequal2;
+function useBillingHookEnabled(params) {
+  const clerk = useClerkInstanceContext();
+  const enabledFromParam = params?.enabled ?? true;
+  const environment = clerk.__unstable__environment;
+  const user = useUserContext();
+  const { organization } = useOrganizationContext();
+  const isOrganization = params?.for === "organization";
+  const billingEnabled = isOrganization ? environment?.commerceSettings.billing.organization.enabled : environment?.commerceSettings.billing.user.enabled;
+  const requireUserAndOrganizationWhenAuthenticated = params?.authenticated ?? true ? (isOrganization ? Boolean(organization?.id) : true) && Boolean(user?.id) : true;
+  return billingEnabled && enabledFromParam && clerk.loaded && requireUserAndOrganizationWhenAuthenticated;
+}
+function createBillingPaginatedHook({ hookName: hookName$4, resourceType, useFetcher, options }) {
+  return function useBillingHook(params) {
+    const { for: _for, enabled: externalEnabled, ...paginationParams } = params || {};
+    const safeFor = _for || "user";
+    useAssertWrappedByClerkProvider(hookName$4);
+    const fetchFn = useFetcher(safeFor);
+    const safeValues = useWithSafeValues(paginationParams, {
+      initialPage: 1,
+      pageSize: 10,
+      keepPreviousData: false,
+      infinite: false,
+      __experimental_mode: undefined
+    });
+    const clerk = useClerkInstanceContext();
+    const user = useUserContext();
+    const { organization } = useOrganizationContext();
+    clerk.telemetry?.record(eventMethodCalled(hookName$4));
+    const isForOrganization = safeFor === "organization";
+    const billingEnabled = useBillingHookEnabled({
+      for: safeFor,
+      enabled: externalEnabled,
+      authenticated: !options?.unauthenticated
+    });
+    const hookParams = typeof paginationParams === "undefined" ? undefined : {
+      initialPage: safeValues.initialPage,
+      pageSize: safeValues.pageSize,
+      ...options?.unauthenticated ? {} : isForOrganization ? { orgId: organization?.id } : {}
+    };
+    const isEnabled = !!hookParams && clerk.loaded && !!billingEnabled;
+    return usePagesOrInfinite({
+      fetcher: fetchFn,
+      config: {
+        keepPreviousData: safeValues.keepPreviousData,
+        infinite: safeValues.infinite,
+        enabled: isEnabled,
+        ...options?.unauthenticated ? {} : { isSignedIn: user !== null },
+        __experimental_mode: safeValues.__experimental_mode,
+        initialPage: safeValues.initialPage,
+        pageSize: safeValues.pageSize
+      },
+      keys: createCacheKeys({
+        stablePrefix: resourceType,
+        authenticated: !options?.unauthenticated,
+        tracked: options?.unauthenticated ? { for: safeFor } : {
+          userId: user?.id,
+          ...isForOrganization ? { ["_orgId"]: organization?.id } : {}
+        },
+        untracked: { args: hookParams }
+      })
+    });
+  };
+}
+var useStatements = createBillingPaginatedHook({
+  hookName: "useStatements",
+  resourceType: STABLE_KEYS.STATEMENTS_KEY,
+  useFetcher: () => {
+    const clerk = useClerkInstanceContext();
+    if (clerk.loaded)
+      return clerk.billing.getStatements;
+  }
+});
+var usePaymentAttempts = createBillingPaginatedHook({
+  hookName: "usePaymentAttempts",
+  resourceType: STABLE_KEYS.PAYMENT_ATTEMPTS_KEY,
+  useFetcher: () => {
+    const clerk = useClerkInstanceContext();
+    if (clerk.loaded)
+      return clerk.billing.getPaymentAttempts;
+  }
+});
+var usePaymentMethods = createBillingPaginatedHook({
+  hookName: "usePaymentMethods",
+  resourceType: STABLE_KEYS.PAYMENT_METHODS_KEY,
+  useFetcher: (resource) => {
+    const { organization } = useOrganizationContext();
+    const user = useUserContext();
+    if (resource === "organization")
+      return organization?.getPaymentMethods;
+    return user?.getPaymentMethods;
+  }
+});
+var usePlans = createBillingPaginatedHook({
+  hookName: "usePlans",
+  resourceType: STABLE_KEYS.PLANS_KEY,
+  useFetcher: (_for) => {
+    const clerk = useClerkInstanceContext();
+    if (!clerk.loaded)
+      return;
+    return (params) => clerk.billing.getPlans({
+      ...params,
+      for: _for
+    });
+  },
+  options: { unauthenticated: true }
+});
+var usePrevious = (value) => {
+  const ref = import_react5.useRef(value);
+  import_react5.useEffect(() => {
+    ref.current = value;
+  }, [value]);
+  return ref.current;
+};
+var useAttachEvent = (element, event, cb) => {
+  const cbDefined = !!cb;
+  const cbRef = import_react5.useRef(cb);
+  import_react5.useEffect(() => {
+    cbRef.current = cb;
+  }, [cb]);
+  import_react5.useEffect(() => {
+    if (!cbDefined || !element)
+      return () => {};
+    const decoratedCb = (...args) => {
+      if (cbRef.current)
+        cbRef.current(...args);
+    };
+    element.on(event, decoratedCb);
+    return () => {
+      element.off(event, decoratedCb);
+    };
+  }, [
+    cbDefined,
+    event,
+    element,
+    cbRef
+  ]);
+};
+var ElementsContext = import_react5.default.createContext(null);
+ElementsContext.displayName = "ElementsContext";
+var parseElementsContext = (ctx, useCase) => {
+  if (!ctx)
+    throw new Error(`Could not find Elements context; You need to wrap the part of your app that ${useCase} in an <Elements> provider.`);
+  return ctx;
+};
+var isUnknownObject = (raw) => {
+  return raw !== null && typeof raw === "object";
+};
+var extractAllowedOptionsUpdates = (options, prevOptions, immutableKeys) => {
+  if (!isUnknownObject(options))
+    return null;
+  return Object.keys(options).reduce((newOptions, key) => {
+    const isUpdated = !isUnknownObject(prevOptions) || !isEqual(options[key], prevOptions[key]);
+    if (immutableKeys.includes(key)) {
+      if (isUpdated)
+        console.warn(`Unsupported prop change: options.${key} is not a mutable property.`);
+      return newOptions;
+    }
+    if (!isUpdated)
+      return newOptions;
+    return {
+      ...newOptions || {},
+      [key]: options[key]
+    };
+  }, null);
+};
+var PLAIN_OBJECT_STR = "[object Object]";
+var isEqual = (left, right) => {
+  if (!isUnknownObject(left) || !isUnknownObject(right))
+    return left === right;
+  const leftArray = Array.isArray(left);
+  if (leftArray !== Array.isArray(right))
+    return false;
+  const leftPlainObject = Object.prototype.toString.call(left) === PLAIN_OBJECT_STR;
+  if (leftPlainObject !== (Object.prototype.toString.call(right) === PLAIN_OBJECT_STR))
+    return false;
+  if (!leftPlainObject && !leftArray)
+    return left === right;
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+  if (leftKeys.length !== rightKeys.length)
+    return false;
+  const keySet = {};
+  for (let i = 0;i < leftKeys.length; i += 1)
+    keySet[leftKeys[i]] = true;
+  for (let i = 0;i < rightKeys.length; i += 1)
+    keySet[rightKeys[i]] = true;
+  const allKeys = Object.keys(keySet);
+  if (allKeys.length !== leftKeys.length)
+    return false;
+  const l = left;
+  const r = right;
+  const pred = (key) => {
+    return isEqual(l[key], r[key]);
+  };
+  return allKeys.every(pred);
+};
+var useElementsOrCheckoutSdkContextWithUseCase = (useCaseString) => {
+  return parseElementsContext(import_react5.default.useContext(ElementsContext), useCaseString);
+};
+var capitalized = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+var createElementComponent = (type, isServer) => {
+  const displayName = `${capitalized(type)}Element`;
+  const ClientElement = ({ id, className, fallback, options = {}, onBlur, onFocus, onReady, onChange, onEscape, onClick, onLoadError, onLoaderStart, onNetworksChange, onConfirm, onCancel, onShippingAddressChange, onShippingRateChange }) => {
+    const ctx = useElementsOrCheckoutSdkContextWithUseCase(`mounts <${displayName}>`);
+    const elements = "elements" in ctx ? ctx.elements : null;
+    const [element, setElement] = import_react5.default.useState(null);
+    const elementRef = import_react5.default.useRef(null);
+    const domNode = import_react5.default.useRef(null);
+    const [isReady, setReady] = import_react5.useState(false);
+    useAttachEvent(element, "blur", onBlur);
+    useAttachEvent(element, "focus", onFocus);
+    useAttachEvent(element, "escape", onEscape);
+    useAttachEvent(element, "click", onClick);
+    useAttachEvent(element, "loaderror", onLoadError);
+    useAttachEvent(element, "loaderstart", onLoaderStart);
+    useAttachEvent(element, "networkschange", onNetworksChange);
+    useAttachEvent(element, "confirm", onConfirm);
+    useAttachEvent(element, "cancel", onCancel);
+    useAttachEvent(element, "shippingaddresschange", onShippingAddressChange);
+    useAttachEvent(element, "shippingratechange", onShippingRateChange);
+    useAttachEvent(element, "change", onChange);
+    let readyCallback;
+    if (onReady)
+      readyCallback = () => {
+        setReady(true);
+        onReady(element);
+      };
+    useAttachEvent(element, "ready", readyCallback);
+    import_react5.default.useLayoutEffect(() => {
+      if (elementRef.current === null && domNode.current !== null && elements) {
+        let newElement = null;
+        if (elements)
+          newElement = elements.create(type, options);
+        elementRef.current = newElement;
+        setElement(newElement);
+        if (newElement)
+          newElement.mount(domNode.current);
+      }
+    }, [elements, options]);
+    const prevOptions = usePrevious(options);
+    import_react5.default.useEffect(() => {
+      if (!elementRef.current)
+        return;
+      const updates = extractAllowedOptionsUpdates(options, prevOptions, ["paymentRequest"]);
+      if (updates && "update" in elementRef.current)
+        elementRef.current.update(updates);
+    }, [options, prevOptions]);
+    import_react5.default.useLayoutEffect(() => {
+      return () => {
+        if (elementRef.current && typeof elementRef.current.destroy === "function")
+          try {
+            elementRef.current.destroy();
+            elementRef.current = null;
+          } catch {}
+      };
+    }, []);
+    return /* @__PURE__ */ import_react5.default.createElement(import_react5.default.Fragment, null, !isReady && fallback, /* @__PURE__ */ import_react5.default.createElement("div", {
+      id,
+      style: {
+        height: isReady ? "unset" : "0px",
+        visibility: isReady ? "visible" : "hidden"
+      },
+      className,
+      ref: domNode
+    }));
+  };
+  const ServerElement = (props) => {
+    useElementsOrCheckoutSdkContextWithUseCase(`mounts <${displayName}>`);
+    const { id, className } = props;
+    return /* @__PURE__ */ import_react5.default.createElement("div", {
+      id,
+      className
+    });
+  };
+  const Element = isServer ? ServerElement : ClientElement;
+  Element.displayName = displayName;
+  Element.__elementType = type;
+  return Element;
+};
+var PaymentElement$1 = createElementComponent("payment", typeof window === "undefined");
+var [PaymentElementContext, usePaymentElementContext] = createContextAndHook("PaymentElementContext");
+var [StripeUtilsContext, useStripeUtilsContext] = createContextAndHook("StripeUtilsContext");
+
+// node_modules/@clerk/clerk-react/dist/chunk-3EQWAEPK.mjs
+var import_react10 = __toESM(require_react(), 1);
+var import_react14 = __toESM(require_react(), 1);
+var errorThrower = buildErrorThrower({ packageName: "@clerk/clerk-react" });
+function setErrorThrowerOptions(options) {
+  errorThrower.setMessages(options).setPackageName(options);
+}
+var [AuthContext, useAuthContext] = createContextAndHook("AuthContext");
+var IsomorphicClerkContext = ClerkInstanceContext;
+var useIsomorphicClerkContext = useClerkInstanceContext;
+var multipleClerkProvidersError = "You've added multiple <ClerkProvider> components in your React component tree. Wrap your components in a single <ClerkProvider>.";
+var multipleChildrenInButtonComponent = (name) => `You've passed multiple children components to <${name}/>. You can only pass a single child component or text.`;
+var invalidStateError = "Invalid state. Feel free to submit a bug or reach out to support here: https://clerk.com/support";
+var unsupportedNonBrowserDomainOrProxyUrlFunction = "Unsupported usage of isSatellite, domain or proxyUrl. The usage of isSatellite, domain or proxyUrl as function is not supported in non-browser environments.";
+var userProfilePageRenderedError = "<UserProfile.Page /> component needs to be a direct child of `<UserProfile />` or `<UserButton />`.";
+var userProfileLinkRenderedError = "<UserProfile.Link /> component needs to be a direct child of `<UserProfile />` or `<UserButton />`.";
+var organizationProfilePageRenderedError = "<OrganizationProfile.Page /> component needs to be a direct child of `<OrganizationProfile />` or `<OrganizationSwitcher />`.";
+var organizationProfileLinkRenderedError = "<OrganizationProfile.Link /> component needs to be a direct child of `<OrganizationProfile />` or `<OrganizationSwitcher />`.";
+var customPagesIgnoredComponent = (componentName) => `<${componentName} /> can only accept <${componentName}.Page /> and <${componentName}.Link /> as its children. Any other provided component will be ignored. Additionally, please ensure that the component is rendered in a client component.`;
+var customPageWrongProps = (componentName) => `Missing props. <${componentName}.Page /> component requires the following props: url, label, labelIcon, alongside with children to be rendered inside the page.`;
+var customLinkWrongProps = (componentName) => `Missing props. <${componentName}.Link /> component requires the following props: url, label and labelIcon.`;
+var userButtonIgnoredComponent = `<UserButton /> can only accept <UserButton.UserProfilePage />, <UserButton.UserProfileLink /> and <UserButton.MenuItems /> as its children. Any other provided component will be ignored. Additionally, please ensure that the component is rendered in a client component.`;
+var customMenuItemsIgnoredComponent = "<UserButton.MenuItems /> component can only accept <UserButton.Action /> and <UserButton.Link /> as its children. Any other provided component will be ignored. Additionally, please ensure that the component is rendered in a client component.";
+var userButtonMenuItemsRenderedError = "<UserButton.MenuItems /> component needs to be a direct child of `<UserButton />`.";
+var userButtonMenuActionRenderedError = "<UserButton.Action /> component needs to be a direct child of `<UserButton.MenuItems />`.";
+var userButtonMenuLinkRenderedError = "<UserButton.Link /> component needs to be a direct child of `<UserButton.MenuItems />`.";
+var userButtonMenuItemLinkWrongProps = "Missing props. <UserButton.Link /> component requires the following props: href, label and labelIcon.";
+var userButtonMenuItemsActionWrongsProps = "Missing props. <UserButton.Action /> component requires the following props: label.";
+var useAssertWrappedByClerkProvider2 = (source) => {
+  useAssertWrappedByClerkProvider(() => {
+    errorThrower.throwMissingClerkProviderError({ source });
+  });
+};
+var clerkLoaded = (isomorphicClerk) => {
+  return new Promise((resolve) => {
+    const handler = (status) => {
+      if (["ready", "degraded"].includes(status)) {
+        resolve();
+        isomorphicClerk.off("status", handler);
+      }
+    };
+    isomorphicClerk.on("status", handler, { notify: true });
+  });
+};
+var createGetToken = (isomorphicClerk) => {
+  return async (options) => {
+    await clerkLoaded(isomorphicClerk);
+    if (!isomorphicClerk.session) {
+      return null;
+    }
+    return isomorphicClerk.session.getToken(options);
+  };
+};
+var createSignOut = (isomorphicClerk) => {
+  return async (...args) => {
+    await clerkLoaded(isomorphicClerk);
+    return isomorphicClerk.signOut(...args);
+  };
+};
+var useAuth = (initialAuthStateOrOptions = {}) => {
+  var _a;
+  useAssertWrappedByClerkProvider2("useAuth");
+  const { treatPendingAsSignedOut, ...rest } = initialAuthStateOrOptions != null ? initialAuthStateOrOptions : {};
+  const initialAuthState = rest;
+  const authContextFromHook = useAuthContext();
+  let authContext = authContextFromHook;
+  if (authContext.sessionId === undefined && authContext.userId === undefined) {
+    authContext = initialAuthState != null ? initialAuthState : {};
+  }
+  const isomorphicClerk = useIsomorphicClerkContext();
+  const getToken = import_react6.useCallback(createGetToken(isomorphicClerk), [isomorphicClerk]);
+  const signOut = import_react6.useCallback(createSignOut(isomorphicClerk), [isomorphicClerk]);
+  (_a = isomorphicClerk.telemetry) == null || _a.record(eventMethodCalled("useAuth", { treatPendingAsSignedOut }));
+  return useDerivedAuth({
+    ...authContext,
+    getToken,
+    signOut
+  }, {
+    treatPendingAsSignedOut
+  });
+};
+function useDerivedAuth(authObject, { treatPendingAsSignedOut = true } = {}) {
+  const { userId, orgId, orgRole, has: has3, signOut, getToken, orgPermissions, factorVerificationAge, sessionClaims } = authObject != null ? authObject : {};
+  const derivedHas = import_react6.useCallback((params) => {
+    if (has3) {
+      return has3(params);
+    }
+    return createCheckAuthorization({
+      userId,
+      orgId,
+      orgRole,
+      orgPermissions,
+      factorVerificationAge,
+      features: (sessionClaims == null ? undefined : sessionClaims.fea) || "",
+      plans: (sessionClaims == null ? undefined : sessionClaims.pla) || ""
+    })(params);
+  }, [has3, userId, orgId, orgRole, orgPermissions, factorVerificationAge, sessionClaims]);
+  const payload = resolveAuthState({
+    authObject: {
+      ...authObject,
+      getToken,
+      signOut,
+      has: derivedHas
+    },
+    options: {
+      treatPendingAsSignedOut
+    }
+  });
+  if (!payload) {
+    return errorThrower.throw(invalidStateError);
+  }
+  return payload;
+}
+var withClerk = (Component, displayNameOrOptions) => {
+  const passedDisplayedName = typeof displayNameOrOptions === "string" ? displayNameOrOptions : displayNameOrOptions == null ? undefined : displayNameOrOptions.component;
+  const displayName = passedDisplayedName || Component.displayName || Component.name || "Component";
+  Component.displayName = displayName;
+  const options = typeof displayNameOrOptions === "string" ? undefined : displayNameOrOptions;
+  const HOC = (props) => {
+    useAssertWrappedByClerkProvider2(displayName || "withClerk");
+    const clerk = useIsomorphicClerkContext();
+    if (!clerk.loaded && !(options == null ? undefined : options.renderWhileLoading)) {
+      return null;
+    }
+    return /* @__PURE__ */ import_react14.default.createElement(Component, {
+      ...props,
+      component: displayName,
+      clerk
+    });
+  };
+  HOC.displayName = `withClerk(${displayName})`;
+  return HOC;
+};
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/runtimeEnvironment-BB2sO-19.mjs
+var isDevelopmentEnvironment = () => {
+  try {
+    return true;
+  } catch {}
+  return false;
+};
+var isTestEnvironment = () => {
+  try {
+    return false;
+  } catch {}
+  return false;
+};
+var isProductionEnvironment = () => {
+  try {
+    return false;
+  } catch {}
+  return false;
+};
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/deprecated-BqlFbLHj.mjs
+var displayedWarnings = /* @__PURE__ */ new Set;
+var deprecated = (fnName, warning, key) => {
+  const hideWarning = isTestEnvironment() || isProductionEnvironment();
+  const messageId = key ?? fnName;
+  if (displayedWarnings.has(messageId) || hideWarning)
+    return;
+  displayedWarnings.add(messageId);
+  console.warn(`Clerk - DEPRECATION WARNING: "${fnName}" is deprecated and will be removed in the next major release.
+${warning}`);
+};
+
+// node_modules/@clerk/clerk-react/dist/chunk-BUI34B34.mjs
+var import_react15 = __toESM(require_react(), 1);
+var RedirectToSignIn = withClerk(({ clerk, ...props }) => {
+  const { client, session } = clerk;
+  const hasSignedInSessions = client.signedInSessions ? client.signedInSessions.length > 0 : client.activeSessions && client.activeSessions.length > 0;
+  import_react15.default.useEffect(() => {
+    if (session === null && hasSignedInSessions) {
+      clerk.redirectToAfterSignOut();
+    } else {
+      clerk.redirectToSignIn(props);
+    }
+  }, []);
+  return null;
+}, "RedirectToSignIn");
+var RedirectToSignUp = withClerk(({ clerk, ...props }) => {
+  import_react15.default.useEffect(() => {
+    clerk.redirectToSignUp(props);
+  }, []);
+  return null;
+}, "RedirectToSignUp");
+var RedirectToTasks = withClerk(({ clerk, ...props }) => {
+  import_react15.default.useEffect(() => {
+    clerk.redirectToTasks(props);
+  }, []);
+  return null;
+}, "RedirectToTasks");
+var RedirectToUserProfile = withClerk(({ clerk }) => {
+  import_react15.default.useEffect(() => {
+    deprecated("RedirectToUserProfile", "Use the `redirectToUserProfile()` method instead.");
+    clerk.redirectToUserProfile();
+  }, []);
+  return null;
+}, "RedirectToUserProfile");
+var RedirectToOrganizationProfile = withClerk(({ clerk }) => {
+  import_react15.default.useEffect(() => {
+    deprecated("RedirectToOrganizationProfile", "Use the `redirectToOrganizationProfile()` method instead.");
+    clerk.redirectToOrganizationProfile();
+  }, []);
+  return null;
+}, "RedirectToOrganizationProfile");
+var RedirectToCreateOrganization = withClerk(({ clerk }) => {
+  import_react15.default.useEffect(() => {
+    deprecated("RedirectToCreateOrganization", "Use the `redirectToCreateOrganization()` method instead.");
+    clerk.redirectToCreateOrganization();
+  }, []);
+  return null;
+}, "RedirectToCreateOrganization");
+var AuthenticateWithRedirectCallback = withClerk(({ clerk, ...handleRedirectCallbackParams }) => {
+  import_react15.default.useEffect(() => {
+    clerk.handleRedirectCallback(handleRedirectCallbackParams);
+  }, []);
+  return null;
+}, "AuthenticateWithRedirectCallback");
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/handleValueOrFn-CcwnRX-K.mjs
+function handleValueOrFn(value, url, defaultValue) {
+  if (typeof value === "function")
+    return value(url);
+  if (typeof value !== "undefined")
+    return value;
+  if (typeof defaultValue !== "undefined")
+    return defaultValue;
+}
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/utils-BfsP_p13.mjs
+var logErrorInDevMode = (message) => {
+  if (isDevelopmentEnvironment())
+    console.error(`Clerk: ${message}`);
+};
+var DANGEROUS_KEYS = new Set([
+  "__proto__",
+  "constructor",
+  "prototype"
+]);
+
+// node_modules/@clerk/clerk-react/dist/chunk-THNCS7QR.mjs
+var import_react17 = __toESM(require_react(), 1);
+var import_react18 = __toESM(require_react(), 1);
+var import_react19 = __toESM(require_react(), 1);
+var import_react20 = __toESM(require_react(), 1);
+var import_react_dom = __toESM(require_react_dom(), 1);
+var import_react21 = __toESM(require_react(), 1);
+var import_react22 = __toESM(require_react(), 1);
+var import_react23 = __toESM(require_react(), 1);
+var import_react24 = __toESM(require_react(), 1);
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/object-Be3MMNTQ.mjs
+var without = (obj, ...props) => {
+  const copy = { ...obj };
+  for (const prop of props)
+    delete copy[prop];
+  return copy;
+};
+
+// node_modules/@clerk/clerk-react/dist/chunk-THNCS7QR.mjs
+var import_react26 = __toESM(require_react(), 1);
+var assertSingleChild = (children) => (name) => {
+  try {
+    return import_react18.default.Children.only(children);
+  } catch {
+    return errorThrower.throw(multipleChildrenInButtonComponent(name));
+  }
+};
+var normalizeWithDefaultValue = (children, defaultText) => {
+  if (!children) {
+    children = defaultText;
+  }
+  if (typeof children === "string") {
+    children = /* @__PURE__ */ import_react18.default.createElement("button", null, children);
+  }
+  return children;
+};
+var safeExecute = (cb) => (...args) => {
+  if (cb && typeof cb === "function") {
+    return cb(...args);
+  }
+};
+function isConstructor(f) {
+  return typeof f === "function";
+}
+var counts = /* @__PURE__ */ new Map;
+function useMaxAllowedInstancesGuard(name, error, maxCount = 1) {
+  import_react19.default.useEffect(() => {
+    const count = counts.get(name) || 0;
+    if (count == maxCount) {
+      return errorThrower.throw(error);
+    }
+    counts.set(name, count + 1);
+    return () => {
+      counts.set(name, (counts.get(name) || 1) - 1);
+    };
+  }, []);
+}
+function withMaxAllowedInstancesGuard(WrappedComponent, name, error) {
+  const displayName = WrappedComponent.displayName || WrappedComponent.name || name || "Component";
+  const Hoc = (props) => {
+    useMaxAllowedInstancesGuard(name, error);
+    return /* @__PURE__ */ import_react19.default.createElement(WrappedComponent, { ...props });
+  };
+  Hoc.displayName = `withMaxAllowedInstancesGuard(${displayName})`;
+  return Hoc;
+}
+var useCustomElementPortal = (elements) => {
+  const [nodeMap, setNodeMap] = import_react20.useState(/* @__PURE__ */ new Map);
+  return elements.map((el) => ({
+    id: el.id,
+    mount: (node) => setNodeMap((prev) => new Map(prev).set(String(el.id), node)),
+    unmount: () => setNodeMap((prev) => {
+      const newMap = new Map(prev);
+      newMap.set(String(el.id), null);
+      return newMap;
+    }),
+    portal: () => {
+      const node = nodeMap.get(String(el.id));
+      return node ? import_react_dom.createPortal(el.component, node) : null;
+    }
+  }));
+};
+var isThatComponent = (v, component) => {
+  return !!v && import_react22.default.isValidElement(v) && (v == null ? undefined : v.type) === component;
+};
+var useUserProfileCustomPages = (children, options) => {
+  const reorderItemsLabels = ["account", "security", "billing", "apiKeys"];
+  return useCustomPages({
+    children,
+    reorderItemsLabels,
+    LinkComponent: UserProfileLink,
+    PageComponent: UserProfilePage,
+    MenuItemsComponent: MenuItems,
+    componentName: "UserProfile"
+  }, options);
+};
+var useOrganizationProfileCustomPages = (children, options) => {
+  const reorderItemsLabels = ["general", "members", "billing", "apiKeys"];
+  return useCustomPages({
+    children,
+    reorderItemsLabels,
+    LinkComponent: OrganizationProfileLink,
+    PageComponent: OrganizationProfilePage,
+    componentName: "OrganizationProfile"
+  }, options);
+};
+var useSanitizedChildren = (children) => {
+  const sanitizedChildren = [];
+  const excludedComponents = [
+    OrganizationProfileLink,
+    OrganizationProfilePage,
+    MenuItems,
+    UserProfilePage,
+    UserProfileLink
+  ];
+  import_react21.default.Children.forEach(children, (child) => {
+    if (!excludedComponents.some((component) => isThatComponent(child, component))) {
+      sanitizedChildren.push(child);
+    }
+  });
+  return sanitizedChildren;
+};
+var useCustomPages = (params, options) => {
+  const { children, LinkComponent, PageComponent, MenuItemsComponent, reorderItemsLabels, componentName } = params;
+  const { allowForAnyChildren = false } = options || {};
+  const validChildren = [];
+  import_react21.default.Children.forEach(children, (child) => {
+    if (!isThatComponent(child, PageComponent) && !isThatComponent(child, LinkComponent) && !isThatComponent(child, MenuItemsComponent)) {
+      if (child && !allowForAnyChildren) {
+        logErrorInDevMode(customPagesIgnoredComponent(componentName));
+      }
+      return;
+    }
+    const { props } = child;
+    const { children: children2, label, url, labelIcon } = props;
+    if (isThatComponent(child, PageComponent)) {
+      if (isReorderItem(props, reorderItemsLabels)) {
+        validChildren.push({ label });
+      } else if (isCustomPage(props)) {
+        validChildren.push({ label, labelIcon, children: children2, url });
+      } else {
+        logErrorInDevMode(customPageWrongProps(componentName));
+        return;
+      }
+    }
+    if (isThatComponent(child, LinkComponent)) {
+      if (isExternalLink(props)) {
+        validChildren.push({ label, labelIcon, url });
+      } else {
+        logErrorInDevMode(customLinkWrongProps(componentName));
+        return;
+      }
+    }
+  });
+  const customPageContents = [];
+  const customPageLabelIcons = [];
+  const customLinkLabelIcons = [];
+  validChildren.forEach((cp, index) => {
+    if (isCustomPage(cp)) {
+      customPageContents.push({ component: cp.children, id: index });
+      customPageLabelIcons.push({ component: cp.labelIcon, id: index });
+      return;
+    }
+    if (isExternalLink(cp)) {
+      customLinkLabelIcons.push({ component: cp.labelIcon, id: index });
+    }
+  });
+  const customPageContentsPortals = useCustomElementPortal(customPageContents);
+  const customPageLabelIconsPortals = useCustomElementPortal(customPageLabelIcons);
+  const customLinkLabelIconsPortals = useCustomElementPortal(customLinkLabelIcons);
+  const customPages = [];
+  const customPagesPortals = [];
+  validChildren.forEach((cp, index) => {
+    if (isReorderItem(cp, reorderItemsLabels)) {
+      customPages.push({ label: cp.label });
+      return;
+    }
+    if (isCustomPage(cp)) {
+      const {
+        portal: contentPortal,
+        mount,
+        unmount
+      } = customPageContentsPortals.find((p) => p.id === index);
+      const {
+        portal: labelPortal,
+        mount: mountIcon,
+        unmount: unmountIcon
+      } = customPageLabelIconsPortals.find((p) => p.id === index);
+      customPages.push({ label: cp.label, url: cp.url, mount, unmount, mountIcon, unmountIcon });
+      customPagesPortals.push(contentPortal);
+      customPagesPortals.push(labelPortal);
+      return;
+    }
+    if (isExternalLink(cp)) {
+      const {
+        portal: labelPortal,
+        mount: mountIcon,
+        unmount: unmountIcon
+      } = customLinkLabelIconsPortals.find((p) => p.id === index);
+      customPages.push({ label: cp.label, url: cp.url, mountIcon, unmountIcon });
+      customPagesPortals.push(labelPortal);
+      return;
+    }
+  });
+  return { customPages, customPagesPortals };
+};
+var isReorderItem = (childProps, validItems) => {
+  const { children, label, url, labelIcon } = childProps;
+  return !children && !url && !labelIcon && validItems.some((v) => v === label);
+};
+var isCustomPage = (childProps) => {
+  const { children, label, url, labelIcon } = childProps;
+  return !!children && !!url && !!labelIcon && !!label;
+};
+var isExternalLink = (childProps) => {
+  const { children, label, url, labelIcon } = childProps;
+  return !children && !!url && !!labelIcon && !!label;
+};
+var useUserButtonCustomMenuItems = (children, options) => {
+  var _a;
+  const reorderItemsLabels = ["manageAccount", "signOut"];
+  return useCustomMenuItems({
+    children,
+    reorderItemsLabels,
+    MenuItemsComponent: MenuItems,
+    MenuActionComponent: MenuAction,
+    MenuLinkComponent: MenuLink,
+    UserProfileLinkComponent: UserProfileLink,
+    UserProfilePageComponent: UserProfilePage,
+    allowForAnyChildren: (_a = options == null ? undefined : options.allowForAnyChildren) != null ? _a : false
+  });
+};
+var useCustomMenuItems = ({
+  children,
+  MenuItemsComponent,
+  MenuActionComponent,
+  MenuLinkComponent,
+  UserProfileLinkComponent,
+  UserProfilePageComponent,
+  reorderItemsLabels,
+  allowForAnyChildren = false
+}) => {
+  const validChildren = [];
+  const customMenuItems = [];
+  const customMenuItemsPortals = [];
+  import_react23.default.Children.forEach(children, (child) => {
+    if (!isThatComponent(child, MenuItemsComponent) && !isThatComponent(child, UserProfileLinkComponent) && !isThatComponent(child, UserProfilePageComponent)) {
+      if (child && !allowForAnyChildren) {
+        logErrorInDevMode(userButtonIgnoredComponent);
+      }
+      return;
+    }
+    if (isThatComponent(child, UserProfileLinkComponent) || isThatComponent(child, UserProfilePageComponent)) {
+      return;
+    }
+    const { props } = child;
+    import_react23.default.Children.forEach(props.children, (child2) => {
+      if (!isThatComponent(child2, MenuActionComponent) && !isThatComponent(child2, MenuLinkComponent)) {
+        if (child2) {
+          logErrorInDevMode(customMenuItemsIgnoredComponent);
+        }
+        return;
+      }
+      const { props: props2 } = child2;
+      const { label, labelIcon, href, onClick, open } = props2;
+      if (isThatComponent(child2, MenuActionComponent)) {
+        if (isReorderItem2(props2, reorderItemsLabels)) {
+          validChildren.push({ label });
+        } else if (isCustomMenuItem(props2)) {
+          const baseItem = {
+            label,
+            labelIcon
+          };
+          if (onClick !== undefined) {
+            validChildren.push({
+              ...baseItem,
+              onClick
+            });
+          } else if (open !== undefined) {
+            validChildren.push({
+              ...baseItem,
+              open: open.startsWith("/") ? open : `/${open}`
+            });
+          } else {
+            logErrorInDevMode("Custom menu item must have either onClick or open property");
+            return;
+          }
+        } else {
+          logErrorInDevMode(userButtonMenuItemsActionWrongsProps);
+          return;
+        }
+      }
+      if (isThatComponent(child2, MenuLinkComponent)) {
+        if (isExternalLink2(props2)) {
+          validChildren.push({ label, labelIcon, href });
+        } else {
+          logErrorInDevMode(userButtonMenuItemLinkWrongProps);
+          return;
+        }
+      }
+    });
+  });
+  const customMenuItemLabelIcons = [];
+  const customLinkLabelIcons = [];
+  validChildren.forEach((mi, index) => {
+    if (isCustomMenuItem(mi)) {
+      customMenuItemLabelIcons.push({ component: mi.labelIcon, id: index });
+    }
+    if (isExternalLink2(mi)) {
+      customLinkLabelIcons.push({ component: mi.labelIcon, id: index });
+    }
+  });
+  const customMenuItemLabelIconsPortals = useCustomElementPortal(customMenuItemLabelIcons);
+  const customLinkLabelIconsPortals = useCustomElementPortal(customLinkLabelIcons);
+  validChildren.forEach((mi, index) => {
+    if (isReorderItem2(mi, reorderItemsLabels)) {
+      customMenuItems.push({
+        label: mi.label
+      });
+    }
+    if (isCustomMenuItem(mi)) {
+      const {
+        portal: iconPortal,
+        mount: mountIcon,
+        unmount: unmountIcon
+      } = customMenuItemLabelIconsPortals.find((p) => p.id === index);
+      const menuItem = {
+        label: mi.label,
+        mountIcon,
+        unmountIcon
+      };
+      if ("onClick" in mi) {
+        menuItem.onClick = mi.onClick;
+      } else if ("open" in mi) {
+        menuItem.open = mi.open;
+      }
+      customMenuItems.push(menuItem);
+      customMenuItemsPortals.push(iconPortal);
+    }
+    if (isExternalLink2(mi)) {
+      const {
+        portal: iconPortal,
+        mount: mountIcon,
+        unmount: unmountIcon
+      } = customLinkLabelIconsPortals.find((p) => p.id === index);
+      customMenuItems.push({
+        label: mi.label,
+        href: mi.href,
+        mountIcon,
+        unmountIcon
+      });
+      customMenuItemsPortals.push(iconPortal);
+    }
+  });
+  return { customMenuItems, customMenuItemsPortals };
+};
+var isReorderItem2 = (childProps, validItems) => {
+  const { children, label, onClick, labelIcon } = childProps;
+  return !children && !onClick && !labelIcon && validItems.some((v) => v === label);
+};
+var isCustomMenuItem = (childProps) => {
+  const { label, labelIcon, onClick, open } = childProps;
+  return !!labelIcon && !!label && (typeof onClick === "function" || typeof open === "string");
+};
+var isExternalLink2 = (childProps) => {
+  const { label, href, labelIcon } = childProps;
+  return !!href && !!labelIcon && !!label;
+};
+var createAwaitableMutationObserver = (globalOptions) => {
+  const isReady = globalOptions == null ? undefined : globalOptions.isReady;
+  return (options) => new Promise((resolve, reject) => {
+    const { root = document == null ? undefined : document.body, selector, timeout = 0 } = options;
+    if (!root) {
+      reject(new Error("No root element provided"));
+      return;
+    }
+    let elementToWatch = root;
+    if (selector) {
+      elementToWatch = root == null ? undefined : root.querySelector(selector);
+    }
+    if (isReady(elementToWatch, selector)) {
+      resolve();
+      return;
+    }
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (!elementToWatch && selector) {
+          elementToWatch = root == null ? undefined : root.querySelector(selector);
+        }
+        if (globalOptions.childList && mutation.type === "childList" || globalOptions.attributes && mutation.type === "attributes") {
+          if (isReady(elementToWatch, selector)) {
+            observer.disconnect();
+            resolve();
+            return;
+          }
+        }
+      }
+    });
+    observer.observe(root, globalOptions);
+    if (timeout > 0) {
+      setTimeout(() => {
+        observer.disconnect();
+        reject(new Error(`Timeout waiting for ${selector}`));
+      }, timeout);
+    }
+  });
+};
+var waitForElementChildren = createAwaitableMutationObserver({
+  childList: true,
+  subtree: true,
+  isReady: (el, selector) => {
+    var _a;
+    return !!(el == null ? undefined : el.childElementCount) && ((_a = el == null ? undefined : el.matches) == null ? undefined : _a.call(el, selector)) && el.childElementCount > 0;
+  }
+});
+function useWaitForComponentMount(component, options) {
+  const watcherRef = import_react24.useRef();
+  const [status, setStatus] = import_react24.useState("rendering");
+  import_react24.useEffect(() => {
+    if (!component) {
+      throw new Error("Clerk: no component name provided, unable to detect mount.");
+    }
+    if (typeof window !== "undefined" && !watcherRef.current) {
+      const defaultSelector = `[data-clerk-component="${component}"]`;
+      const selector = options == null ? undefined : options.selector;
+      watcherRef.current = waitForElementChildren({
+        selector: selector ? defaultSelector + selector : defaultSelector
+      }).then(() => {
+        setStatus("rendered");
+      }).catch(() => {
+        setStatus("error");
+      });
+    }
+  }, [component, options == null ? undefined : options.selector]);
+  return status;
+}
+var isMountProps = (props) => {
+  return "mount" in props;
+};
+var isOpenProps = (props) => {
+  return "open" in props;
+};
+var stripMenuItemIconHandlers = (menuItems) => {
+  return menuItems == null ? undefined : menuItems.map(({ mountIcon, unmountIcon, ...rest }) => rest);
+};
+var ClerkHostRenderer = class extends import_react26.default.PureComponent {
+  constructor() {
+    super(...arguments);
+    this.rootRef = import_react26.default.createRef();
+  }
+  componentDidUpdate(_prevProps) {
+    var _a, _b, _c, _d;
+    if (!isMountProps(_prevProps) || !isMountProps(this.props)) {
+      return;
+    }
+    const prevProps = without(_prevProps.props, "customPages", "customMenuItems", "children");
+    const newProps = without(this.props.props, "customPages", "customMenuItems", "children");
+    const customPagesChanged = ((_a = prevProps.customPages) == null ? undefined : _a.length) !== ((_b = newProps.customPages) == null ? undefined : _b.length);
+    const customMenuItemsChanged = ((_c = prevProps.customMenuItems) == null ? undefined : _c.length) !== ((_d = newProps.customMenuItems) == null ? undefined : _d.length);
+    const prevMenuItemsWithoutHandlers = stripMenuItemIconHandlers(_prevProps.props.customMenuItems);
+    const newMenuItemsWithoutHandlers = stripMenuItemIconHandlers(this.props.props.customMenuItems);
+    if (!isDeeplyEqual(prevProps, newProps) || !isDeeplyEqual(prevMenuItemsWithoutHandlers, newMenuItemsWithoutHandlers) || customPagesChanged || customMenuItemsChanged) {
+      if (this.rootRef.current) {
+        this.props.updateProps({ node: this.rootRef.current, props: this.props.props });
+      }
+    }
+  }
+  componentDidMount() {
+    if (this.rootRef.current) {
+      if (isMountProps(this.props)) {
+        this.props.mount(this.rootRef.current, this.props.props);
+      }
+      if (isOpenProps(this.props)) {
+        this.props.open(this.props.props);
+      }
+    }
+  }
+  componentWillUnmount() {
+    if (this.rootRef.current) {
+      if (isMountProps(this.props)) {
+        this.props.unmount(this.rootRef.current);
+      }
+      if (isOpenProps(this.props)) {
+        this.props.close();
+      }
+    }
+  }
+  render() {
+    const { hideRootHtmlElement = false } = this.props;
+    const rootAttributes = {
+      ref: this.rootRef,
+      ...this.props.rootProps,
+      ...this.props.component && { "data-clerk-component": this.props.component }
+    };
+    return /* @__PURE__ */ import_react26.default.createElement(import_react26.default.Fragment, null, !hideRootHtmlElement && /* @__PURE__ */ import_react26.default.createElement("div", { ...rootAttributes }), this.props.children);
+  }
+};
+var CustomPortalsRenderer = (props) => {
+  var _a, _b;
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, (_a = props == null ? undefined : props.customPagesPortals) == null ? undefined : _a.map((portal, index) => import_react17.createElement(portal, { key: index })), (_b = props == null ? undefined : props.customMenuItemsPortals) == null ? undefined : _b.map((portal, index) => import_react17.createElement(portal, { key: index })));
+};
+var SignIn = withClerk(({ clerk, component, fallback, ...props }) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    mount: clerk.mountSignIn,
+    unmount: clerk.unmountSignIn,
+    updateProps: clerk.__unstable__updateProps,
+    props,
+    rootProps: rendererRootProps
+  }));
+}, { component: "SignIn", renderWhileLoading: true });
+var SignUp = withClerk(({ clerk, component, fallback, ...props }) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    mount: clerk.mountSignUp,
+    unmount: clerk.unmountSignUp,
+    updateProps: clerk.__unstable__updateProps,
+    props,
+    rootProps: rendererRootProps
+  }));
+}, { component: "SignUp", renderWhileLoading: true });
+function UserProfilePage({ children }) {
+  logErrorInDevMode(userProfilePageRenderedError);
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, children);
+}
+function UserProfileLink({ children }) {
+  logErrorInDevMode(userProfileLinkRenderedError);
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, children);
+}
+var _UserProfile = withClerk(({
+  clerk,
+  component,
+  fallback,
+  ...props
+}) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  const { customPages, customPagesPortals } = useUserProfileCustomPages(props.children);
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    mount: clerk.mountUserProfile,
+    unmount: clerk.unmountUserProfile,
+    updateProps: clerk.__unstable__updateProps,
+    props: { ...props, customPages },
+    rootProps: rendererRootProps
+  }, /* @__PURE__ */ import_react17.default.createElement(CustomPortalsRenderer, { customPagesPortals })));
+}, { component: "UserProfile", renderWhileLoading: true });
+var UserProfile = Object.assign(_UserProfile, {
+  Page: UserProfilePage,
+  Link: UserProfileLink
+});
+var UserButtonContext = import_react17.createContext({
+  mount: () => {},
+  unmount: () => {},
+  updateProps: () => {}
+});
+var _UserButton = withClerk(({
+  clerk,
+  component,
+  fallback,
+  ...props
+}) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  const { customPages, customPagesPortals } = useUserProfileCustomPages(props.children, {
+    allowForAnyChildren: !!props.__experimental_asProvider
+  });
+  const userProfileProps = { ...props.userProfileProps, customPages };
+  const { customMenuItems, customMenuItemsPortals } = useUserButtonCustomMenuItems(props.children, {
+    allowForAnyChildren: !!props.__experimental_asProvider
+  });
+  const sanitizedChildren = useSanitizedChildren(props.children);
+  const passableProps = {
+    mount: clerk.mountUserButton,
+    unmount: clerk.unmountUserButton,
+    updateProps: clerk.__unstable__updateProps,
+    props: { ...props, userProfileProps, customMenuItems }
+  };
+  const portalProps = {
+    customPagesPortals,
+    customMenuItemsPortals
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(UserButtonContext.Provider, { value: passableProps }, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    ...passableProps,
+    hideRootHtmlElement: !!props.__experimental_asProvider,
+    rootProps: rendererRootProps
+  }, props.__experimental_asProvider ? sanitizedChildren : null, /* @__PURE__ */ import_react17.default.createElement(CustomPortalsRenderer, { ...portalProps })));
+}, { component: "UserButton", renderWhileLoading: true });
+function MenuItems({ children }) {
+  logErrorInDevMode(userButtonMenuItemsRenderedError);
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, children);
+}
+function MenuAction({ children }) {
+  logErrorInDevMode(userButtonMenuActionRenderedError);
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, children);
+}
+function MenuLink({ children }) {
+  logErrorInDevMode(userButtonMenuLinkRenderedError);
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, children);
+}
+function UserButtonOutlet(outletProps) {
+  const providerProps = import_react17.useContext(UserButtonContext);
+  const portalProps = {
+    ...providerProps,
+    props: {
+      ...providerProps.props,
+      ...outletProps
+    }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, { ...portalProps });
+}
+var UserButton = Object.assign(_UserButton, {
+  UserProfilePage,
+  UserProfileLink,
+  MenuItems,
+  Action: MenuAction,
+  Link: MenuLink,
+  __experimental_Outlet: UserButtonOutlet
+});
+function OrganizationProfilePage({ children }) {
+  logErrorInDevMode(organizationProfilePageRenderedError);
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, children);
+}
+function OrganizationProfileLink({ children }) {
+  logErrorInDevMode(organizationProfileLinkRenderedError);
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, children);
+}
+var _OrganizationProfile = withClerk(({
+  clerk,
+  component,
+  fallback,
+  ...props
+}) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  const { customPages, customPagesPortals } = useOrganizationProfileCustomPages(props.children);
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    mount: clerk.mountOrganizationProfile,
+    unmount: clerk.unmountOrganizationProfile,
+    updateProps: clerk.__unstable__updateProps,
+    props: { ...props, customPages },
+    rootProps: rendererRootProps
+  }, /* @__PURE__ */ import_react17.default.createElement(CustomPortalsRenderer, { customPagesPortals })));
+}, { component: "OrganizationProfile", renderWhileLoading: true });
+var OrganizationProfile = Object.assign(_OrganizationProfile, {
+  Page: OrganizationProfilePage,
+  Link: OrganizationProfileLink
+});
+var CreateOrganization = withClerk(({ clerk, component, fallback, ...props }) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    mount: clerk.mountCreateOrganization,
+    unmount: clerk.unmountCreateOrganization,
+    updateProps: clerk.__unstable__updateProps,
+    props,
+    rootProps: rendererRootProps
+  }));
+}, { component: "CreateOrganization", renderWhileLoading: true });
+var OrganizationSwitcherContext = import_react17.createContext({
+  mount: () => {},
+  unmount: () => {},
+  updateProps: () => {}
+});
+var _OrganizationSwitcher = withClerk(({
+  clerk,
+  component,
+  fallback,
+  ...props
+}) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  const { customPages, customPagesPortals } = useOrganizationProfileCustomPages(props.children, {
+    allowForAnyChildren: !!props.__experimental_asProvider
+  });
+  const organizationProfileProps = { ...props.organizationProfileProps, customPages };
+  const sanitizedChildren = useSanitizedChildren(props.children);
+  const passableProps = {
+    mount: clerk.mountOrganizationSwitcher,
+    unmount: clerk.unmountOrganizationSwitcher,
+    updateProps: clerk.__unstable__updateProps,
+    props: { ...props, organizationProfileProps },
+    rootProps: rendererRootProps,
+    component
+  };
+  clerk.__experimental_prefetchOrganizationSwitcher();
+  return /* @__PURE__ */ import_react17.default.createElement(OrganizationSwitcherContext.Provider, { value: passableProps }, /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    ...passableProps,
+    hideRootHtmlElement: !!props.__experimental_asProvider
+  }, props.__experimental_asProvider ? sanitizedChildren : null, /* @__PURE__ */ import_react17.default.createElement(CustomPortalsRenderer, { customPagesPortals }))));
+}, { component: "OrganizationSwitcher", renderWhileLoading: true });
+function OrganizationSwitcherOutlet(outletProps) {
+  const providerProps = import_react17.useContext(OrganizationSwitcherContext);
+  const portalProps = {
+    ...providerProps,
+    props: {
+      ...providerProps.props,
+      ...outletProps
+    }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, { ...portalProps });
+}
+var OrganizationSwitcher = Object.assign(_OrganizationSwitcher, {
+  OrganizationProfilePage,
+  OrganizationProfileLink,
+  __experimental_Outlet: OrganizationSwitcherOutlet
+});
+var OrganizationList = withClerk(({ clerk, component, fallback, ...props }) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    mount: clerk.mountOrganizationList,
+    unmount: clerk.unmountOrganizationList,
+    updateProps: clerk.__unstable__updateProps,
+    props,
+    rootProps: rendererRootProps
+  }));
+}, { component: "OrganizationList", renderWhileLoading: true });
+var GoogleOneTap = withClerk(({ clerk, component, fallback, ...props }) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    open: clerk.openGoogleOneTap,
+    close: clerk.closeGoogleOneTap,
+    updateProps: clerk.__unstable__updateProps,
+    props,
+    rootProps: rendererRootProps
+  }));
+}, { component: "GoogleOneTap", renderWhileLoading: true });
+var Waitlist = withClerk(({ clerk, component, fallback, ...props }) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    mount: clerk.mountWaitlist,
+    unmount: clerk.unmountWaitlist,
+    updateProps: clerk.__unstable__updateProps,
+    props,
+    rootProps: rendererRootProps
+  }));
+}, { component: "Waitlist", renderWhileLoading: true });
+var PricingTable = withClerk(({ clerk, component, fallback, ...props }) => {
+  const mountingStatus = useWaitForComponentMount(component, {
+    selector: '[data-component-status="ready"]'
+  });
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    mount: clerk.mountPricingTable,
+    unmount: clerk.unmountPricingTable,
+    updateProps: clerk.__unstable__updateProps,
+    props,
+    rootProps: rendererRootProps
+  }));
+}, { component: "PricingTable", renderWhileLoading: true });
+var APIKeys = withClerk(({ clerk, component, fallback, ...props }) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    mount: clerk.mountAPIKeys,
+    unmount: clerk.unmountAPIKeys,
+    updateProps: clerk.__unstable__updateProps,
+    props,
+    rootProps: rendererRootProps
+  }));
+}, { component: "ApiKeys", renderWhileLoading: true });
+var UserAvatar = withClerk(({ clerk, component, fallback, ...props }) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    mount: clerk.mountUserAvatar,
+    unmount: clerk.unmountUserAvatar,
+    updateProps: clerk.__unstable__updateProps,
+    props,
+    rootProps: rendererRootProps
+  }));
+}, { component: "UserAvatar", renderWhileLoading: true });
+var TaskChooseOrganization = withClerk(({ clerk, component, fallback, ...props }) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    mount: clerk.mountTaskChooseOrganization,
+    unmount: clerk.unmountTaskChooseOrganization,
+    updateProps: clerk.__unstable__updateProps,
+    props,
+    rootProps: rendererRootProps
+  }));
+}, { component: "TaskChooseOrganization", renderWhileLoading: true });
+var TaskResetPassword = withClerk(({ clerk, component, fallback, ...props }) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    mount: clerk.mountTaskResetPassword,
+    unmount: clerk.unmountTaskResetPassword,
+    updateProps: clerk.__unstable__updateProps,
+    props,
+    rootProps: rendererRootProps
+  }));
+}, { component: "TaskResetPassword", renderWhileLoading: true });
+var TaskSetupMFA = withClerk(({ clerk, component, fallback, ...props }) => {
+  const mountingStatus = useWaitForComponentMount(component);
+  const shouldShowFallback = mountingStatus === "rendering" || !clerk.loaded;
+  const rendererRootProps = {
+    ...shouldShowFallback && fallback && { style: { display: "none" } }
+  };
+  return /* @__PURE__ */ import_react17.default.createElement(import_react17.default.Fragment, null, shouldShowFallback && fallback, clerk.loaded && /* @__PURE__ */ import_react17.default.createElement(ClerkHostRenderer, {
+    component,
+    mount: clerk.mountTaskSetupMFA,
+    unmount: clerk.unmountTaskSetupMFA,
+    updateProps: clerk.__unstable__updateProps,
+    props,
+    rootProps: rendererRootProps
+  }));
+}, { component: "TaskSetupMFA", renderWhileLoading: true });
+
+// node_modules/@clerk/clerk-react/dist/chunk-OANWQR3B.mjs
+var __typeError = (msg) => {
+  throw TypeError(msg);
+};
+var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot " + msg);
+var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
+var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
+var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/retry-DAlTROH9.mjs
+var defaultOptions = {
+  initialDelay: 125,
+  maxDelayBetweenRetries: 0,
+  factor: 2,
+  shouldRetry: (_, iteration) => iteration < 5,
+  retryImmediately: false,
+  jitter: true
+};
+var RETRY_IMMEDIATELY_DELAY = 100;
+var sleep = async (ms) => new Promise((s) => setTimeout(s, ms));
+var applyJitter = (delay, jitter) => {
+  return jitter ? delay * (1 + Math.random()) : delay;
+};
+var createExponentialDelayAsyncFn = (opts) => {
+  let timesCalled = 0;
+  const calculateDelayInMs = () => {
+    const constant = opts.initialDelay;
+    const base = opts.factor;
+    let delay = constant * Math.pow(base, timesCalled);
+    delay = applyJitter(delay, opts.jitter);
+    return Math.min(opts.maxDelayBetweenRetries || delay, delay);
+  };
+  return async () => {
+    await sleep(calculateDelayInMs());
+    timesCalled++;
+  };
+};
+var retry = async (callback, options = {}) => {
+  let iterations = 0;
+  const { shouldRetry, initialDelay, maxDelayBetweenRetries, factor, retryImmediately, jitter, onBeforeRetry } = {
+    ...defaultOptions,
+    ...options
+  };
+  const delay = createExponentialDelayAsyncFn({
+    initialDelay,
+    maxDelayBetweenRetries,
+    factor,
+    jitter
+  });
+  while (true)
+    try {
+      return await callback();
+    } catch (e) {
+      iterations++;
+      if (!shouldRetry(e, iterations))
+        throw e;
+      if (onBeforeRetry)
+        await onBeforeRetry(iterations);
+      if (retryImmediately && iterations === 1)
+        await sleep(applyJitter(RETRY_IMMEDIATELY_DELAY, jitter));
+      else
+        await delay();
+    }
+};
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/loadScript-t1vaIfy5.mjs
+var NO_DOCUMENT_ERROR = "loadScript cannot be called when document does not exist";
+var NO_SRC_ERROR = "loadScript cannot be called without a src";
+async function loadScript(src = "", opts) {
+  const { async, defer, beforeLoad, crossOrigin, nonce } = opts || {};
+  const load = () => {
+    return new Promise((resolve, reject) => {
+      if (!src)
+        reject(new Error(NO_SRC_ERROR));
+      if (!document || !document.body)
+        reject(new Error(NO_DOCUMENT_ERROR));
+      const script = document.createElement("script");
+      if (crossOrigin)
+        script.setAttribute("crossorigin", crossOrigin);
+      script.async = async || false;
+      script.defer = defer || false;
+      script.addEventListener("load", () => {
+        script.remove();
+        resolve(script);
+      });
+      script.addEventListener("error", (event) => {
+        script.remove();
+        reject(event.error ?? /* @__PURE__ */ new Error(`failed to load script: ${src}`));
+      });
+      script.src = src;
+      script.nonce = nonce;
+      beforeLoad?.(script);
+      document.body.appendChild(script);
+    });
+  };
+  return retry(load, { shouldRetry: (_, iterations) => iterations <= 5 });
+}
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/proxy-Bq8EHApG.mjs
+function isValidProxyUrl(key) {
+  if (!key)
+    return true;
+  return isHttpOrHttps(key) || isProxyUrlRelative(key);
+}
+function isHttpOrHttps(key) {
+  return /^http(s)?:\/\//.test(key || "");
+}
+function isProxyUrlRelative(key) {
+  return key.startsWith("/");
+}
+function proxyUrlToAbsoluteURL(url) {
+  if (!url)
+    return "";
+  return isProxyUrlRelative(url) ? new URL(url, window.location.origin).toString() : url;
+}
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/url-Cdy8w8vK.mjs
+function addClerkPrefix(str) {
+  if (!str)
+    return "";
+  let regex;
+  if (str.match(/^(clerk\.)+\w*$/))
+    regex = /(clerk\.)*(?=clerk\.)/;
+  else if (str.match(/\.clerk.accounts/))
+    return str;
+  else
+    regex = /^(clerk\.)*/gi;
+  return `clerk.${str.replace(regex, "")}`;
+}
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/versionSelector-B1dLG0_G.mjs
+var versionSelector = (clerkJSVersion, packageVersion = "5.125.7") => {
+  if (clerkJSVersion)
+    return clerkJSVersion;
+  const prereleaseTag = getPrereleaseTag(packageVersion);
+  if (prereleaseTag) {
+    if (prereleaseTag === "snapshot")
+      return "5.125.7";
+    return prereleaseTag;
+  }
+  return getMajorVersion(packageVersion);
+};
+var getPrereleaseTag = (packageVersion) => packageVersion.trim().replace(/^v/, "").match(/-(.+?)(\.|$)/)?.[1];
+var getMajorVersion = (packageVersion) => packageVersion.trim().replace(/^v/, "").split(".")[0];
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/loadClerkJsScript-BcmR4xsJ.mjs
+var ERROR_CODE = "failed_to_load_clerk_js";
+var ERROR_CODE_TIMEOUT = "failed_to_load_clerk_js_timeout";
+var FAILED_TO_LOAD_ERROR = "Failed to load Clerk";
+var { isDevOrStagingUrl } = createDevOrStagingUrlCache();
+var errorThrower2 = buildErrorThrower({ packageName: "@clerk/shared" });
+function setClerkJsLoadingErrorPackageName(packageName) {
+  errorThrower2.setPackageName({ packageName });
+}
+function isClerkProperlyLoaded() {
+  if (typeof window === "undefined" || !window.Clerk)
+    return false;
+  const clerk = window.Clerk;
+  return typeof clerk === "object" && typeof clerk.load === "function";
+}
+function hasScriptRequestError(scriptUrl) {
+  if (typeof window === "undefined" || !window.performance)
+    return false;
+  const entries = performance.getEntriesByName(scriptUrl, "resource");
+  if (entries.length === 0)
+    return false;
+  const scriptEntry = entries[entries.length - 1];
+  if (scriptEntry.transferSize === 0 && scriptEntry.decodedBodySize === 0) {
+    if (scriptEntry.responseEnd === 0)
+      return true;
+    if (scriptEntry.responseEnd > 0 && scriptEntry.responseStart > 0)
+      return true;
+    if ("responseStatus" in scriptEntry) {
+      if (scriptEntry.responseStatus >= 400)
+        return true;
+      if (scriptEntry.responseStatus === 0)
+        return true;
+    }
+  }
+  return false;
+}
+function waitForClerkWithTimeout(timeoutMs, existingScript) {
+  return new Promise((resolve, reject) => {
+    let resolved = false;
+    const cleanup = (timeoutId$1, pollInterval$1) => {
+      clearTimeout(timeoutId$1);
+      clearInterval(pollInterval$1);
+    };
+    existingScript?.addEventListener("error", () => {
+      cleanup(timeoutId, pollInterval);
+      reject(new ClerkRuntimeError(FAILED_TO_LOAD_ERROR, { code: ERROR_CODE }));
+    });
+    const checkAndResolve = () => {
+      if (resolved)
+        return;
+      if (isClerkProperlyLoaded()) {
+        resolved = true;
+        cleanup(timeoutId, pollInterval);
+        resolve(null);
+      }
+    };
+    const handleTimeout = () => {
+      if (resolved)
+        return;
+      resolved = true;
+      cleanup(timeoutId, pollInterval);
+      if (!isClerkProperlyLoaded())
+        reject(new ClerkRuntimeError(FAILED_TO_LOAD_ERROR, { code: ERROR_CODE_TIMEOUT }));
+      else
+        resolve(null);
+    };
+    const timeoutId = setTimeout(handleTimeout, timeoutMs);
+    checkAndResolve();
+    const pollInterval = setInterval(() => {
+      if (resolved) {
+        clearInterval(pollInterval);
+        return;
+      }
+      checkAndResolve();
+    }, 100);
+  });
+}
+var loadClerkJsScript = async (opts) => {
+  const timeout = opts?.scriptLoadTimeout ?? 15000;
+  if (isClerkProperlyLoaded())
+    return null;
+  if (!opts?.publishableKey) {
+    errorThrower2.throwMissingPublishableKeyError();
+    return null;
+  }
+  const scriptUrl = clerkJsScriptUrl(opts);
+  const existingScript = document.querySelector("script[data-clerk-js-script]");
+  if (existingScript)
+    if (hasScriptRequestError(scriptUrl))
+      existingScript.remove();
+    else
+      try {
+        await waitForClerkWithTimeout(timeout, existingScript);
+        return null;
+      } catch {
+        existingScript.remove();
+      }
+  const loadPromise = waitForClerkWithTimeout(timeout);
+  loadScript(scriptUrl, {
+    async: true,
+    crossOrigin: "anonymous",
+    nonce: opts.nonce,
+    beforeLoad: applyClerkJsScriptAttributes(opts)
+  }).catch((error) => {
+    throw new ClerkRuntimeError(FAILED_TO_LOAD_ERROR + (error.message ? `, ${error.message}` : ""), {
+      code: ERROR_CODE,
+      cause: error
+    });
+  });
+  return loadPromise;
+};
+var clerkJsScriptUrl = (opts) => {
+  const { clerkJSUrl, clerkJSVariant, clerkJSVersion, proxyUrl, domain, publishableKey } = opts;
+  if (clerkJSUrl)
+    return clerkJSUrl;
+  let scriptHost = "";
+  if (!!proxyUrl && isValidProxyUrl(proxyUrl))
+    scriptHost = proxyUrlToAbsoluteURL(proxyUrl).replace(/http(s)?:\/\//, "");
+  else if (domain && !isDevOrStagingUrl(parsePublishableKey(publishableKey)?.frontendApi || ""))
+    scriptHost = addClerkPrefix(domain);
+  else
+    scriptHost = parsePublishableKey(publishableKey)?.frontendApi || "";
+  const variant = clerkJSVariant ? `${clerkJSVariant.replace(/\.+$/, "")}.` : "";
+  const version = versionSelector(clerkJSVersion);
+  return `https://${scriptHost}/npm/@clerk/clerk-js@${version}/dist/clerk.${variant}browser.js`;
+};
+var buildClerkJsScriptAttributes = (options) => {
+  const obj = {};
+  if (options.publishableKey)
+    obj["data-clerk-publishable-key"] = options.publishableKey;
+  if (options.proxyUrl)
+    obj["data-clerk-proxy-url"] = options.proxyUrl;
+  if (options.domain)
+    obj["data-clerk-domain"] = options.domain;
+  if (options.nonce)
+    obj.nonce = options.nonce;
+  return obj;
+};
+var applyClerkJsScriptAttributes = (options) => (script) => {
+  const attributes = buildClerkJsScriptAttributes(options);
+  for (const attribute in attributes)
+    script.setAttribute(attribute, attributes[attribute]);
+};
+
+// node_modules/@clerk/clerk-react/dist/index.mjs
+var import_react27 = __toESM(require_react(), 1);
+var import_react28 = __toESM(require_react(), 1);
+var import_react29 = __toESM(require_react(), 1);
+var import_react30 = __toESM(require_react(), 1);
+var import_react31 = __toESM(require_react(), 1);
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/deriveState-ChDqlleE.mjs
+var deriveState = (clerkOperational, state, initialState) => {
+  if (!clerkOperational && initialState)
+    return deriveFromSsrInitialState(initialState);
+  return deriveFromClientSideState(state);
+};
+var deriveFromSsrInitialState = (initialState) => {
+  const userId = initialState.userId;
+  const user = initialState.user;
+  const sessionId = initialState.sessionId;
+  const sessionStatus = initialState.sessionStatus;
+  const sessionClaims = initialState.sessionClaims;
+  return {
+    userId,
+    user,
+    sessionId,
+    session: initialState.session,
+    sessionStatus,
+    sessionClaims,
+    organization: initialState.organization,
+    orgId: initialState.orgId,
+    orgRole: initialState.orgRole,
+    orgPermissions: initialState.orgPermissions,
+    orgSlug: initialState.orgSlug,
+    actor: initialState.actor,
+    factorVerificationAge: initialState.factorVerificationAge
+  };
+};
+var deriveFromClientSideState = (state) => {
+  const userId = state.user ? state.user.id : state.user;
+  const user = state.user;
+  const sessionId = state.session ? state.session.id : state.session;
+  const session = state.session;
+  const sessionStatus = state.session?.status;
+  const sessionClaims = state.session ? state.session.lastActiveToken?.jwt?.claims : null;
+  const factorVerificationAge = state.session ? state.session.factorVerificationAge : null;
+  const actor = session?.actor;
+  const organization = state.organization;
+  const orgId = state.organization ? state.organization.id : state.organization;
+  const orgSlug = organization?.slug;
+  const membership = organization ? user?.organizationMemberships?.find((om) => om.organization.id === orgId) : organization;
+  const orgPermissions = membership ? membership.permissions : membership;
+  return {
+    userId,
+    user,
+    sessionId,
+    session,
+    sessionStatus,
+    sessionClaims,
+    organization,
+    orgId,
+    orgRole: membership ? membership.role : membership,
+    orgSlug,
+    orgPermissions,
+    actor,
+    factorVerificationAge
+  };
+};
+
+// node_modules/@clerk/clerk-react/dist/index.mjs
+var import_react33 = __toESM(require_react(), 1);
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/browser-D5e8obql.mjs
+function inBrowser() {
+  return typeof window !== "undefined";
+}
+var botAgentRegex = new RegExp([
+  "bot",
+  "spider",
+  "crawl",
+  "APIs-Google",
+  "AdsBot",
+  "Googlebot",
+  "mediapartners",
+  "Google Favicon",
+  "FeedFetcher",
+  "Google-Read-Aloud",
+  "DuplexWeb-Google",
+  "googleweblight",
+  "bing",
+  "yandex",
+  "baidu",
+  "duckduck",
+  "yahoo",
+  "ecosia",
+  "ia_archiver",
+  "facebook",
+  "instagram",
+  "pinterest",
+  "reddit",
+  "slack",
+  "twitter",
+  "whatsapp",
+  "youtube",
+  "semrush"
+].join("|"), "i");
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/eventBus-UpdW-1JB.mjs
+var _on = (eventToHandlersMap, latestPayloadMap, event, handler, opts) => {
+  const { notify } = opts || {};
+  let handlers = eventToHandlersMap.get(event);
+  if (!handlers) {
+    handlers = [];
+    eventToHandlersMap.set(event, handlers);
+  }
+  handlers.push(handler);
+  if (notify && latestPayloadMap.has(event))
+    handler(latestPayloadMap.get(event));
+};
+var _dispatch = (eventToHandlersMap, event, payload) => (eventToHandlersMap.get(event) || []).map((h) => h(payload));
+var _off = (eventToHandlersMap, event, handler) => {
+  const handlers = eventToHandlersMap.get(event);
+  if (handlers)
+    if (handler)
+      handlers.splice(handlers.indexOf(handler) >>> 0, 1);
+    else
+      eventToHandlersMap.set(event, []);
+};
+var createEventBus = () => {
+  const eventToHandlersMap = /* @__PURE__ */ new Map;
+  const latestPayloadMap = /* @__PURE__ */ new Map;
+  const eventToPredispatchHandlersMap = /* @__PURE__ */ new Map;
+  const emit = (event, payload) => {
+    latestPayloadMap.set(event, payload);
+    _dispatch(eventToPredispatchHandlersMap, event, payload);
+    _dispatch(eventToHandlersMap, event, payload);
+  };
+  return {
+    on: (...args) => _on(eventToHandlersMap, latestPayloadMap, ...args),
+    prioritizedOn: (...args) => _on(eventToPredispatchHandlersMap, latestPayloadMap, ...args),
+    emit,
+    off: (...args) => _off(eventToHandlersMap, ...args),
+    prioritizedOff: (...args) => _off(eventToPredispatchHandlersMap, ...args),
+    internal: { retrieveListeners: (event) => eventToHandlersMap.get(event) || [] }
+  };
+};
+
+// node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/clerkEventBus.mjs
+var clerkEvents = { Status: "status" };
+var createClerkEventBus = () => {
+  return createEventBus();
+};
+
+// node_modules/@clerk/clerk-react/dist/index.mjs
+if (typeof window !== "undefined" && !window.global) {
+  window.global = typeof global === "undefined" ? window : global;
+}
+var SignInButton = withClerk(({ clerk, children, ...props }) => {
+  const {
+    appearance,
+    signUpFallbackRedirectUrl,
+    forceRedirectUrl,
+    fallbackRedirectUrl,
+    signUpForceRedirectUrl,
+    mode,
+    initialValues,
+    withSignUp,
+    oauthFlow,
+    ...rest
+  } = props;
+  children = normalizeWithDefaultValue(children, "Sign in");
+  const child = assertSingleChild(children)("SignInButton");
+  const clickHandler = () => {
+    const opts = {
+      forceRedirectUrl,
+      fallbackRedirectUrl,
+      signUpFallbackRedirectUrl,
+      signUpForceRedirectUrl,
+      initialValues,
+      withSignUp,
+      oauthFlow
+    };
+    if (mode === "modal") {
+      return clerk.openSignIn({ ...opts, appearance });
+    }
+    return clerk.redirectToSignIn({
+      ...opts,
+      signInFallbackRedirectUrl: fallbackRedirectUrl,
+      signInForceRedirectUrl: forceRedirectUrl
+    });
+  };
+  const wrappedChildClickHandler = async (e) => {
+    if (child && typeof child === "object" && "props" in child) {
+      await safeExecute(child.props.onClick)(e);
+    }
+    return clickHandler();
+  };
+  const childProps = { ...rest, onClick: wrappedChildClickHandler };
+  return import_react27.default.cloneElement(child, childProps);
+}, { component: "SignInButton", renderWhileLoading: true });
+var SignInWithMetamaskButton = withClerk(({ clerk, children, ...props }) => {
+  const { redirectUrl, ...rest } = props;
+  children = normalizeWithDefaultValue(children, "Sign in with Metamask");
+  const child = assertSingleChild(children)("SignInWithMetamaskButton");
+  const clickHandler = async () => {
+    async function authenticate() {
+      await clerk.authenticateWithMetamask({ redirectUrl: redirectUrl || undefined });
+    }
+    authenticate();
+  };
+  const wrappedChildClickHandler = async (e) => {
+    await safeExecute(child.props.onClick)(e);
+    return clickHandler();
+  };
+  const childProps = { ...rest, onClick: wrappedChildClickHandler };
+  return import_react28.default.cloneElement(child, childProps);
+}, { component: "SignInWithMetamask", renderWhileLoading: true });
+var SignOutButton = withClerk(({ clerk, children, ...props }) => {
+  const { redirectUrl = "/", signOutOptions, ...rest } = props;
+  children = normalizeWithDefaultValue(children, "Sign out");
+  const child = assertSingleChild(children)("SignOutButton");
+  const clickHandler = () => clerk.signOut({ redirectUrl, ...signOutOptions });
+  const wrappedChildClickHandler = async (e) => {
+    await safeExecute(child.props.onClick)(e);
+    return clickHandler();
+  };
+  const childProps = { ...rest, onClick: wrappedChildClickHandler };
+  return import_react29.default.cloneElement(child, childProps);
+}, { component: "SignOutButton", renderWhileLoading: true });
+var SignUpButton = withClerk(({ clerk, children, ...props }) => {
+  const {
+    appearance,
+    unsafeMetadata,
+    fallbackRedirectUrl,
+    forceRedirectUrl,
+    signInFallbackRedirectUrl,
+    signInForceRedirectUrl,
+    mode,
+    initialValues,
+    oauthFlow,
+    ...rest
+  } = props;
+  children = normalizeWithDefaultValue(children, "Sign up");
+  const child = assertSingleChild(children)("SignUpButton");
+  const clickHandler = () => {
+    const opts = {
+      fallbackRedirectUrl,
+      forceRedirectUrl,
+      signInFallbackRedirectUrl,
+      signInForceRedirectUrl,
+      initialValues,
+      oauthFlow
+    };
+    if (mode === "modal") {
+      return clerk.openSignUp({
+        ...opts,
+        appearance,
+        unsafeMetadata
+      });
+    }
+    return clerk.redirectToSignUp({
+      ...opts,
+      signUpFallbackRedirectUrl: fallbackRedirectUrl,
+      signUpForceRedirectUrl: forceRedirectUrl
+    });
+  };
+  const wrappedChildClickHandler = async (e) => {
+    if (child && typeof child === "object" && "props" in child) {
+      await safeExecute(child.props.onClick)(e);
+    }
+    return clickHandler();
+  };
+  const childProps = { ...rest, onClick: wrappedChildClickHandler };
+  return import_react30.default.cloneElement(child, childProps);
+}, { component: "SignUpButton", renderWhileLoading: true });
+var defaultSignInErrors = () => ({
+  fields: {
+    identifier: null,
+    password: null,
+    code: null
+  },
+  raw: null,
+  global: null
+});
+var defaultSignUpErrors = () => ({
+  fields: {
+    firstName: null,
+    lastName: null,
+    emailAddress: null,
+    phoneNumber: null,
+    password: null,
+    username: null,
+    code: null,
+    captcha: null,
+    legalAccepted: null
+  },
+  raw: null,
+  global: null
+});
+var StateProxy = class {
+  constructor(isomorphicClerk) {
+    this.isomorphicClerk = isomorphicClerk;
+    this.signInSignalProxy = this.buildSignInProxy();
+    this.signUpSignalProxy = this.buildSignUpProxy();
+  }
+  signInSignal() {
+    return this.signInSignalProxy;
+  }
+  signUpSignal() {
+    return this.signUpSignalProxy;
+  }
+  buildSignInProxy() {
+    const gateProperty = this.gateProperty.bind(this);
+    const target = () => this.client.signIn.__internal_future;
+    return {
+      errors: defaultSignInErrors(),
+      fetchStatus: "idle",
+      signIn: {
+        status: "needs_identifier",
+        availableStrategies: [],
+        isTransferable: false,
+        get id() {
+          return gateProperty(target, "id", undefined);
+        },
+        get supportedFirstFactors() {
+          return gateProperty(target, "supportedFirstFactors", []);
+        },
+        get supportedSecondFactors() {
+          return gateProperty(target, "supportedSecondFactors", []);
+        },
+        get secondFactorVerification() {
+          return gateProperty(target, "secondFactorVerification", {
+            status: null,
+            error: null,
+            expireAt: null,
+            externalVerificationRedirectURL: null,
+            nonce: null,
+            attempts: null,
+            message: null,
+            strategy: null,
+            verifiedAtClient: null,
+            verifiedFromTheSameClient: () => false,
+            __internal_toSnapshot: () => {
+              throw new Error("__internal_toSnapshot called before Clerk is loaded");
+            },
+            pathRoot: "",
+            reload: () => {
+              throw new Error("__internal_toSnapshot called before Clerk is loaded");
+            }
+          });
+        },
+        get identifier() {
+          return gateProperty(target, "identifier", null);
+        },
+        get createdSessionId() {
+          return gateProperty(target, "createdSessionId", null);
+        },
+        get userData() {
+          return gateProperty(target, "userData", {});
+        },
+        get firstFactorVerification() {
+          return gateProperty(target, "firstFactorVerification", {
+            status: null,
+            error: null,
+            expireAt: null,
+            externalVerificationRedirectURL: null,
+            nonce: null,
+            attempts: null,
+            message: null,
+            strategy: null,
+            verifiedAtClient: null,
+            verifiedFromTheSameClient: () => false,
+            __internal_toSnapshot: () => {
+              throw new Error("__internal_toSnapshot called before Clerk is loaded");
+            },
+            pathRoot: "",
+            reload: () => {
+              throw new Error("__internal_toSnapshot called before Clerk is loaded");
+            }
+          });
+        },
+        create: this.gateMethod(target, "create"),
+        password: this.gateMethod(target, "password"),
+        sso: this.gateMethod(target, "sso"),
+        finalize: this.gateMethod(target, "finalize"),
+        emailCode: this.wrapMethods(() => target().emailCode, ["sendCode", "verifyCode"]),
+        emailLink: this.wrapStruct(() => target().emailLink, ["sendLink", "waitForVerification"], ["verification"], { verification: null }),
+        resetPasswordEmailCode: this.wrapMethods(() => target().resetPasswordEmailCode, [
+          "sendCode",
+          "verifyCode",
+          "submitPassword"
+        ]),
+        phoneCode: this.wrapMethods(() => target().phoneCode, ["sendCode", "verifyCode"]),
+        mfa: this.wrapMethods(() => target().mfa, [
+          "sendPhoneCode",
+          "verifyPhoneCode",
+          "verifyTOTP",
+          "verifyBackupCode"
+        ]),
+        ticket: this.gateMethod(target, "ticket"),
+        passkey: this.gateMethod(target, "passkey"),
+        web3: this.gateMethod(target, "web3")
+      }
+    };
+  }
+  buildSignUpProxy() {
+    const gateProperty = this.gateProperty.bind(this);
+    const gateMethod = this.gateMethod.bind(this);
+    const wrapMethods = this.wrapMethods.bind(this);
+    const target = () => this.client.signUp.__internal_future;
+    return {
+      errors: defaultSignUpErrors(),
+      fetchStatus: "idle",
+      signUp: {
+        get id() {
+          return gateProperty(target, "id", undefined);
+        },
+        get requiredFields() {
+          return gateProperty(target, "requiredFields", []);
+        },
+        get optionalFields() {
+          return gateProperty(target, "optionalFields", []);
+        },
+        get missingFields() {
+          return gateProperty(target, "missingFields", []);
+        },
+        get username() {
+          return gateProperty(target, "username", null);
+        },
+        get firstName() {
+          return gateProperty(target, "firstName", null);
+        },
+        get lastName() {
+          return gateProperty(target, "lastName", null);
+        },
+        get emailAddress() {
+          return gateProperty(target, "emailAddress", null);
+        },
+        get phoneNumber() {
+          return gateProperty(target, "phoneNumber", null);
+        },
+        get web3Wallet() {
+          return gateProperty(target, "web3Wallet", null);
+        },
+        get hasPassword() {
+          return gateProperty(target, "hasPassword", false);
+        },
+        get unsafeMetadata() {
+          return gateProperty(target, "unsafeMetadata", {});
+        },
+        get createdSessionId() {
+          return gateProperty(target, "createdSessionId", null);
+        },
+        get createdUserId() {
+          return gateProperty(target, "createdUserId", null);
+        },
+        get abandonAt() {
+          return gateProperty(target, "abandonAt", null);
+        },
+        get legalAcceptedAt() {
+          return gateProperty(target, "legalAcceptedAt", null);
+        },
+        get locale() {
+          return gateProperty(target, "locale", null);
+        },
+        get status() {
+          return gateProperty(target, "status", "missing_requirements");
+        },
+        get unverifiedFields() {
+          return gateProperty(target, "unverifiedFields", []);
+        },
+        get isTransferable() {
+          return gateProperty(target, "isTransferable", false);
+        },
+        create: gateMethod(target, "create"),
+        update: gateMethod(target, "update"),
+        sso: gateMethod(target, "sso"),
+        password: gateMethod(target, "password"),
+        ticket: gateMethod(target, "ticket"),
+        web3: gateMethod(target, "web3"),
+        finalize: gateMethod(target, "finalize"),
+        verifications: wrapMethods(() => target().verifications, [
+          "sendEmailCode",
+          "verifyEmailCode",
+          "sendPhoneCode",
+          "verifyPhoneCode"
+        ])
+      }
+    };
+  }
+  __internal_effect(_) {
+    throw new Error("__internal_effect called before Clerk is loaded");
+  }
+  __internal_computed(_) {
+    throw new Error("__internal_computed called before Clerk is loaded");
+  }
+  get client() {
+    const c = this.isomorphicClerk.client;
+    if (!c) {
+      throw new Error("Clerk client not ready");
+    }
+    return c;
+  }
+  gateProperty(getTarget, key, defaultValue) {
+    return (() => {
+      if (!inBrowser() || !this.isomorphicClerk.loaded) {
+        return defaultValue;
+      }
+      const t = getTarget();
+      return t[key];
+    })();
+  }
+  gateMethod(getTarget, key) {
+    return async (...args) => {
+      if (!inBrowser()) {
+        return errorThrower.throw(`Attempted to call a method (${key}) that is not supported on the server.`);
+      }
+      if (!this.isomorphicClerk.loaded) {
+        await new Promise((resolve) => this.isomorphicClerk.addOnLoaded(resolve));
+      }
+      const t = getTarget();
+      return t[key].apply(t, args);
+    };
+  }
+  wrapMethods(getTarget, keys) {
+    return Object.fromEntries(keys.map((k) => [k, this.gateMethod(getTarget, k)]));
+  }
+  wrapStruct(getTarget, methods, getters, fallbacks) {
+    const out = {};
+    for (const m of methods) {
+      out[m] = this.gateMethod(getTarget, m);
+    }
+    for (const g of getters) {
+      Object.defineProperty(out, g, {
+        get: () => this.gateProperty(getTarget, g, fallbacks[g]),
+        enumerable: true
+      });
+    }
+    return out;
+  }
+};
+if (typeof globalThis.__BUILD_DISABLE_RHC__ === "undefined") {
+  globalThis.__BUILD_DISABLE_RHC__ = false;
+}
+var SDK_METADATA = {
+  name: "@clerk/clerk-react",
+  version: "5.61.3",
+  environment: "development"
+};
+var _status;
+var _domain;
+var _proxyUrl;
+var _publishableKey;
+var _eventBus;
+var _stateProxy;
+var _instance;
+var _IsomorphicClerk_instances;
+var waitForClerkJS_fn;
+var _IsomorphicClerk = class _IsomorphicClerk2 {
+  constructor(options) {
+    __privateAdd(this, _IsomorphicClerk_instances);
+    this.clerkjs = null;
+    this.preopenOneTap = null;
+    this.preopenUserVerification = null;
+    this.preopenEnableOrganizationsPrompt = null;
+    this.preopenSignIn = null;
+    this.preopenCheckout = null;
+    this.preopenPlanDetails = null;
+    this.preopenSubscriptionDetails = null;
+    this.preopenSignUp = null;
+    this.preopenUserProfile = null;
+    this.preopenOrganizationProfile = null;
+    this.preopenCreateOrganization = null;
+    this.preOpenWaitlist = null;
+    this.premountSignInNodes = /* @__PURE__ */ new Map;
+    this.premountSignUpNodes = /* @__PURE__ */ new Map;
+    this.premountUserAvatarNodes = /* @__PURE__ */ new Map;
+    this.premountUserProfileNodes = /* @__PURE__ */ new Map;
+    this.premountUserButtonNodes = /* @__PURE__ */ new Map;
+    this.premountOrganizationProfileNodes = /* @__PURE__ */ new Map;
+    this.premountCreateOrganizationNodes = /* @__PURE__ */ new Map;
+    this.premountOrganizationSwitcherNodes = /* @__PURE__ */ new Map;
+    this.premountOrganizationListNodes = /* @__PURE__ */ new Map;
+    this.premountMethodCalls = /* @__PURE__ */ new Map;
+    this.premountWaitlistNodes = /* @__PURE__ */ new Map;
+    this.premountPricingTableNodes = /* @__PURE__ */ new Map;
+    this.premountAPIKeysNodes = /* @__PURE__ */ new Map;
+    this.premountOAuthConsentNodes = /* @__PURE__ */ new Map;
+    this.premountTaskChooseOrganizationNodes = /* @__PURE__ */ new Map;
+    this.premountTaskResetPasswordNodes = /* @__PURE__ */ new Map;
+    this.premountTaskSetupMFANodes = /* @__PURE__ */ new Map;
+    this.premountAddListenerCalls = /* @__PURE__ */ new Map;
+    this.loadedListeners = [];
+    __privateAdd(this, _status, "loading");
+    __privateAdd(this, _domain);
+    __privateAdd(this, _proxyUrl);
+    __privateAdd(this, _publishableKey);
+    __privateAdd(this, _eventBus, createClerkEventBus());
+    __privateAdd(this, _stateProxy);
+    this.buildSignInUrl = (opts) => {
+      const callback = () => {
+        var _a;
+        return ((_a = this.clerkjs) == null ? undefined : _a.buildSignInUrl(opts)) || "";
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("buildSignInUrl", callback);
+      }
+    };
+    this.buildSignUpUrl = (opts) => {
+      const callback = () => {
+        var _a;
+        return ((_a = this.clerkjs) == null ? undefined : _a.buildSignUpUrl(opts)) || "";
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("buildSignUpUrl", callback);
+      }
+    };
+    this.buildAfterSignInUrl = (...args) => {
+      const callback = () => {
+        var _a;
+        return ((_a = this.clerkjs) == null ? undefined : _a.buildAfterSignInUrl(...args)) || "";
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("buildAfterSignInUrl", callback);
+      }
+    };
+    this.buildAfterSignUpUrl = (...args) => {
+      const callback = () => {
+        var _a;
+        return ((_a = this.clerkjs) == null ? undefined : _a.buildAfterSignUpUrl(...args)) || "";
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("buildAfterSignUpUrl", callback);
+      }
+    };
+    this.buildAfterSignOutUrl = () => {
+      const callback = () => {
+        var _a;
+        return ((_a = this.clerkjs) == null ? undefined : _a.buildAfterSignOutUrl()) || "";
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("buildAfterSignOutUrl", callback);
+      }
+    };
+    this.buildNewSubscriptionRedirectUrl = () => {
+      const callback = () => {
+        var _a;
+        return ((_a = this.clerkjs) == null ? undefined : _a.buildNewSubscriptionRedirectUrl()) || "";
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("buildNewSubscriptionRedirectUrl", callback);
+      }
+    };
+    this.buildAfterMultiSessionSingleSignOutUrl = () => {
+      const callback = () => {
+        var _a;
+        return ((_a = this.clerkjs) == null ? undefined : _a.buildAfterMultiSessionSingleSignOutUrl()) || "";
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("buildAfterMultiSessionSingleSignOutUrl", callback);
+      }
+    };
+    this.buildUserProfileUrl = () => {
+      const callback = () => {
+        var _a;
+        return ((_a = this.clerkjs) == null ? undefined : _a.buildUserProfileUrl()) || "";
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("buildUserProfileUrl", callback);
+      }
+    };
+    this.buildCreateOrganizationUrl = () => {
+      const callback = () => {
+        var _a;
+        return ((_a = this.clerkjs) == null ? undefined : _a.buildCreateOrganizationUrl()) || "";
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("buildCreateOrganizationUrl", callback);
+      }
+    };
+    this.buildOrganizationProfileUrl = () => {
+      const callback = () => {
+        var _a;
+        return ((_a = this.clerkjs) == null ? undefined : _a.buildOrganizationProfileUrl()) || "";
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("buildOrganizationProfileUrl", callback);
+      }
+    };
+    this.buildWaitlistUrl = () => {
+      const callback = () => {
+        var _a;
+        return ((_a = this.clerkjs) == null ? undefined : _a.buildWaitlistUrl()) || "";
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("buildWaitlistUrl", callback);
+      }
+    };
+    this.buildTasksUrl = () => {
+      const callback = () => {
+        var _a;
+        return ((_a = this.clerkjs) == null ? undefined : _a.buildTasksUrl()) || "";
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("buildTasksUrl", callback);
+      }
+    };
+    this.buildUrlWithAuth = (to) => {
+      const callback = () => {
+        var _a;
+        return ((_a = this.clerkjs) == null ? undefined : _a.buildUrlWithAuth(to)) || "";
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("buildUrlWithAuth", callback);
+      }
+    };
+    this.handleUnauthenticated = async () => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.handleUnauthenticated();
+      };
+      if (this.clerkjs && this.loaded) {
+        callback();
+      } else {
+        this.premountMethodCalls.set("handleUnauthenticated", callback);
+      }
+    };
+    this.on = (...args) => {
+      var _a;
+      if ((_a = this.clerkjs) == null ? undefined : _a.on) {
+        return this.clerkjs.on(...args);
+      } else {
+        __privateGet(this, _eventBus).on(...args);
+      }
+    };
+    this.off = (...args) => {
+      var _a;
+      if ((_a = this.clerkjs) == null ? undefined : _a.off) {
+        return this.clerkjs.off(...args);
+      } else {
+        __privateGet(this, _eventBus).off(...args);
+      }
+    };
+    this.addOnLoaded = (cb) => {
+      this.loadedListeners.push(cb);
+      if (this.loaded) {
+        this.emitLoaded();
+      }
+    };
+    this.emitLoaded = () => {
+      this.loadedListeners.forEach((cb) => cb());
+      this.loadedListeners = [];
+    };
+    this.beforeLoad = (clerkjs) => {
+      if (!clerkjs) {
+        throw new Error("Failed to hydrate latest Clerk JS");
+      }
+    };
+    this.hydrateClerkJS = (clerkjs) => {
+      var _a, _b;
+      if (!clerkjs) {
+        throw new Error("Failed to hydrate latest Clerk JS");
+      }
+      this.clerkjs = clerkjs;
+      this.premountMethodCalls.forEach((cb) => cb());
+      this.premountAddListenerCalls.forEach((listenerHandlers, listener) => {
+        listenerHandlers.nativeUnsubscribe = clerkjs.addListener(listener);
+      });
+      (_a = __privateGet(this, _eventBus).internal.retrieveListeners("status")) == null || _a.forEach((listener) => {
+        this.on("status", listener, { notify: true });
+      });
+      (_b = __privateGet(this, _eventBus).internal.retrieveListeners("queryClientStatus")) == null || _b.forEach((listener) => {
+        this.on("queryClientStatus", listener, { notify: true });
+      });
+      if (this.preopenSignIn !== null) {
+        clerkjs.openSignIn(this.preopenSignIn);
+      }
+      if (this.preopenCheckout !== null) {
+        clerkjs.__internal_openCheckout(this.preopenCheckout);
+      }
+      if (this.preopenPlanDetails !== null) {
+        clerkjs.__internal_openPlanDetails(this.preopenPlanDetails);
+      }
+      if (this.preopenSubscriptionDetails !== null) {
+        clerkjs.__internal_openSubscriptionDetails(this.preopenSubscriptionDetails);
+      }
+      if (this.preopenSignUp !== null) {
+        clerkjs.openSignUp(this.preopenSignUp);
+      }
+      if (this.preopenUserProfile !== null) {
+        clerkjs.openUserProfile(this.preopenUserProfile);
+      }
+      if (this.preopenUserVerification !== null) {
+        clerkjs.__internal_openReverification(this.preopenUserVerification);
+      }
+      if (this.preopenOneTap !== null) {
+        clerkjs.openGoogleOneTap(this.preopenOneTap);
+      }
+      if (this.preopenOrganizationProfile !== null) {
+        clerkjs.openOrganizationProfile(this.preopenOrganizationProfile);
+      }
+      if (this.preopenCreateOrganization !== null) {
+        clerkjs.openCreateOrganization(this.preopenCreateOrganization);
+      }
+      if (this.preOpenWaitlist !== null) {
+        clerkjs.openWaitlist(this.preOpenWaitlist);
+      }
+      if (this.preopenEnableOrganizationsPrompt) {
+        clerkjs.__internal_openEnableOrganizationsPrompt(this.preopenEnableOrganizationsPrompt);
+      }
+      this.premountSignInNodes.forEach((props, node) => {
+        clerkjs.mountSignIn(node, props);
+      });
+      this.premountSignUpNodes.forEach((props, node) => {
+        clerkjs.mountSignUp(node, props);
+      });
+      this.premountUserProfileNodes.forEach((props, node) => {
+        clerkjs.mountUserProfile(node, props);
+      });
+      this.premountUserAvatarNodes.forEach((props, node) => {
+        clerkjs.mountUserAvatar(node, props);
+      });
+      this.premountUserButtonNodes.forEach((props, node) => {
+        clerkjs.mountUserButton(node, props);
+      });
+      this.premountOrganizationListNodes.forEach((props, node) => {
+        clerkjs.mountOrganizationList(node, props);
+      });
+      this.premountWaitlistNodes.forEach((props, node) => {
+        clerkjs.mountWaitlist(node, props);
+      });
+      this.premountPricingTableNodes.forEach((props, node) => {
+        clerkjs.mountPricingTable(node, props);
+      });
+      this.premountAPIKeysNodes.forEach((props, node) => {
+        clerkjs.mountAPIKeys(node, props);
+      });
+      this.premountOAuthConsentNodes.forEach((props, node) => {
+        clerkjs.__internal_mountOAuthConsent(node, props);
+      });
+      this.premountTaskChooseOrganizationNodes.forEach((props, node) => {
+        clerkjs.mountTaskChooseOrganization(node, props);
+      });
+      this.premountTaskResetPasswordNodes.forEach((props, node) => {
+        clerkjs.mountTaskResetPassword(node, props);
+      });
+      this.premountTaskSetupMFANodes.forEach((props, node) => {
+        clerkjs.mountTaskSetupMFA(node, props);
+      });
+      if (typeof this.clerkjs.status === "undefined") {
+        __privateGet(this, _eventBus).emit(clerkEvents.Status, "ready");
+      }
+      this.emitLoaded();
+      return this.clerkjs;
+    };
+    this.__experimental_checkout = (...args) => {
+      var _a;
+      return (_a = this.clerkjs) == null ? undefined : _a.__experimental_checkout(...args);
+    };
+    this.__unstable__updateProps = async (props) => {
+      const clerkjs = await __privateMethod(this, _IsomorphicClerk_instances, waitForClerkJS_fn).call(this);
+      if (clerkjs && "__unstable__updateProps" in clerkjs) {
+        return clerkjs.__unstable__updateProps(props);
+      }
+    };
+    this.setActive = (params) => {
+      if (this.clerkjs) {
+        return this.clerkjs.setActive(params);
+      } else {
+        return Promise.reject();
+      }
+    };
+    this.openSignIn = (props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.openSignIn(props);
+      } else {
+        this.preopenSignIn = props;
+      }
+    };
+    this.closeSignIn = () => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.closeSignIn();
+      } else {
+        this.preopenSignIn = null;
+      }
+    };
+    this.__internal_openCheckout = (props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.__internal_openCheckout(props);
+      } else {
+        this.preopenCheckout = props;
+      }
+    };
+    this.__internal_closeCheckout = () => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.__internal_closeCheckout();
+      } else {
+        this.preopenCheckout = null;
+      }
+    };
+    this.__internal_openPlanDetails = (props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.__internal_openPlanDetails(props);
+      } else {
+        this.preopenPlanDetails = props;
+      }
+    };
+    this.__internal_closePlanDetails = () => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.__internal_closePlanDetails();
+      } else {
+        this.preopenPlanDetails = null;
+      }
+    };
+    this.__internal_openSubscriptionDetails = (props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.__internal_openSubscriptionDetails(props);
+      } else {
+        this.preopenSubscriptionDetails = props != null ? props : null;
+      }
+    };
+    this.__internal_closeSubscriptionDetails = () => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.__internal_closeSubscriptionDetails();
+      } else {
+        this.preopenSubscriptionDetails = null;
+      }
+    };
+    this.__internal_openReverification = (props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.__internal_openReverification(props);
+      } else {
+        this.preopenUserVerification = props;
+      }
+    };
+    this.__internal_closeReverification = () => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.__internal_closeReverification();
+      } else {
+        this.preopenUserVerification = null;
+      }
+    };
+    this.__internal_openEnableOrganizationsPrompt = (props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.__internal_openEnableOrganizationsPrompt(props);
+      } else {
+        this.preopenEnableOrganizationsPrompt = props;
+      }
+    };
+    this.__internal_closeEnableOrganizationsPrompt = () => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.__internal_closeEnableOrganizationsPrompt();
+      } else {
+        this.preopenEnableOrganizationsPrompt = null;
+      }
+    };
+    this.openGoogleOneTap = (props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.openGoogleOneTap(props);
+      } else {
+        this.preopenOneTap = props;
+      }
+    };
+    this.closeGoogleOneTap = () => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.closeGoogleOneTap();
+      } else {
+        this.preopenOneTap = null;
+      }
+    };
+    this.openUserProfile = (props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.openUserProfile(props);
+      } else {
+        this.preopenUserProfile = props;
+      }
+    };
+    this.closeUserProfile = () => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.closeUserProfile();
+      } else {
+        this.preopenUserProfile = null;
+      }
+    };
+    this.openOrganizationProfile = (props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.openOrganizationProfile(props);
+      } else {
+        this.preopenOrganizationProfile = props;
+      }
+    };
+    this.closeOrganizationProfile = () => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.closeOrganizationProfile();
+      } else {
+        this.preopenOrganizationProfile = null;
+      }
+    };
+    this.openCreateOrganization = (props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.openCreateOrganization(props);
+      } else {
+        this.preopenCreateOrganization = props;
+      }
+    };
+    this.closeCreateOrganization = () => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.closeCreateOrganization();
+      } else {
+        this.preopenCreateOrganization = null;
+      }
+    };
+    this.openWaitlist = (props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.openWaitlist(props);
+      } else {
+        this.preOpenWaitlist = props;
+      }
+    };
+    this.closeWaitlist = () => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.closeWaitlist();
+      } else {
+        this.preOpenWaitlist = null;
+      }
+    };
+    this.openSignUp = (props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.openSignUp(props);
+      } else {
+        this.preopenSignUp = props;
+      }
+    };
+    this.closeSignUp = () => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.closeSignUp();
+      } else {
+        this.preopenSignUp = null;
+      }
+    };
+    this.mountSignIn = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountSignIn(node, props);
+      } else {
+        this.premountSignInNodes.set(node, props);
+      }
+    };
+    this.unmountSignIn = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountSignIn(node);
+      } else {
+        this.premountSignInNodes.delete(node);
+      }
+    };
+    this.mountSignUp = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountSignUp(node, props);
+      } else {
+        this.premountSignUpNodes.set(node, props);
+      }
+    };
+    this.unmountSignUp = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountSignUp(node);
+      } else {
+        this.premountSignUpNodes.delete(node);
+      }
+    };
+    this.mountUserAvatar = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountUserAvatar(node, props);
+      } else {
+        this.premountUserAvatarNodes.set(node, props);
+      }
+    };
+    this.unmountUserAvatar = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountUserAvatar(node);
+      } else {
+        this.premountUserAvatarNodes.delete(node);
+      }
+    };
+    this.mountUserProfile = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountUserProfile(node, props);
+      } else {
+        this.premountUserProfileNodes.set(node, props);
+      }
+    };
+    this.unmountUserProfile = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountUserProfile(node);
+      } else {
+        this.premountUserProfileNodes.delete(node);
+      }
+    };
+    this.mountOrganizationProfile = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountOrganizationProfile(node, props);
+      } else {
+        this.premountOrganizationProfileNodes.set(node, props);
+      }
+    };
+    this.unmountOrganizationProfile = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountOrganizationProfile(node);
+      } else {
+        this.premountOrganizationProfileNodes.delete(node);
+      }
+    };
+    this.mountCreateOrganization = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountCreateOrganization(node, props);
+      } else {
+        this.premountCreateOrganizationNodes.set(node, props);
+      }
+    };
+    this.unmountCreateOrganization = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountCreateOrganization(node);
+      } else {
+        this.premountCreateOrganizationNodes.delete(node);
+      }
+    };
+    this.mountOrganizationSwitcher = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountOrganizationSwitcher(node, props);
+      } else {
+        this.premountOrganizationSwitcherNodes.set(node, props);
+      }
+    };
+    this.unmountOrganizationSwitcher = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountOrganizationSwitcher(node);
+      } else {
+        this.premountOrganizationSwitcherNodes.delete(node);
+      }
+    };
+    this.__experimental_prefetchOrganizationSwitcher = () => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.__experimental_prefetchOrganizationSwitcher();
+      };
+      if (this.clerkjs && this.loaded) {
+        callback();
+      } else {
+        this.premountMethodCalls.set("__experimental_prefetchOrganizationSwitcher", callback);
+      }
+    };
+    this.mountOrganizationList = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountOrganizationList(node, props);
+      } else {
+        this.premountOrganizationListNodes.set(node, props);
+      }
+    };
+    this.unmountOrganizationList = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountOrganizationList(node);
+      } else {
+        this.premountOrganizationListNodes.delete(node);
+      }
+    };
+    this.mountUserButton = (node, userButtonProps) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountUserButton(node, userButtonProps);
+      } else {
+        this.premountUserButtonNodes.set(node, userButtonProps);
+      }
+    };
+    this.unmountUserButton = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountUserButton(node);
+      } else {
+        this.premountUserButtonNodes.delete(node);
+      }
+    };
+    this.mountWaitlist = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountWaitlist(node, props);
+      } else {
+        this.premountWaitlistNodes.set(node, props);
+      }
+    };
+    this.unmountWaitlist = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountWaitlist(node);
+      } else {
+        this.premountWaitlistNodes.delete(node);
+      }
+    };
+    this.mountPricingTable = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountPricingTable(node, props);
+      } else {
+        this.premountPricingTableNodes.set(node, props);
+      }
+    };
+    this.unmountPricingTable = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountPricingTable(node);
+      } else {
+        this.premountPricingTableNodes.delete(node);
+      }
+    };
+    this.mountAPIKeys = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountAPIKeys(node, props);
+      } else {
+        this.premountAPIKeysNodes.set(node, props);
+      }
+    };
+    this.unmountAPIKeys = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountAPIKeys(node);
+      } else {
+        this.premountAPIKeysNodes.delete(node);
+      }
+    };
+    this.__internal_mountOAuthConsent = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.__internal_mountOAuthConsent(node, props);
+      } else {
+        this.premountOAuthConsentNodes.set(node, props);
+      }
+    };
+    this.__internal_unmountOAuthConsent = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.__internal_unmountOAuthConsent(node);
+      } else {
+        this.premountOAuthConsentNodes.delete(node);
+      }
+    };
+    this.mountTaskChooseOrganization = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountTaskChooseOrganization(node, props);
+      } else {
+        this.premountTaskChooseOrganizationNodes.set(node, props);
+      }
+    };
+    this.unmountTaskChooseOrganization = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountTaskChooseOrganization(node);
+      } else {
+        this.premountTaskChooseOrganizationNodes.delete(node);
+      }
+    };
+    this.mountTaskResetPassword = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountTaskResetPassword(node, props);
+      } else {
+        this.premountTaskResetPasswordNodes.set(node, props);
+      }
+    };
+    this.unmountTaskResetPassword = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountTaskResetPassword(node);
+      } else {
+        this.premountTaskResetPasswordNodes.delete(node);
+      }
+    };
+    this.mountTaskSetupMFA = (node, props) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.mountTaskSetupMFA(node, props);
+      } else {
+        this.premountTaskSetupMFANodes.set(node, props);
+      }
+    };
+    this.unmountTaskSetupMFA = (node) => {
+      if (this.clerkjs && this.loaded) {
+        this.clerkjs.unmountTaskSetupMFA(node);
+      } else {
+        this.premountTaskSetupMFANodes.delete(node);
+      }
+    };
+    this.addListener = (listener) => {
+      if (this.clerkjs) {
+        return this.clerkjs.addListener(listener);
+      } else {
+        const unsubscribe = () => {
+          var _a;
+          const listenerHandlers = this.premountAddListenerCalls.get(listener);
+          if (listenerHandlers) {
+            (_a = listenerHandlers.nativeUnsubscribe) == null || _a.call(listenerHandlers);
+            this.premountAddListenerCalls.delete(listener);
+          }
+        };
+        this.premountAddListenerCalls.set(listener, { unsubscribe, nativeUnsubscribe: undefined });
+        return unsubscribe;
+      }
+    };
+    this.navigate = (to) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.navigate(to);
+      };
+      if (this.clerkjs && this.loaded) {
+        callback();
+      } else {
+        this.premountMethodCalls.set("navigate", callback);
+      }
+    };
+    this.redirectWithAuth = async (...args) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.redirectWithAuth(...args);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("redirectWithAuth", callback);
+        return;
+      }
+    };
+    this.redirectToSignIn = async (opts) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.redirectToSignIn(opts);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("redirectToSignIn", callback);
+        return;
+      }
+    };
+    this.redirectToSignUp = async (opts) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.redirectToSignUp(opts);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("redirectToSignUp", callback);
+        return;
+      }
+    };
+    this.redirectToUserProfile = async () => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.redirectToUserProfile();
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("redirectToUserProfile", callback);
+        return;
+      }
+    };
+    this.redirectToAfterSignUp = () => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.redirectToAfterSignUp();
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("redirectToAfterSignUp", callback);
+      }
+    };
+    this.redirectToAfterSignIn = () => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.redirectToAfterSignIn();
+      };
+      if (this.clerkjs && this.loaded) {
+        callback();
+      } else {
+        this.premountMethodCalls.set("redirectToAfterSignIn", callback);
+      }
+    };
+    this.redirectToAfterSignOut = () => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.redirectToAfterSignOut();
+      };
+      if (this.clerkjs && this.loaded) {
+        callback();
+      } else {
+        this.premountMethodCalls.set("redirectToAfterSignOut", callback);
+      }
+    };
+    this.redirectToOrganizationProfile = async () => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.redirectToOrganizationProfile();
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("redirectToOrganizationProfile", callback);
+        return;
+      }
+    };
+    this.redirectToCreateOrganization = async () => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.redirectToCreateOrganization();
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("redirectToCreateOrganization", callback);
+        return;
+      }
+    };
+    this.redirectToWaitlist = async () => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.redirectToWaitlist();
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("redirectToWaitlist", callback);
+        return;
+      }
+    };
+    this.redirectToTasks = async (opts) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.redirectToTasks(opts);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("redirectToTasks", callback);
+        return;
+      }
+    };
+    this.handleRedirectCallback = async (params) => {
+      var _a;
+      const callback = () => {
+        var _a2;
+        return (_a2 = this.clerkjs) == null ? undefined : _a2.handleRedirectCallback(params);
+      };
+      if (this.clerkjs && this.loaded) {
+        (_a = callback()) == null || _a.catch(() => {});
+      } else {
+        this.premountMethodCalls.set("handleRedirectCallback", callback);
+      }
+    };
+    this.handleGoogleOneTapCallback = async (signInOrUp, params) => {
+      var _a;
+      const callback = () => {
+        var _a2;
+        return (_a2 = this.clerkjs) == null ? undefined : _a2.handleGoogleOneTapCallback(signInOrUp, params);
+      };
+      if (this.clerkjs && this.loaded) {
+        (_a = callback()) == null || _a.catch(() => {});
+      } else {
+        this.premountMethodCalls.set("handleGoogleOneTapCallback", callback);
+      }
+    };
+    this.handleEmailLinkVerification = async (params) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.handleEmailLinkVerification(params);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("handleEmailLinkVerification", callback);
+      }
+    };
+    this.authenticateWithMetamask = async (params) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.authenticateWithMetamask(params);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("authenticateWithMetamask", callback);
+      }
+    };
+    this.authenticateWithCoinbaseWallet = async (params) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.authenticateWithCoinbaseWallet(params);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("authenticateWithCoinbaseWallet", callback);
+      }
+    };
+    this.authenticateWithBase = async (params) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.authenticateWithBase(params);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("authenticateWithBase", callback);
+      }
+    };
+    this.authenticateWithOKXWallet = async (params) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.authenticateWithOKXWallet(params);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("authenticateWithOKXWallet", callback);
+      }
+    };
+    this.authenticateWithSolana = async (params) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.authenticateWithSolana(params);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("authenticateWithSolana", callback);
+      }
+    };
+    this.authenticateWithWeb3 = async (params) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.authenticateWithWeb3(params);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("authenticateWithWeb3", callback);
+      }
+    };
+    this.authenticateWithGoogleOneTap = async (params) => {
+      const clerkjs = await __privateMethod(this, _IsomorphicClerk_instances, waitForClerkJS_fn).call(this);
+      return clerkjs.authenticateWithGoogleOneTap(params);
+    };
+    this.__internal_loadStripeJs = async () => {
+      const clerkjs = await __privateMethod(this, _IsomorphicClerk_instances, waitForClerkJS_fn).call(this);
+      return clerkjs.__internal_loadStripeJs();
+    };
+    this.createOrganization = async (params) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.createOrganization(params);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("createOrganization", callback);
+      }
+    };
+    this.getOrganization = async (organizationId) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.getOrganization(organizationId);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("getOrganization", callback);
+      }
+    };
+    this.joinWaitlist = async (params) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.joinWaitlist(params);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("joinWaitlist", callback);
+      }
+    };
+    this.signOut = async (...args) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.signOut(...args);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("signOut", callback);
+      }
+    };
+    this.__internal_attemptToEnableEnvironmentSetting = (options2) => {
+      const callback = () => {
+        var _a;
+        return (_a = this.clerkjs) == null ? undefined : _a.__internal_attemptToEnableEnvironmentSetting(options2);
+      };
+      if (this.clerkjs && this.loaded) {
+        return callback();
+      } else {
+        this.premountMethodCalls.set("__internal_attemptToEnableEnvironmentSetting", callback);
+      }
+    };
+    const { Clerk = null, publishableKey } = options || {};
+    __privateSet(this, _publishableKey, publishableKey);
+    __privateSet(this, _proxyUrl, options == null ? undefined : options.proxyUrl);
+    __privateSet(this, _domain, options == null ? undefined : options.domain);
+    this.options = options;
+    this.Clerk = Clerk;
+    this.mode = inBrowser() ? "browser" : "server";
+    __privateSet(this, _stateProxy, new StateProxy(this));
+    if (!this.options.sdkMetadata) {
+      this.options.sdkMetadata = SDK_METADATA;
+    }
+    __privateGet(this, _eventBus).emit(clerkEvents.Status, "loading");
+    __privateGet(this, _eventBus).prioritizedOn(clerkEvents.Status, (status) => __privateSet(this, _status, status));
+    if (__privateGet(this, _publishableKey)) {
+      this.loadClerkJS();
+    }
+  }
+  get publishableKey() {
+    return __privateGet(this, _publishableKey);
+  }
+  get loaded() {
+    var _a;
+    return ((_a = this.clerkjs) == null ? undefined : _a.loaded) || false;
+  }
+  get status() {
+    var _a;
+    if (!this.clerkjs) {
+      return __privateGet(this, _status);
+    }
+    return ((_a = this.clerkjs) == null ? undefined : _a.status) || (this.clerkjs.loaded ? "ready" : "loading");
+  }
+  static getOrCreateInstance(options) {
+    if (!inBrowser() || !__privateGet(this, _instance) || options.Clerk && __privateGet(this, _instance).Clerk !== options.Clerk || __privateGet(this, _instance).publishableKey !== options.publishableKey) {
+      __privateSet(this, _instance, new _IsomorphicClerk2(options));
+    }
+    return __privateGet(this, _instance);
+  }
+  static clearInstance() {
+    __privateSet(this, _instance, null);
+  }
+  get domain() {
+    if (typeof window !== "undefined" && window.location) {
+      return handleValueOrFn(__privateGet(this, _domain), new URL(window.location.href), "");
+    }
+    if (typeof __privateGet(this, _domain) === "function") {
+      return errorThrower.throw(unsupportedNonBrowserDomainOrProxyUrlFunction);
+    }
+    return __privateGet(this, _domain) || "";
+  }
+  get proxyUrl() {
+    if (typeof window !== "undefined" && window.location) {
+      return handleValueOrFn(__privateGet(this, _proxyUrl), new URL(window.location.href), "");
+    }
+    if (typeof __privateGet(this, _proxyUrl) === "function") {
+      return errorThrower.throw(unsupportedNonBrowserDomainOrProxyUrlFunction);
+    }
+    return __privateGet(this, _proxyUrl) || "";
+  }
+  __internal_getOption(key) {
+    var _a, _b;
+    return ((_a = this.clerkjs) == null ? undefined : _a.__internal_getOption) ? (_b = this.clerkjs) == null ? undefined : _b.__internal_getOption(key) : this.options[key];
+  }
+  get sdkMetadata() {
+    var _a;
+    return ((_a = this.clerkjs) == null ? undefined : _a.sdkMetadata) || this.options.sdkMetadata || undefined;
+  }
+  get instanceType() {
+    var _a;
+    return (_a = this.clerkjs) == null ? undefined : _a.instanceType;
+  }
+  get frontendApi() {
+    var _a;
+    return ((_a = this.clerkjs) == null ? undefined : _a.frontendApi) || "";
+  }
+  get isStandardBrowser() {
+    var _a;
+    return ((_a = this.clerkjs) == null ? undefined : _a.isStandardBrowser) || this.options.standardBrowser || false;
+  }
+  get __internal_queryClient() {
+    var _a;
+    return (_a = this.clerkjs) == null ? undefined : _a.__internal_queryClient;
+  }
+  get isSatellite() {
+    if (typeof window !== "undefined" && window.location) {
+      return handleValueOrFn(this.options.isSatellite, new URL(window.location.href), false);
+    }
+    if (typeof this.options.isSatellite === "function") {
+      return errorThrower.throw(unsupportedNonBrowserDomainOrProxyUrlFunction);
+    }
+    return false;
+  }
+  async loadClerkJS() {
+    var _a;
+    if (this.mode !== "browser" || this.loaded) {
+      return;
+    }
+    if (typeof window !== "undefined") {
+      window.__clerk_publishable_key = __privateGet(this, _publishableKey);
+      window.__clerk_proxy_url = this.proxyUrl;
+      window.__clerk_domain = this.domain;
+    }
+    try {
+      if (this.Clerk) {
+        let c;
+        if (isConstructor(this.Clerk)) {
+          c = new this.Clerk(__privateGet(this, _publishableKey), {
+            proxyUrl: this.proxyUrl,
+            domain: this.domain
+          });
+          this.beforeLoad(c);
+          await c.load(this.options);
+        } else {
+          c = this.Clerk;
+          if (!c.loaded) {
+            this.beforeLoad(c);
+            await c.load(this.options);
+          }
+        }
+        global.Clerk = c;
+      } else if (!__BUILD_DISABLE_RHC__) {
+        if (!global.Clerk) {
+          await loadClerkJsScript({
+            ...this.options,
+            publishableKey: __privateGet(this, _publishableKey),
+            proxyUrl: this.proxyUrl,
+            domain: this.domain,
+            nonce: this.options.nonce
+          });
+        }
+        if (!global.Clerk) {
+          throw new Error("Failed to download latest ClerkJS. Contact support@clerk.com.");
+        }
+        this.beforeLoad(global.Clerk);
+        await global.Clerk.load(this.options);
+      }
+      if ((_a = global.Clerk) == null ? undefined : _a.loaded) {
+        return this.hydrateClerkJS(global.Clerk);
+      }
+      return;
+    } catch (err) {
+      const error = err;
+      __privateGet(this, _eventBus).emit(clerkEvents.Status, "error");
+      console.error(error.stack || error.message || error);
+      return;
+    }
+  }
+  get version() {
+    var _a;
+    return (_a = this.clerkjs) == null ? undefined : _a.version;
+  }
+  get client() {
+    if (this.clerkjs) {
+      return this.clerkjs.client;
+    } else {
+      return;
+    }
+  }
+  get session() {
+    if (this.clerkjs) {
+      return this.clerkjs.session;
+    } else {
+      return;
+    }
+  }
+  get user() {
+    if (this.clerkjs) {
+      return this.clerkjs.user;
+    } else {
+      return;
+    }
+  }
+  get organization() {
+    if (this.clerkjs) {
+      return this.clerkjs.organization;
+    } else {
+      return;
+    }
+  }
+  get telemetry() {
+    if (this.clerkjs) {
+      return this.clerkjs.telemetry;
+    } else {
+      return;
+    }
+  }
+  get __unstable__environment() {
+    if (this.clerkjs) {
+      return this.clerkjs.__unstable__environment;
+    } else {
+      return;
+    }
+  }
+  get isSignedIn() {
+    if (this.clerkjs) {
+      return this.clerkjs.isSignedIn;
+    } else {
+      return false;
+    }
+  }
+  get billing() {
+    var _a;
+    return (_a = this.clerkjs) == null ? undefined : _a.billing;
+  }
+  get __internal_state() {
+    return this.loaded && this.clerkjs ? this.clerkjs.__internal_state : __privateGet(this, _stateProxy);
+  }
+  get apiKeys() {
+    var _a;
+    return (_a = this.clerkjs) == null ? undefined : _a.apiKeys;
+  }
+  __unstable__setEnvironment(...args) {
+    if (this.clerkjs && "__unstable__setEnvironment" in this.clerkjs) {
+      this.clerkjs.__unstable__setEnvironment(args);
+    } else {
+      return;
+    }
+  }
+};
+_status = new WeakMap;
+_domain = new WeakMap;
+_proxyUrl = new WeakMap;
+_publishableKey = new WeakMap;
+_eventBus = new WeakMap;
+_stateProxy = new WeakMap;
+_instance = new WeakMap;
+_IsomorphicClerk_instances = new WeakSet;
+waitForClerkJS_fn = function() {
+  return new Promise((resolve) => {
+    this.addOnLoaded(() => resolve(this.clerkjs));
+  });
+};
+__privateAdd(_IsomorphicClerk, _instance);
+var IsomorphicClerk = _IsomorphicClerk;
+function ClerkContextProvider(props) {
+  const { isomorphicClerkOptions, initialState, children } = props;
+  const { isomorphicClerk: clerk, clerkStatus } = useLoadedIsomorphicClerk(isomorphicClerkOptions);
+  const [state, setState] = import_react33.default.useState({
+    client: clerk.client,
+    session: clerk.session,
+    user: clerk.user,
+    organization: clerk.organization
+  });
+  import_react33.default.useEffect(() => {
+    return clerk.addListener((e) => setState({ ...e }));
+  }, []);
+  const derivedState = deriveState(clerk.loaded, state, initialState);
+  const clerkCtx = import_react33.default.useMemo(() => ({ value: clerk }), [
+    clerkStatus
+  ]);
+  const clientCtx = import_react33.default.useMemo(() => ({ value: state.client }), [state.client]);
+  const {
+    sessionId,
+    sessionStatus,
+    sessionClaims,
+    session,
+    userId,
+    user,
+    orgId,
+    actor,
+    organization,
+    orgRole,
+    orgSlug,
+    orgPermissions,
+    factorVerificationAge
+  } = derivedState;
+  const authCtx = import_react33.default.useMemo(() => {
+    const value = {
+      sessionId,
+      sessionStatus,
+      sessionClaims,
+      userId,
+      actor,
+      orgId,
+      orgRole,
+      orgSlug,
+      orgPermissions,
+      factorVerificationAge
+    };
+    return { value };
+  }, [sessionId, sessionStatus, userId, actor, orgId, orgRole, orgSlug, factorVerificationAge, sessionClaims == null ? undefined : sessionClaims.__raw]);
+  const sessionCtx = import_react33.default.useMemo(() => ({ value: session }), [sessionId, session]);
+  const userCtx = import_react33.default.useMemo(() => ({ value: user }), [userId, user]);
+  const organizationCtx = import_react33.default.useMemo(() => {
+    const value = {
+      organization
+    };
+    return { value };
+  }, [orgId, organization]);
+  return /* @__PURE__ */ import_react33.default.createElement(IsomorphicClerkContext.Provider, { value: clerkCtx }, /* @__PURE__ */ import_react33.default.createElement(ClientContext.Provider, { value: clientCtx }, /* @__PURE__ */ import_react33.default.createElement(SessionContext.Provider, { value: sessionCtx }, /* @__PURE__ */ import_react33.default.createElement(OrganizationProvider, { ...organizationCtx.value }, /* @__PURE__ */ import_react33.default.createElement(AuthContext.Provider, { value: authCtx }, /* @__PURE__ */ import_react33.default.createElement(UserContext.Provider, { value: userCtx }, /* @__PURE__ */ import_react33.default.createElement(__experimental_CheckoutProvider, {
+    value: undefined
+  }, children)))))));
+}
+var useLoadedIsomorphicClerk = (options) => {
+  const isomorphicClerkRef = import_react33.default.useRef(IsomorphicClerk.getOrCreateInstance(options));
+  const [clerkStatus, setClerkStatus] = import_react33.default.useState(isomorphicClerkRef.current.status);
+  import_react33.default.useEffect(() => {
+    isomorphicClerkRef.current.__unstable__updateProps({ appearance: options.appearance });
+  }, [options.appearance]);
+  import_react33.default.useEffect(() => {
+    isomorphicClerkRef.current.__unstable__updateProps({ options });
+  }, [options.localization]);
+  import_react33.default.useEffect(() => {
+    isomorphicClerkRef.current.on("status", setClerkStatus);
+    return () => {
+      if (isomorphicClerkRef.current) {
+        isomorphicClerkRef.current.off("status", setClerkStatus);
+      }
+      IsomorphicClerk.clearInstance();
+    };
+  }, []);
+  return { isomorphicClerk: isomorphicClerkRef.current, clerkStatus };
+};
+function ClerkProviderBase(props) {
+  const { initialState, children, __internal_bypassMissingPublishableKey, ...restIsomorphicClerkOptions } = props;
+  const { publishableKey = "", Clerk: userInitialisedClerk } = restIsomorphicClerkOptions;
+  if (!userInitialisedClerk && !__internal_bypassMissingPublishableKey) {
+    if (!publishableKey) {
+      errorThrower.throwMissingPublishableKeyError();
+    } else if (publishableKey && !isPublishableKey(publishableKey)) {
+      errorThrower.throwInvalidPublishableKeyError({ key: publishableKey });
+    }
+  }
+  return /* @__PURE__ */ import_react31.default.createElement(ClerkContextProvider, {
+    initialState,
+    isomorphicClerkOptions: restIsomorphicClerkOptions
+  }, children);
+}
+var ClerkProvider = withMaxAllowedInstancesGuard(ClerkProviderBase, "ClerkProvider", multipleClerkProvidersError);
+ClerkProvider.displayName = "ClerkProvider";
+setErrorThrowerOptions({ packageName: "@clerk/clerk-react" });
+setClerkJsLoadingErrorPackageName("@clerk/clerk-react");
+
+// frontend/state/app-state.tsx
+var import_react34 = __toESM(require_react(), 1);
 
 // frontend/types/generate.ts
 var AI_MODELS = [
@@ -23734,25 +29885,25 @@ var FIELD_LABELS = {
 
 // frontend/state/app-state.tsx
 var jsx_dev_runtime = __toESM(require_jsx_dev_runtime(), 1);
-var AppContext = import_react.createContext(null);
+var AppContext = import_react34.createContext(null);
 function AppProvider({ children }) {
-  const [tab, setTab] = import_react.useState("generate");
-  const [latest, setLatest] = import_react.useState(null);
-  const [toasts, setToasts] = import_react.useState([]);
-  const [navCollapsed, setNavCollapsed] = import_react.useState(() => localStorage.getItem("indieforge_nav_collapsed") === "true");
-  const [selectedModel, setSelectedModelRaw] = import_react.useState(() => localStorage.getItem("indieforge_model") ?? DEFAULT_MODEL);
-  const setSelectedModel = import_react.useCallback((model) => {
+  const [tab, setTab] = import_react34.useState("generate");
+  const [latest, setLatest] = import_react34.useState(null);
+  const [toasts, setToasts] = import_react34.useState([]);
+  const [navCollapsed, setNavCollapsed] = import_react34.useState(() => localStorage.getItem("indieforge_nav_collapsed") === "true");
+  const [selectedModel, setSelectedModelRaw] = import_react34.useState(() => localStorage.getItem("indieforge_model") ?? DEFAULT_MODEL);
+  const setSelectedModel = import_react34.useCallback((model) => {
     localStorage.setItem("indieforge_model", model);
     setSelectedModelRaw(model);
   }, []);
-  const toggleNav = import_react.useCallback(() => {
+  const toggleNav = import_react34.useCallback(() => {
     setNavCollapsed((v) => {
       const next = !v;
       localStorage.setItem("indieforge_nav_collapsed", String(next));
       return next;
     });
   }, []);
-  const showToast = import_react.useCallback((msg, kind = "ok") => {
+  const showToast = import_react34.useCallback((msg, kind = "ok") => {
     const id = crypto.randomUUID();
     setToasts((t) => [...t, { id, msg, kind }]);
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3000);
@@ -23763,7 +29914,7 @@ function AppProvider({ children }) {
   }, undefined, false, undefined, this);
 }
 function useAppState() {
-  const ctx = import_react.useContext(AppContext);
+  const ctx = import_react34.useContext(AppContext);
   if (!ctx)
     throw new Error("useAppState must be used within AppProvider");
   return ctx;
@@ -23772,6 +29923,7 @@ function useAppState() {
 // frontend/components/layout/Header.tsx
 var jsx_dev_runtime2 = __toESM(require_jsx_dev_runtime(), 1);
 function Header() {
+  const { isSignedIn, isLoaded } = useAuth();
   return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("header", {
     className: "app-header",
     children: [
@@ -23785,11 +29937,48 @@ function Header() {
       }, undefined, false, undefined, this),
       /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
         className: "app-header__actions",
-        children: /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
-          className: "app-header__badge",
-          children: "✦ AI Powered"
-        }, undefined, false, undefined, this)
-      }, undefined, false, undefined, this)
+        children: [
+          isLoaded && (isSignedIn ? /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(UserButton, {
+            appearance: {
+              elements: {
+                avatarBox: "app-header__user-avatar"
+              }
+            }
+          }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(SignInButton, {
+            mode: "modal",
+            children: /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
+              className: "app-header__login-btn",
+              title: "Iniciar sesión / Crear cuenta",
+              "aria-label": "Iniciar sesión",
+              children: /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("svg", {
+                width: "18",
+                height: "18",
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: "2",
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                "aria-hidden": "true",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("circle", {
+                    cx: "12",
+                    cy: "8",
+                    r: "4"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("path", {
+                    d: "M4 20c0-4 3.6-7 8-7s8 3 8 7"
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this)
+            }, undefined, false, undefined, this)
+          }, undefined, false, undefined, this)),
+          /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+            className: "app-header__badge",
+            children: "✦ AI Powered"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
     ]
   }, undefined, true, undefined, this);
 }
@@ -23865,10 +30054,10 @@ function ToastContainer({ toasts }) {
 }
 
 // frontend/pages/HomePage.tsx
-var import_react10 = __toESM(require_react(), 1);
+var import_react43 = __toESM(require_react(), 1);
 
 // frontend/components/generate/GenerateForm.tsx
-var import_react2 = __toESM(require_react(), 1);
+var import_react35 = __toESM(require_react(), 1);
 
 // frontend/components/generate/TypeSelector.tsx
 var jsx_dev_runtime5 = __toESM(require_jsx_dev_runtime(), 1);
@@ -24006,8 +30195,8 @@ function ModelSelector({ value, onChange }) {
 // frontend/components/generate/GenerateForm.tsx
 var jsx_dev_runtime9 = __toESM(require_jsx_dev_runtime(), 1);
 function GenerateForm({ onGenerate, loading, model, onModelChange }) {
-  const [type, setType] = import_react2.useState("npc");
-  const [fields, setFields] = import_react2.useState({});
+  const [type, setType] = import_react35.useState("npc");
+  const [fields, setFields] = import_react35.useState({});
   const set = (k, v) => setFields((f) => ({ ...f, [k]: v }));
   const val = (k) => fields[k] ?? "";
   const handleTypeChange = (t) => {
@@ -24230,7 +30419,7 @@ function GenerateForm({ onGenerate, loading, model, onModelChange }) {
 }
 
 // frontend/components/results/ResultCard.tsx
-var import_react6 = __toESM(require_react(), 1);
+var import_react39 = __toESM(require_react(), 1);
 
 // frontend/components/ui/Card.tsx
 var jsx_dev_runtime10 = __toESM(require_jsx_dev_runtime(), 1);
@@ -24282,11 +30471,11 @@ function Badge({ type, icon, label, small = false }) {
 }
 
 // frontend/components/ui/Modal.tsx
-var import_react3 = __toESM(require_react(), 1);
-var import_react_dom = __toESM(require_react_dom(), 1);
+var import_react36 = __toESM(require_react(), 1);
+var import_react_dom2 = __toESM(require_react_dom(), 1);
 var jsx_dev_runtime12 = __toESM(require_jsx_dev_runtime(), 1);
 function Modal({ open, onClose, title, children, footer, size = "md" }) {
-  import_react3.useEffect(() => {
+  import_react36.useEffect(() => {
     if (!open)
       return;
     const handler = (e) => {
@@ -24339,7 +30528,7 @@ function Modal({ open, onClose, title, children, footer, size = "md" }) {
       ]
     }, undefined, true, undefined, this)
   }, undefined, false, undefined, this);
-  return import_react_dom.createPortal(content, document.body);
+  return import_react_dom2.createPortal(content, document.body);
 }
 
 // frontend/components/results/ResultActions.tsx
@@ -24463,10 +30652,10 @@ function ResultJson({ data }) {
 }
 
 // frontend/components/results/ImagePreview.tsx
-var import_react5 = __toESM(require_react(), 1);
+var import_react38 = __toESM(require_react(), 1);
 
 // frontend/components/results/Model3DPreview.tsx
-var import_react4 = __toESM(require_react(), 1);
+var import_react37 = __toESM(require_react(), 1);
 
 // frontend/components/ui/Loader.tsx
 var jsx_dev_runtime15 = __toESM(require_jsx_dev_runtime(), 1);
@@ -24486,10 +30675,34 @@ function Loader({ size = "md", label, center = false }) {
   }, undefined, true, undefined, this);
 }
 
+// frontend/lib/auth-token.ts
+var _getToken = null;
+function setTokenGetter(fn) {
+  _getToken = fn;
+}
+async function getAuthToken() {
+  if (!_getToken)
+    return null;
+  try {
+    return await _getToken();
+  } catch {
+    return null;
+  }
+}
+
 // frontend/lib/fetcher.ts
 async function fetcher(url, options) {
   try {
-    const res = await fetch(url, options);
+    const token = await getAuthToken();
+    const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+    const mergedOptions = {
+      ...options,
+      headers: {
+        ...authHeader,
+        ...options?.headers ?? {}
+      }
+    };
+    const res = await fetch(url, mergedOptions);
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       return { data: null, error: `HTTP ${res.status}: ${text}` };
@@ -24650,10 +30863,10 @@ var THREE_D_MODELS = [
   }
 ];
 function Model3DPreview({ imageUrl, generationId, onGlbReady }) {
-  const [model, setModel] = import_react4.useState("instant-mesh");
-  const [loading, setLoading] = import_react4.useState(false);
-  const [glbUrl, setGlbUrl] = import_react4.useState(null);
-  const [error, setError] = import_react4.useState(null);
+  const [model, setModel] = import_react37.useState("instant-mesh");
+  const [loading, setLoading] = import_react37.useState(false);
+  const [glbUrl, setGlbUrl] = import_react37.useState(null);
+  const [error, setError] = import_react37.useState(null);
   const selected = THREE_D_MODELS.find((m) => m.id === model);
   const handleGenerate = async () => {
     setLoading(true);
@@ -24805,10 +31018,10 @@ function ImagePreview({
   onImageReady,
   onGlbReady
 }) {
-  const [loading, setLoading] = import_react5.useState(false);
-  const [imageUrl, setImageUrl] = import_react5.useState(initialImageUrl ?? null);
-  const [error, setError] = import_react5.useState(null);
-  const [show3D, setShow3D] = import_react5.useState(false);
+  const [loading, setLoading] = import_react38.useState(false);
+  const [imageUrl, setImageUrl] = import_react38.useState(initialImageUrl ?? null);
+  const [error, setError] = import_react38.useState(null);
+  const [show3D, setShow3D] = import_react38.useState(false);
   const handleGenerate = async () => {
     setLoading(true);
     setError(null);
@@ -24964,9 +31177,9 @@ function ResultCard({
   onGlbGenerated,
   onImageGenerated
 }) {
-  const [view, setView] = import_react6.useState("fields");
-  const [showIllustrator, setShowIllustrator] = import_react6.useState(false);
-  const [fieldModal, setFieldModal] = import_react6.useState(null);
+  const [view, setView] = import_react39.useState("fields");
+  const [showIllustrator, setShowIllustrator] = import_react39.useState(false);
+  const [fieldModal, setFieldModal] = import_react39.useState(null);
   const handleImageReady = (url) => {
     onImageGenerated?.(url);
   };
@@ -25046,17 +31259,17 @@ function ResultCard({
 }
 
 // frontend/components/social/PublishModal.tsx
-var import_react7 = __toESM(require_react(), 1);
+var import_react40 = __toESM(require_react(), 1);
 var jsx_dev_runtime19 = __toESM(require_jsx_dev_runtime(), 1);
 var MAX_TAGS = 8;
 function PublishModal({ gen, onClose, onPublished, onToast, initialGlbUrl, initialImageUrl }) {
-  const [title, setTitle] = import_react7.useState(getGenerationTitle(gen.result, gen.type, gen.id));
-  const [desc, setDesc] = import_react7.useState("");
-  const [tagInput, setTagInput] = import_react7.useState("");
-  const [tags, setTags] = import_react7.useState([]);
-  const [imageUrl, setImageUrl] = import_react7.useState(initialImageUrl ?? gen.image_url ?? undefined);
-  const [glbUrl, setGlbUrl] = import_react7.useState(initialGlbUrl);
-  const [loading, setLoading] = import_react7.useState(false);
+  const [title, setTitle] = import_react40.useState(getGenerationTitle(gen.result, gen.type, gen.id));
+  const [desc, setDesc] = import_react40.useState("");
+  const [tagInput, setTagInput] = import_react40.useState("");
+  const [tags, setTags] = import_react40.useState([]);
+  const [imageUrl, setImageUrl] = import_react40.useState(initialImageUrl ?? gen.image_url ?? undefined);
+  const [glbUrl, setGlbUrl] = import_react40.useState(initialGlbUrl);
+  const [loading, setLoading] = import_react40.useState(false);
   const meta = TYPE_META[gen.type];
   const addTag = (raw) => {
     const t = sanitizeTag(raw);
@@ -25286,14 +31499,14 @@ function PageContainer({ children, narrow = false, wide = false }) {
 }
 
 // frontend/hooks/useGenerate.ts
-var import_react8 = __toESM(require_react(), 1);
+var import_react41 = __toESM(require_react(), 1);
 function useGenerate() {
-  const [state, setState] = import_react8.useState({
+  const [state, setState] = import_react41.useState({
     loading: false,
     error: null,
     result: null
   });
-  const generate = import_react8.useCallback(async (type, meta, model) => {
+  const generate = import_react41.useCallback(async (type, meta, model) => {
     setState({ loading: true, error: null, result: null });
     const { data, error } = await apiGenerate(type, meta, model);
     if (error || !data) {
@@ -25307,12 +31520,13 @@ function useGenerate() {
 }
 
 // frontend/hooks/useFavorites.ts
-var import_react9 = __toESM(require_react(), 1);
+var import_react42 = __toESM(require_react(), 1);
 function useFavorites() {
-  const [favorites, setFavorites] = import_react9.useState([]);
-  const [favIds, setFavIds] = import_react9.useState(new Set);
-  const [loading, setLoading] = import_react9.useState(false);
-  const reload = import_react9.useCallback(async () => {
+  const [favorites, setFavorites] = import_react42.useState([]);
+  const [favIds, setFavIds] = import_react42.useState(new Set);
+  const [loading, setLoading] = import_react42.useState(false);
+  const { userId, isLoaded } = useAuth();
+  const reload = import_react42.useCallback(async () => {
     setLoading(true);
     const { data } = await apiFavorites();
     if (data) {
@@ -25321,10 +31535,11 @@ function useFavorites() {
     }
     setLoading(false);
   }, []);
-  import_react9.useEffect(() => {
-    reload();
-  }, [reload]);
-  const toggle = import_react9.useCallback(async (id, add) => {
+  import_react42.useEffect(() => {
+    if (isLoaded)
+      reload();
+  }, [reload, isLoaded, userId]);
+  const toggle = import_react42.useCallback(async (id, add) => {
     if (add) {
       await apiAddFavorite(id);
       setFavIds((s) => new Set(s).add(id));
@@ -25347,9 +31562,9 @@ function HomePage({ onToast }) {
   const { latest, setLatest, setTab, selectedModel, setSelectedModel } = useAppState();
   const { generate, loading, error } = useGenerate();
   const { favIds, toggle: toggleFav } = useFavorites();
-  const [publishing, setPublishing] = import_react10.useState(false);
-  const [glbUrl, setGlbUrl] = import_react10.useState(undefined);
-  const [imageUrl, setImageUrl] = import_react10.useState(undefined);
+  const [publishing, setPublishing] = import_react43.useState(false);
+  const [glbUrl, setGlbUrl] = import_react43.useState(undefined);
+  const [imageUrl, setImageUrl] = import_react43.useState(undefined);
   const handleGenerate = async (type, meta, model) => {
     setGlbUrl(undefined);
     setImageUrl(undefined);
@@ -25442,7 +31657,7 @@ function HomePage({ onToast }) {
 }
 
 // frontend/pages/HistoryPage.tsx
-var import_react12 = __toESM(require_react(), 1);
+var import_react45 = __toESM(require_react(), 1);
 
 // frontend/components/history/HistoryItem.tsx
 var jsx_dev_runtime22 = __toESM(require_jsx_dev_runtime(), 1);
@@ -25515,20 +31730,22 @@ function HistoryList({ items, loading, onSelect, emptyMsg }) {
 }
 
 // frontend/hooks/useHistory.ts
-var import_react11 = __toESM(require_react(), 1);
+var import_react44 = __toESM(require_react(), 1);
 function useHistory() {
-  const [history, setHistory] = import_react11.useState([]);
-  const [loading, setLoading] = import_react11.useState(false);
-  const reload = import_react11.useCallback(async () => {
+  const [history, setHistory] = import_react44.useState([]);
+  const [loading, setLoading] = import_react44.useState(false);
+  const { userId, isLoaded } = useAuth();
+  const reload = import_react44.useCallback(async () => {
     setLoading(true);
     const { data } = await apiHistory(30);
     if (data)
       setHistory(data);
     setLoading(false);
   }, []);
-  import_react11.useEffect(() => {
-    reload();
-  }, [reload]);
+  import_react44.useEffect(() => {
+    if (isLoaded)
+      reload();
+  }, [reload, isLoaded, userId]);
   const prepend = (gen) => setHistory((h) => [gen, ...h]);
   return { history, loading, reload, prepend };
 }
@@ -25538,8 +31755,8 @@ var jsx_dev_runtime24 = __toESM(require_jsx_dev_runtime(), 1);
 function HistoryPage({ onToast }) {
   const { history, loading } = useHistory();
   const { favIds, toggle: toggleFav } = useFavorites();
-  const [selected, setSelected] = import_react12.useState(null);
-  const [publishing, setPublishing] = import_react12.useState(false);
+  const [selected, setSelected] = import_react45.useState(null);
+  const [publishing, setPublishing] = import_react45.useState(false);
   return /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
     className: "page-bg-wrap",
     children: [
@@ -25636,7 +31853,7 @@ function HistoryPage({ onToast }) {
 }
 
 // frontend/pages/FavoritesPage.tsx
-var import_react13 = __toESM(require_react(), 1);
+var import_react46 = __toESM(require_react(), 1);
 
 // frontend/components/favorites/FavoriteList.tsx
 var jsx_dev_runtime25 = __toESM(require_jsx_dev_runtime(), 1);
@@ -25674,8 +31891,8 @@ function FavoriteList({ items, loading, onSelect }) {
 var jsx_dev_runtime26 = __toESM(require_jsx_dev_runtime(), 1);
 function FavoritesPage({ onToast }) {
   const { favorites, loading, favIds, toggle: toggleFav } = useFavorites();
-  const [selected, setSelected] = import_react13.useState(null);
-  const [publishing, setPublishing] = import_react13.useState(false);
+  const [selected, setSelected] = import_react46.useState(null);
+  const [publishing, setPublishing] = import_react46.useState(false);
   return /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
     className: "page-bg-wrap",
     children: [
@@ -25771,17 +31988,17 @@ function FavoritesPage({ onToast }) {
 }
 
 // frontend/components/social/FeedPost.tsx
-var import_react15 = __toESM(require_react(), 1);
+var import_react48 = __toESM(require_react(), 1);
 
 // frontend/components/social/CommentList.tsx
-var import_react14 = __toESM(require_react(), 1);
+var import_react47 = __toESM(require_react(), 1);
 var jsx_dev_runtime27 = __toESM(require_jsx_dev_runtime(), 1);
 function CommentList({ postId, onToast }) {
-  const [comments, setComments] = import_react14.useState([]);
-  const [loading, setLoading] = import_react14.useState(true);
-  const [text, setText] = import_react14.useState("");
-  const [sending, setSending] = import_react14.useState(false);
-  import_react14.useEffect(() => {
+  const [comments, setComments] = import_react47.useState([]);
+  const [loading, setLoading] = import_react47.useState(true);
+  const [text, setText] = import_react47.useState("");
+  const [sending, setSending] = import_react47.useState(false);
+  import_react47.useEffect(() => {
     apiGetComments(postId).then(({ data }) => {
       if (data)
         setComments(data);
@@ -25897,12 +32114,12 @@ function FeedPost({
   onDelete,
   onToast
 }) {
-  const [expanded, setExpanded] = import_react15.useState(false);
-  const [showCmts, setShowCmts] = import_react15.useState(false);
-  const [liked, setLiked] = import_react15.useState(post.liked_by_me);
-  const [likeCount, setLikeCount] = import_react15.useState(post.like_count);
-  const [cmtCount, setCmtCount] = import_react15.useState(post.comment_count);
-  import_react15.useEffect(() => {
+  const [expanded, setExpanded] = import_react48.useState(false);
+  const [showCmts, setShowCmts] = import_react48.useState(false);
+  const [liked, setLiked] = import_react48.useState(post.liked_by_me);
+  const [likeCount, setLikeCount] = import_react48.useState(post.like_count);
+  const [cmtCount, setCmtCount] = import_react48.useState(post.comment_count);
+  import_react48.useEffect(() => {
     apiRecordInteraction(post.id, "view");
   }, [post.id]);
   const meta = TYPE_META[post.type];
@@ -26196,16 +32413,17 @@ function Tabs({
 }
 
 // frontend/hooks/useSocialFeed.ts
-var import_react16 = __toESM(require_react(), 1);
+var import_react49 = __toESM(require_react(), 1);
 function useSocialFeed() {
-  const [posts, setPosts] = import_react16.useState([]);
-  const [loading, setLoading] = import_react16.useState(false);
-  const [subTab, setSubTab] = import_react16.useState("feed");
-  const [sortMode, setSortMode] = import_react16.useState("reciente");
-  const [filterTag, setFilterTag] = import_react16.useState(null);
-  const [followedTags, setFollowedTags] = import_react16.useState(new Set);
-  const [popularTags, setPopularTags] = import_react16.useState([]);
-  const loadPosts = import_react16.useCallback(async () => {
+  const [posts, setPosts] = import_react49.useState([]);
+  const [loading, setLoading] = import_react49.useState(false);
+  const [subTab, setSubTab] = import_react49.useState("feed");
+  const [sortMode, setSortMode] = import_react49.useState("reciente");
+  const [filterTag, setFilterTag] = import_react49.useState(null);
+  const [followedTags, setFollowedTags] = import_react49.useState(new Set);
+  const [popularTags, setPopularTags] = import_react49.useState([]);
+  const { userId, isLoaded } = useAuth();
+  const loadPosts = import_react49.useCallback(async () => {
     setLoading(true);
     let data = null;
     if (subTab === "feed")
@@ -26220,19 +32438,21 @@ function useSocialFeed() {
       setPosts(data);
     setLoading(false);
   }, [subTab, filterTag, sortMode]);
-  const loadMeta = import_react16.useCallback(async () => {
+  const loadMeta = import_react49.useCallback(async () => {
     const [tags, popular] = await Promise.all([apiFollowedTags(), apiPopularTags()]);
     if (tags.data)
       setFollowedTags(new Set(tags.data));
     if (popular.data)
       setPopularTags(popular.data);
   }, []);
-  import_react16.useEffect(() => {
-    loadPosts();
-  }, [loadPosts]);
-  import_react16.useEffect(() => {
-    loadMeta();
-  }, [loadMeta]);
+  import_react49.useEffect(() => {
+    if (isLoaded)
+      loadPosts();
+  }, [loadPosts, isLoaded, userId]);
+  import_react49.useEffect(() => {
+    if (isLoaded)
+      loadMeta();
+  }, [loadMeta, isLoaded, userId]);
   const toggleTag = async (tag, follow) => {
     if (follow) {
       await apiFollowTag(tag);
@@ -26453,9 +32673,17 @@ function SocialPage({ onToast }) {
 
 // frontend/app.tsx
 var jsx_dev_runtime33 = __toESM(require_jsx_dev_runtime(), 1);
+var CLERK_KEY = "pk_test_Y29tbXVuYWwtbW9jY2FzaW4tNS5jbGVyay5hY2NvdW50cy5kZXYk";
+function ClerkTokenSync() {
+  const { getToken, isSignedIn } = useAuth();
+  import_react50.default.useEffect(() => {
+    setTokenGetter(isSignedIn ? getToken : null);
+  }, [getToken, isSignedIn]);
+  return null;
+}
 function Pages() {
   const { tab, toasts, showToast, navCollapsed } = useAppState();
-  import_react17.default.useEffect(() => {
+  import_react50.default.useEffect(() => {
     document.getElementById("root")?.classList.toggle("nav-collapsed", navCollapsed);
   }, [navCollapsed]);
   return /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(jsx_dev_runtime33.Fragment, {
@@ -26486,8 +32714,14 @@ function Pages() {
   }, undefined, true, undefined, this);
 }
 function App() {
-  return /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(AppProvider, {
-    children: /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(Pages, {}, undefined, false, undefined, this)
-  }, undefined, false, undefined, this);
+  return /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(ClerkProvider, {
+    publishableKey: CLERK_KEY,
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(ClerkTokenSync, {}, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(AppProvider, {
+        children: /* @__PURE__ */ jsx_dev_runtime33.jsxDEV(Pages, {}, undefined, false, undefined, this)
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
 }
 import_client.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsx_dev_runtime33.jsxDEV(App, {}, undefined, false, undefined, this));

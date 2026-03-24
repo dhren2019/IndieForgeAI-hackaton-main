@@ -10,6 +10,8 @@
     "db:migrate-from-sqlite": "bun run scripts/migrate-sqlite-to-pg.ts"
   },
   "dependencies": {
+    "@clerk/backend": "^3.2.2",
+    "@clerk/clerk-react": "^5.61.3",
     "@gradio/client": "^2.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

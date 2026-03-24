@@ -1,12 +1,29 @@
 /**
  * Thin fetch wrapper with typed responses.
+ * Automatically attaches Authorization: Bearer <token> when the user is
+ * signed in with Clerk (token getter set by ClerkTokenSync in app.tsx).
  */
+import { getAuthToken } from "./auth-token";
+
 export async function fetcher<T>(
   url: string,
   options?: RequestInit
 ): Promise<{ data: T | null; error: string | null }> {
   try {
-    const res = await fetch(url, options);
+    const token = await getAuthToken();
+    const authHeader: Record<string, string> = token
+      ? { Authorization: `Bearer ${token}` }
+      : {};
+
+    const mergedOptions: RequestInit = {
+      ...options,
+      headers: {
+        ...authHeader,
+        ...(options?.headers as Record<string, string> ?? {}),
+      },
+    };
+
+    const res = await fetch(url, mergedOptions);
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");

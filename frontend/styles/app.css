@@ -62,6 +62,20 @@ input, textarea, select {
   border: 1px solid rgba(124,58,237,0.3);
   letter-spacing: 0.04em; text-transform: uppercase;
 }
+/* Clerk login icon button */
+.app-header__login-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: var(--r-full);
+  background: transparent; border: 1px solid var(--border-hover);
+  color: var(--text-md); cursor: pointer;
+  transition: border-color 0.18s, color 0.18s, background 0.18s;
+}
+.app-header__login-btn:hover {
+  border-color: var(--accent); color: #c4b5fd;
+  background: var(--accent-dim);
+}
+/* Clerk UserButton avatar size */
+.app-header__user-avatar { width: 34px !important; height: 34px !important; }
 
 /* === LEFT NAV === */
 .app-nav {

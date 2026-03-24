@@ -1,5 +1,6 @@
 ﻿import React from "react";
 import { createRoot } from "react-dom/client";
+import { ClerkProvider, useAuth } from "@clerk/clerk-react";
 
 import { AppProvider, useAppState } from "./state/app-state";
 import { Header }                   from "./components/layout/Header";
@@ -9,6 +10,18 @@ import { HomePage }                 from "./pages/HomePage";
 import { HistoryPage }              from "./pages/HistoryPage";
 import { FavoritesPage }            from "./pages/FavoritesPage";
 import { SocialPage }               from "./pages/SocialPage";
+import { setTokenGetter }           from "./lib/auth-token";
+
+const CLERK_KEY = process.env.CLERK_PUBLISHABLE_KEY ?? "";
+
+/** Keeps the module-level token getter in sync with Clerk auth state */
+function ClerkTokenSync() {
+  const { getToken, isSignedIn } = useAuth();
+  React.useEffect(() => {
+    setTokenGetter(isSignedIn ? getToken : null);
+  }, [getToken, isSignedIn]);
+  return null;
+}
 
 function Pages() {
   const { tab, toasts, showToast, navCollapsed } = useAppState();
@@ -34,9 +47,12 @@ function Pages() {
 
 function App() {
   return (
-    <AppProvider>
-      <Pages />
-    </AppProvider>
+    <ClerkProvider publishableKey={CLERK_KEY}>
+      <ClerkTokenSync />
+      <AppProvider>
+        <Pages />
+      </AppProvider>
+    </ClerkProvider>
   );
 }
 

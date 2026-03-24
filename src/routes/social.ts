@@ -22,10 +22,10 @@ import { ok, err } from "../utils/response";
 import type { UserInteractionType } from "../types/social";
 import type { GenerationType } from "../types/generate";
 
-export async function handleSocial(req: Request): Promise<Response> {
+export async function handleSocial(req: Request, sessionId: string): Promise<Response> {
   const url      = new URL(req.url);
   const pathname = url.pathname; // e.g. /api/social/posts/3/like
-  const session  = getSessionId(req);
+  const session  = sessionId;
   const method   = req.method;
 
   // POST  /api/social/posts
@@ -207,8 +207,5 @@ async function handleRecordInteraction(req: Request, session: string): Promise<R
   return ok({ recorded: true });
 }
 
-function getSessionId(req: Request): string {
-  const cookie = req.headers.get("cookie") ?? "";
-  const match  = cookie.match(/session_id=([^;]+)/);
-  return match?.[1] ?? `anon-${crypto.randomUUID()}`;
-}
+// getSessionId helper removed — sessionId is now resolved by the main server
+// middleware (supports both Clerk JWT and cookie-based anonymous sessions)

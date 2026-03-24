@@ -101,7 +101,7 @@ async function router(req: Request, sessionId: string): Promise<Response> {
   if (pathname.startsWith("/api/favorite"))                return favoritesRoute(req, sessionId);
 
   // Social
-  if (pathname.startsWith("/api/social"))                  return handleSocial(req);
+  if (pathname.startsWith("/api/social"))                  return handleSocial(req, sessionId);
 
   // Static files (compiled frontend)
   const staticRes = await serveStatic(pathname);
@@ -116,7 +116,7 @@ Bun.serve({
   async fetch(req) {
     if (req.method === "OPTIONS") return corsPreflightResponse();
 
-    const { sessionId, setCookie } = resolveSession(req);
+    const { sessionId, setCookie } = await resolveSession(req);
 
     let res: Response;
     try {
