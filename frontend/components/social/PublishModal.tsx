@@ -141,14 +141,22 @@ export function PublishModal({ gen, onClose, onPublished, onToast, initialGlbUrl
 
         {glbUrl && (
           <div className="form-field">
-            <span className="form-field__label">Modelo 3D</span>
-            <div className="publish-glb-preview">
-              <span className="publish-glb-preview__icon">🧊</span>
-              <span className="publish-glb-preview__text">Modelo .glb generado — se publicará junto a la creación</span>
-              <a href={glbUrl} download="personaje-3d.glb" className="publish-glb-preview__download">
-                ⬇ Descargar .glb
-              </a>
+            <span className="form-field__label">Modelo 3D — se publicará con tu creación</span>
+            <div className="publish-3d-viewer">
+              {/* @ts-ignore custom element */}
+              <model-viewer
+                src={glbUrl}
+                alt="Vista previa del modelo 3D"
+                auto-rotate
+                camera-controls
+                shadow-intensity="1"
+                environment-image="neutral"
+                class="publish-3d-viewer__canvas"
+              />
             </div>
+            <a href={glbUrl} download="personaje-3d.glb" className="publish-glb-preview__download">
+              ⬇ Descargar .glb
+            </a>
           </div>
         )}
       </div>

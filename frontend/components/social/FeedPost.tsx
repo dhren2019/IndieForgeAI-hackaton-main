@@ -105,11 +105,26 @@ export function FeedPost({
       {post.image_url && (
         <div className="post-image-wrap">
           <img src={post.image_url} alt="Hoja de diseño" className="post-image" />
-          {post.glb_url && (
-            <a href={post.glb_url} download="personaje-3d.glb" className="post-glb-download">
-              🧊 Descargar modelo 3D (.glb)
-            </a>
-          )}
+        </div>
+      )}
+
+      {/* 3D model viewer */}
+      {post.glb_url && (
+        <div className="post-3d-viewer">
+          {/* @ts-ignore custom element */}
+          <model-viewer
+            src={post.glb_url}
+            alt="Modelo 3D"
+            auto-rotate
+            camera-controls
+            shadow-intensity="1"
+            environment-image="neutral"
+            class="post-3d-viewer__canvas"
+          />
+          <div className="post-3d-viewer__hint">🖱 Arrastra para rotar · Scroll para zoom</div>
+          <a href={post.glb_url} download="personaje-3d.glb" className="post-glb-download">
+            ⬇ Descargar modelo 3D (.glb)
+          </a>
         </div>
       )}
 
