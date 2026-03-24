@@ -46,15 +46,17 @@ function FieldsView({
   return (
     <div className="fields-grid">
       {Object.entries(data).map(([k, v]) => {
-        const strVal    = Array.isArray(v) ? v.join(" · ") : String(v);
+        const rawStr    = Array.isArray(v) ? v.join(" · ") : String(v);
+        const TRUNC_KEYS = new Set(["appearance", "backstory", "dialogue"]);
+        const strVal    = TRUNC_KEYS.has(k) && rawStr.length > 100 ? rawStr.slice(0, 100) + "…" : rawStr;
         const featured  = k in FEATURED_FIELD_ICONS;
-        const expandable = featured || (EXPANDABLE_FIELDS.has(k) && strVal.length > 60);
+        const expandable = featured || (EXPANDABLE_FIELDS.has(k) && rawStr.length > 60);
         const icon       = FEATURED_FIELD_ICONS[k];
         return (
           <div
             className={`field-item${expandable ? " field-item--expandable" : ""}${featured ? " field-item--featured" : ""}`}
             key={k}
-            onClick={expandable ? () => onExpand({ key: k, label: labelFor(k), value: strVal }) : undefined}
+            onClick={expandable ? () => onExpand({ key: k, label: labelFor(k), value: rawStr }) : undefined}
             title={expandable ? "Haz clic para ver el texto completo" : undefined}
           >
             <div className="field-item__key">
@@ -67,7 +69,7 @@ function FieldsView({
                 ? v.map((item, i) => (
                     <span key={i} className="field-item__tag">{String(item)}</span>
                   ))
-                : String(v)}
+                : strVal}
             </div>
           </div>
         );

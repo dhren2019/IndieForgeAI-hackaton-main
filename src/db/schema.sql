@@ -1,10 +1,10 @@
--- IndieForge AI — Database Schema (SQLite compatible)
+-- IndieForge AI — Database Schema (PostgreSQL)
 -- Run: bun run db:migrate
 
 CREATE TABLE IF NOT EXISTS users (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  id          SERIAL PRIMARY KEY,
   session_id  TEXT NOT NULL UNIQUE,
-  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS generations (

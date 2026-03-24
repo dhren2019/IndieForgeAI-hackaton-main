@@ -7,6 +7,6 @@ export const ENV = {
   HF_TOKEN:       process.env.HF_TOKEN              ?? "",
   HF_MODEL_URL:   process.env.HF_MODEL_URL          ?? "https://router.huggingface.co/hf-inference/models/Dhren/Qwen3-0.6B-heretic",
   HF_IMAGE_MODEL: process.env.HF_IMAGE_MODEL        ?? "black-forest-labs/FLUX.1-schnell",
-  DATABASE_FILE:  process.env.DATABASE_FILE         ?? "./indieforge.db",
+  DATABASE_URL:   process.env.DATABASE_URL          ?? "",
   NODE_ENV:       process.env.NODE_ENV              ?? "development",
 } as const;

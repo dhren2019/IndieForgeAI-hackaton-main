@@ -24918,13 +24918,15 @@ function FieldsView({
   return /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
     className: "fields-grid",
     children: Object.entries(data).map(([k, v]) => {
-      const strVal = Array.isArray(v) ? v.join(" · ") : String(v);
+      const rawStr = Array.isArray(v) ? v.join(" · ") : String(v);
+      const TRUNC_KEYS = new Set(["appearance", "backstory", "dialogue"]);
+      const strVal = TRUNC_KEYS.has(k) && rawStr.length > 100 ? rawStr.slice(0, 100) + "…" : rawStr;
       const featured = k in FEATURED_FIELD_ICONS;
-      const expandable = featured || EXPANDABLE_FIELDS.has(k) && strVal.length > 60;
+      const expandable = featured || EXPANDABLE_FIELDS.has(k) && rawStr.length > 60;
       const icon = FEATURED_FIELD_ICONS[k];
       return /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
         className: `field-item${expandable ? " field-item--expandable" : ""}${featured ? " field-item--featured" : ""}`,
-        onClick: expandable ? () => onExpand({ key: k, label: labelFor(k), value: strVal }) : undefined,
+        onClick: expandable ? () => onExpand({ key: k, label: labelFor(k), value: rawStr }) : undefined,
         title: expandable ? "Haz clic para ver el texto completo" : undefined,
         children: [
           /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
@@ -24946,7 +24948,7 @@ function FieldsView({
             children: Array.isArray(v) ? v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("span", {
               className: "field-item__tag",
               children: String(item)
-            }, i, false, undefined, this)) : String(v)
+            }, i, false, undefined, this)) : strVal
           }, undefined, false, undefined, this)
         ]
       }, k, true, undefined, this);

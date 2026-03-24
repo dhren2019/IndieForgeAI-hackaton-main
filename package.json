@@ -6,7 +6,8 @@
     "build": "bun run scripts/build.ts",
     "dev": "bun run scripts/dev.ts",
     "start": "bun run scripts/build.ts && bun run src/server.ts",
-    "db:migrate": "bun run scripts/migrate.ts"
+    "db:migrate": "bun run src/db/migrate.ts",
+    "db:migrate-from-sqlite": "bun run scripts/migrate-sqlite-to-pg.ts"
   },
   "dependencies": {
     "@gradio/client": "^2.1.0",
