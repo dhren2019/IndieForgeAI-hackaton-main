@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@clerk/clerk-react";
 import { apiFavorites, apiAddFavorite, apiRemoveFavorite } from "../lib/api";
 import type { Generation } from "../types/generate";
 
@@ -6,6 +7,7 @@ export function useFavorites() {
   const [favorites, setFavorites] = useState<Generation[]>([]);
   const [favIds, setFavIds]       = useState<Set<number>>(new Set());
   const [loading, setLoading]     = useState(false);
+  const { userId, isLoaded } = useAuth();
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -17,7 +19,10 @@ export function useFavorites() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { reload(); }, [reload]);
+  // Re-fetch whenever auth state settles or the logged-in user changes
+  useEffect(() => {
+    if (isLoaded) reload();
+  }, [reload, isLoaded, userId]);
 
   const toggle = useCallback(async (id: number, add: boolean) => {
     if (add) {

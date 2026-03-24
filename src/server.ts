@@ -23,31 +23,24 @@ import { trellisRoute }               from "./routes/trellis";
 import { instantMeshRoute }           from "./routes/instant-mesh";
 import { shapERoute }                 from "./routes/shap-e";
 import { healthRoute }                from "./routes/health";
-import { getDB }                      from "./db/client";
+import { sql }                          from "bun";
 import { logger }                     from "./utils/logger";
 import { readFileSync }               from "fs";
 import { join }                       from "path";
 
 // ── DB Migration ─────────────────────────────────────────────────────────────
-function runMigration(): void {
-  const db  = getDB();
-  const sql = readFileSync(join(import.meta.dir, "db/schema.sql"), "utf-8");
+async function runMigration(): Promise<void> {
+  const schemaSql = readFileSync(join(import.meta.dir, "db/schema.sql"), "utf-8");
 
-  const statements = sql
+  const statements = schemaSql
     .replace(/--[^\n]*/g, "")
     .split(";")
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
 
-  db.transaction(() => {
-    for (const stmt of statements) db.run(stmt);
-  })();
-
-  // Ensure image_url column exists for older databases
-  try { db.run("ALTER TABLE posts ADD COLUMN image_url TEXT"); } catch {}
-  try { db.run("ALTER TABLE generations ADD COLUMN image_url TEXT"); } catch {}
-  try { db.run("ALTER TABLE posts ADD COLUMN glb_url TEXT"); } catch {}
-  try { db.run("ALTER TABLE generations ADD COLUMN glb_url TEXT"); } catch {}
+  for (const stmt of statements) {
+    await sql.unsafe(stmt);
+  }
 
   logger.info("DB ready");
 }
@@ -108,7 +101,7 @@ async function router(req: Request, sessionId: string): Promise<Response> {
   if (pathname.startsWith("/api/favorite"))                return favoritesRoute(req, sessionId);
 
   // Social
-  if (pathname.startsWith("/api/social"))                  return handleSocial(req);
+  if (pathname.startsWith("/api/social"))                  return handleSocial(req, sessionId);
 
   // Static files (compiled frontend)
   const staticRes = await serveStatic(pathname);
@@ -116,14 +109,14 @@ async function router(req: Request, sessionId: string): Promise<Response> {
 }
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
-runMigration();
+await runMigration();
 
 Bun.serve({
   port: ENV.PORT,
   async fetch(req) {
     if (req.method === "OPTIONS") return corsPreflightResponse();
 
-    const { sessionId, setCookie } = resolveSession(req);
+    const { sessionId, setCookie } = await resolveSession(req);
 
     let res: Response;
     try {

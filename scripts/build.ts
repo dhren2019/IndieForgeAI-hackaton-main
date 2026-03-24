@@ -11,7 +11,8 @@ const result = await Bun.build({
   minify:      isProd,
   target:      "browser",
   define: {
-    "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV ?? "development"),
+    "process.env.NODE_ENV":             JSON.stringify(process.env.NODE_ENV             ?? "development"),
+    "process.env.CLERK_PUBLISHABLE_KEY": JSON.stringify(process.env.CLERK_PUBLISHABLE_KEY ?? ""),
   },
 });
 

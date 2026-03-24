@@ -9,7 +9,7 @@ import { buildPrompt }           from "../lib/prompts";
 import { parseJSON }             from "../utils/json-parser";
 import { validateAndSanitize }   from "../lib/parser";
 import { getFallback }           from "../lib/fallback";
-import { insertGeneration, getDB } from "../db/client";
+import { insertGeneration } from "../db/client";
 import { logger }                from "../utils/logger";
 import { ENV }                   from "../config/env";
 import type { GenerationType, PromptMeta, Generation } from "../types/generate";
@@ -57,12 +57,10 @@ export async function generateContent(
     source = "fallback";
   }
 
-  const db         = getDB();
-  // Preserve user visual hint and genre in the stored result so ImagePreview can use them
   const metaRaw = meta as Record<string, unknown>;
   if (metaRaw.userPrompt) result.userPrompt = metaRaw.userPrompt;
   if (metaRaw.genre)      result._genre     = metaRaw.genre;
-  const generation = insertGeneration(db, {
+  const generation = await insertGeneration({
     session_id:  sessionId,
     type,
     prompt_meta: meta as Record<string, unknown>,

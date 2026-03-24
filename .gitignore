@@ -39,6 +39,14 @@ coverage/
 
 # Misc
 
+# Environment secrets — NEVER commit
+.env
+*.env
+
+# SQLite files (dev only)
+*.db
+*.db-shm
+*.db-wal
 
 # Ignore generated assets
 /public/assets/

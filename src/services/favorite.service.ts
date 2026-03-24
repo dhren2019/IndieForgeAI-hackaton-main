@@ -1,14 +1,14 @@
-import { getDB, addFavorite, removeFavorite, getFavorites } from "../db/client";
+import { addFavorite, removeFavorite, getFavorites } from "../db/client";
 import type { Generation } from "../types/generate";
 
-export function addToFavorites(sessionId: string, generationId: number): void {
-  addFavorite(getDB(), sessionId, generationId);
+export async function addToFavorites(sessionId: string, generationId: number): Promise<void> {
+  await addFavorite(sessionId, generationId);
 }
 
-export function removeFromFavorites(sessionId: string, generationId: number): void {
-  removeFavorite(getDB(), sessionId, generationId);
+export async function removeFromFavorites(sessionId: string, generationId: number): Promise<void> {
+  await removeFavorite(sessionId, generationId);
 }
 
-export function getUserFavorites(sessionId: string): Generation[] {
-  return getFavorites(getDB(), sessionId) as Generation[];
+export async function getUserFavorites(sessionId: string): Promise<Generation[]> {
+  return getFavorites(sessionId) as Promise<Generation[]>;
 }

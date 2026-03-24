@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@clerk/clerk-react";
 import { apiFeed, apiTrending, apiExplore, apiMyPosts, apiFollowedTags, apiPopularTags, apiFollowTag, apiUnfollowTag } from "../lib/api";
 import type { Post, SocialSubTab, SortMode } from "../types/social";
 
@@ -10,6 +11,7 @@ export function useSocialFeed() {
   const [filterTag, setFilterTag]       = useState<string | null>(null);
   const [followedTags, setFollowedTags] = useState<Set<string>>(new Set());
   const [popularTags, setPopularTags]   = useState<Array<{ tag: string; count: number }>>([]);
+  const { userId, isLoaded } = useAuth();
 
   const loadPosts = useCallback(async () => {
     setLoading(true);
@@ -30,8 +32,9 @@ export function useSocialFeed() {
     if (popular.data) setPopularTags(popular.data);
   }, []);
 
-  useEffect(() => { loadPosts(); }, [loadPosts]);
-  useEffect(() => { loadMeta(); }, [loadMeta]);
+  // Re-fetch when auth changes (sign in / sign out affects "Mis Posts" and tags)
+  useEffect(() => { if (isLoaded) loadPosts(); }, [loadPosts, isLoaded, userId]);
+  useEffect(() => { if (isLoaded) loadMeta(); },  [loadMeta, isLoaded, userId]);
 
   const toggleTag = async (tag: string, follow: boolean) => {
     if (follow) {
