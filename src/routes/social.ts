@@ -108,54 +108,54 @@ async function handleCreatePost(req: Request, session: string): Promise<Response
   if (!result || typeof result !== "object")
     return err("Resultado inválido");
 
-  const post = createSocialPost({
+  const post = await createSocialPost({
     session_id: session, generation_id: gen_id,
     title, description, type, result, tags, image_url, glb_url,
   });
   return ok(post);
 }
 
-function handleTrending(url: URL, session: string): Response {
+async function handleTrending(url: URL, session: string): Promise<Response> {
   const limit = Math.min(Number(url.searchParams.get("limit") ?? "20"), 50);
-  return ok(getTrending(session, limit));
+  return ok(await getTrending(session, limit));
 }
 
-function handleFeed(url: URL, session: string): Response {
+async function handleFeed(url: URL, session: string): Promise<Response> {
   const limit = Math.min(Number(url.searchParams.get("limit") ?? "20"), 50);
-  return ok(getSocialFeed(session, limit));
+  return ok(await getSocialFeed(session, limit));
 }
 
-function handleExplore(url: URL, session: string): Response {
+async function handleExplore(url: URL, session: string): Promise<Response> {
   const limit = Math.min(Number(url.searchParams.get("limit") ?? "20"), 50);
   const tag   = url.searchParams.get("tag") || null;
   const sort  = url.searchParams.get("sort") || "reciente";
-  return ok(exploreSocialPosts(session, tag, sort, limit));
+  return ok(await exploreSocialPosts(session, tag, sort, limit));
 }
 
-function handleMyPosts(session: string): Response {
-  return ok(getOwnPosts(session));
+async function handleMyPosts(session: string): Promise<Response> {
+  return ok(await getOwnPosts(session));
 }
 
-function handleGetPost(id: number, session: string): Response {
-  const post = getSocialPost(id, session);
+async function handleGetPost(id: number, session: string): Promise<Response> {
+  const post = await getSocialPost(id, session);
   if (!post) return err("Publicación no encontrada", 404);
   return ok(post);
 }
 
-function handleDeletePost(id: number, session: string): Response {
-  const deleted = deleteSocialPost(id, session);
+async function handleDeletePost(id: number, session: string): Promise<Response> {
+  const deleted = await deleteSocialPost(id, session);
   if (!deleted) return err("No autorizado o no encontrado", 403);
   return ok({ deleted: true });
 }
 
-function handleLike(postId: number, session: string): Response {
-  const liked = togglePostLike(postId, session);
-  if (liked) recordUserInteraction(session, postId, "like");
+async function handleLike(postId: number, session: string): Promise<Response> {
+  const liked = await togglePostLike(postId, session);
+  if (liked) await recordUserInteraction(session, postId, "like");
   return ok({ liked });
 }
 
-function handleGetComments(postId: number): Response {
-  return ok(getPostComments(postId));
+async function handleGetComments(postId: number): Promise<Response> {
+  return ok(await getPostComments(postId));
 }
 
 async function handleAddComment(req: Request, postId: number, session: string): Promise<Response> {
@@ -167,24 +167,24 @@ async function handleAddComment(req: Request, postId: number, session: string): 
   if (!content)         return err("El comentario no puede estar vacío");
   if (content.length > 300) return err("Máximo 300 caracteres");
 
-  const comment = addPostComment(postId, session, content);
-  recordUserInteraction(session, postId, "comment");
+  const comment = await addPostComment(postId, session, content);
+  await recordUserInteraction(session, postId, "comment");
   return ok(comment);
 }
 
-function handlePopularTags(): Response {
-  return ok(getPopularTagsList());
+async function handlePopularTags(): Promise<Response> {
+  return ok(await getPopularTagsList());
 }
 
-function handleFollowedTags(session: string): Response {
-  return ok(getUserFollowedTags(session));
+async function handleFollowedTags(session: string): Promise<Response> {
+  return ok(await getUserFollowedTags(session));
 }
 
 async function handleFollowTag(req: Request, session: string): Promise<Response> {
   const body = await req.json().catch(() => null) as { tag?: string } | null;
   const tag  = body?.tag?.trim().toLowerCase();
   if (!tag) return err("Etiqueta requerida");
-  followUserTag(session, tag);
+  await followUserTag(session, tag);
   return ok({ following: tag });
 }
 
@@ -192,7 +192,7 @@ async function handleUnfollowTag(req: Request, session: string): Promise<Respons
   const body = await req.json().catch(() => null) as { tag?: string } | null;
   const tag  = body?.tag?.trim().toLowerCase();
   if (!tag) return err("Etiqueta requerida");
-  unfollowUserTag(session, tag);
+  await unfollowUserTag(session, tag);
   return ok({ unfollowed: tag });
 }
 
@@ -203,7 +203,7 @@ async function handleRecordInteraction(req: Request, session: string): Promise<R
   if (!post_id || isNaN(post_id)) return err("post_id inválido");
   if (!action || !["view", "expand", "like", "comment"].includes(action))
     return err("action inválida");
-  recordUserInteraction(session, post_id, action);
+  await recordUserInteraction(session, post_id, action);
   return ok({ recorded: true });
 }
 

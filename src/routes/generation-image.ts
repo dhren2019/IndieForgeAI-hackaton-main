@@ -2,8 +2,9 @@
  * PATCH /api/generations/:id/image  — saves image_url
  * PATCH /api/generations/:id/glb    — saves glb_url
  */
-import { getDB, updateGenerationImage, updateGenerationGlb } from "../db/client";
-import { ok, err }                       from "../utils/response";
+import { sql }                              from "bun";
+import { updateGenerationImage, updateGenerationGlb } from "../db/client";
+import { ok, err }                          from "../utils/response";
 
 export async function saveGenerationImageRoute(
   req: Request,
@@ -21,17 +22,13 @@ export async function saveGenerationImageRoute(
     return err("image_url requerida");
   }
 
-  const db = getDB();
-  const gen = db
-    .prepare<{ id: number; session_id: string }, [number]>(
-      "SELECT id, session_id FROM generations WHERE id = ?"
-    )
-    .get(id);
+  const rows = await sql`SELECT id, session_id FROM generations WHERE id = ${id}`;
+  const gen  = rows[0] as { id: number; session_id: string } | undefined;
 
   if (!gen) return err("Not found", 404);
   if (gen.session_id !== sessionId) return err("Forbidden", 403);
 
-  updateGenerationImage(db, id, body.image_url);
+  await updateGenerationImage(id, body.image_url);
   return ok({ saved: true });
 }
 
@@ -51,16 +48,12 @@ export async function saveGenerationGlbRoute(
     return err("glb_url requerida");
   }
 
-  const db = getDB();
-  const gen = db
-    .prepare<{ id: number; session_id: string }, [number]>(
-      "SELECT id, session_id FROM generations WHERE id = ?"
-    )
-    .get(id);
+  const rows = await sql`SELECT id, session_id FROM generations WHERE id = ${id}`;
+  const gen  = rows[0] as { id: number; session_id: string } | undefined;
 
   if (!gen) return err("Not found", 404);
   if (gen.session_id !== sessionId) return err("Forbidden", 403);
 
-  updateGenerationGlb(db, id, body.glb_url);
+  await updateGenerationGlb(id, body.glb_url);
   return ok({ saved: true });
 }

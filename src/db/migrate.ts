@@ -1,40 +1,28 @@
 /**
  * bun run src/db/migrate.ts
- * Applies schema.sql against the local SQLite database.
+ * Applies schema.sql against the PostgreSQL database (DATABASE_URL).
  */
-import { getDB } from "./client";
+import { sql } from "bun";
 import { readFileSync } from "fs";
 import { join } from "path";
 
-const db = getDB();
+const schemaPath = join(import.meta.dir, "schema.sql");
+const schemaSql  = readFileSync(schemaPath, "utf-8");
 
-// SQLite doesn't support multi-statement exec via db.run(), so split manually.
-const sql = readFileSync(join(import.meta.dir, "schema.sql"), "utf-8");
-
-// Strip comments and split on semicolons
-const statements = sql
-  .replace(/--[^\n]*/g, "")   // strip line comments first
+// Strip line comments and split on semicolons
+const statements = schemaSql
+  .replace(/--[^\n]*/g, "")
   .split(";")
   .map((s) => s.trim())
   .filter((s) => s.length > 0);
 
-db.transaction(() => {
-  for (const stmt of statements) {
-    try {
-      db.run(stmt);
-    } catch (e) {
-      console.error("Migration failed on:", stmt.slice(0, 60));
-      throw e;
-    }
+for (const stmt of statements) {
+  try {
+    await sql.unsafe(stmt);
+  } catch (e) {
+    console.error("Migration failed on:", stmt.slice(0, 80));
+    throw e;
   }
-})();
-
-// Safe ALTER TABLE for columns added after initial deploy (SQLite ignores duplicate column errors)
-const alterations = [
-  "ALTER TABLE generations ADD COLUMN glb_url TEXT",
-];
-for (const alt of alterations) {
-  try { db.run(alt); } catch { /* column already exists — ignore */ }
 }
 
-console.log("✅ Migration complete");
+console.log("✅ Migration complete — schema applied to PostgreSQL");

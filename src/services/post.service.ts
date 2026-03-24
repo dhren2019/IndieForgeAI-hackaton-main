@@ -1,5 +1,4 @@
 import {
-  getDB,
   createPost,
   getPostById,
   getFeed,
@@ -18,78 +17,77 @@ import {
 } from "../db/client";
 import type { Post, PostComment, CreatePostInput, UserInteractionType } from "../types/social";
 
-export function createSocialPost(input: CreatePostInput): Post {
-  return createPost(getDB(), input) as Post;
+export async function createSocialPost(input: CreatePostInput): Promise<Post> {
+  return createPost(input) as Promise<Post>;
 }
 
-export function getSocialPost(postId: number, sessionId: string): Post | null {
-  return getPostById(getDB(), postId, sessionId) as Post | null;
+export async function getSocialPost(postId: number, sessionId: string): Promise<Post | null> {
+  return getPostById(postId, sessionId) as Promise<Post | null>;
 }
 
-export function getSocialFeed(sessionId: string, limit = 20): Post[] {
-  return getFeed(getDB(), sessionId, limit) as Post[];
+export async function getSocialFeed(sessionId: string, limit = 20): Promise<Post[]> {
+  return getFeed(sessionId, limit) as Promise<Post[]>;
 }
 
-export function exploreSocialPosts(
+export async function exploreSocialPosts(
   sessionId: string,
   tag: string | null,
   sort: string,
   limit: number
-): Post[] {
-  return explorePosts(getDB(), sessionId, tag, sort, limit) as Post[];
+): Promise<Post[]> {
+  return explorePosts(sessionId, tag, sort, limit) as Promise<Post[]>;
 }
 
-export function getTrending(sessionId: string, limit = 20): Post[] {
-  return getTrendingPosts(getDB(), sessionId, limit) as Post[];
+export async function getTrending(sessionId: string, limit = 20): Promise<Post[]> {
+  return getTrendingPosts(sessionId, limit) as Promise<Post[]>;
 }
 
-export function getOwnPosts(sessionId: string): Post[] {
-  return getMyPosts(getDB(), sessionId) as Post[];
+export async function getOwnPosts(sessionId: string): Promise<Post[]> {
+  return getMyPosts(sessionId) as Promise<Post[]>;
 }
 
-export function deleteSocialPost(postId: number, sessionId: string): boolean {
-  const post = getPostById(getDB(), postId, sessionId);
+export async function deleteSocialPost(postId: number, sessionId: string): Promise<boolean> {
+  const post = await getPostById(postId, sessionId);
   if (!post || post.session_id !== sessionId) return false;
-  deletePost(getDB(), postId, sessionId);
-  return true;
+  return deletePost(postId, sessionId);
 }
 
-export function togglePostLike(postId: number, sessionId: string): boolean {
-  return toggleLike(getDB(), sessionId, postId) as boolean;
+export async function togglePostLike(postId: number, sessionId: string): Promise<boolean> {
+  return toggleLike(sessionId, postId);
 }
 
-export function getPostComments(postId: number): PostComment[] {
-  return getComments(getDB(), postId) as PostComment[];
+export async function getPostComments(postId: number): Promise<PostComment[]> {
+  return getComments(postId) as Promise<PostComment[]>;
 }
 
-export function addPostComment(
+export async function addPostComment(
   postId: number,
   sessionId: string,
   content: string
-): PostComment {
-  return addComment(getDB(), sessionId, postId, content) as PostComment;
+): Promise<PostComment> {
+  return addComment(sessionId, postId, content) as Promise<PostComment>;
 }
 
-export function followUserTag(sessionId: string, tag: string): void {
-  followTag(getDB(), sessionId, tag);
+export async function followUserTag(sessionId: string, tag: string): Promise<void> {
+  await followTag(sessionId, tag);
 }
 
-export function unfollowUserTag(sessionId: string, tag: string): void {
-  unfollowTag(getDB(), sessionId, tag);
+export async function unfollowUserTag(sessionId: string, tag: string): Promise<void> {
+  await unfollowTag(sessionId, tag);
 }
 
-export function getUserFollowedTags(sessionId: string): string[] {
-  return getFollowedTags(getDB(), sessionId) as string[];
+export async function getUserFollowedTags(sessionId: string): Promise<string[]> {
+  return getFollowedTags(sessionId);
 }
 
-export function getPopularTagsList(): Array<{ tag: string; count: number }> {
-  return getPopularTags(getDB()) as Array<{ tag: string; count: number }>;
+export async function getPopularTagsList(): Promise<Array<{ tag: string; count: number }>> {
+  return getPopularTags();
 }
 
-export function recordUserInteraction(
+export async function recordUserInteraction(
   sessionId: string,
   postId: number,
   action: UserInteractionType
-): void {
-  recordInteraction(getDB(), sessionId, postId, action);
+): Promise<void> {
+  await recordInteraction(sessionId, postId, action);
 }

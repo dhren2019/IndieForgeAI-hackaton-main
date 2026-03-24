@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS generations (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  id          SERIAL PRIMARY KEY,
   session_id  TEXT NOT NULL,
   type        TEXT NOT NULL CHECK (type IN ('npc', 'quest', 'item', 'lore', 'weapon', 'enemy')),
   prompt_meta TEXT NOT NULL DEFAULT '{}',
@@ -17,14 +17,14 @@ CREATE TABLE IF NOT EXISTS generations (
   source      TEXT NOT NULL DEFAULT 'model' CHECK (source IN ('model', 'fallback')),
   image_url   TEXT,
   glb_url     TEXT,
-  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS favorites (
-  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  id             SERIAL PRIMARY KEY,
   session_id     TEXT NOT NULL,
   generation_id  INTEGER NOT NULL REFERENCES generations(id) ON DELETE CASCADE,
-  created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (session_id, generation_id)
 );
 
@@ -37,7 +37,7 @@ CREATE INDEX IF NOT EXISTS idx_favorites_session   ON favorites(session_id);
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS posts (
-  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  id            SERIAL PRIMARY KEY,
   session_id    TEXT NOT NULL,
   generation_id INTEGER REFERENCES generations(id) ON DELETE SET NULL,
   title         TEXT NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS posts (
   result        TEXT NOT NULL,
   image_url     TEXT,
   glb_url       TEXT,
-  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS post_tags (
@@ -58,22 +58,23 @@ CREATE TABLE IF NOT EXISTS post_tags (
 CREATE TABLE IF NOT EXISTS tag_follows (
   session_id TEXT NOT NULL,
   tag        TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   PRIMARY KEY (session_id, tag)
 );
 
 CREATE TABLE IF NOT EXISTS post_likes (
   session_id TEXT NOT NULL,
   post_id    INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   PRIMARY KEY (session_id, post_id)
 );
 
 CREATE TABLE IF NOT EXISTS post_comments (
-  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  id         SERIAL PRIMARY KEY,
   post_id    INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
   session_id TEXT NOT NULL,
-  content    TEXT NOT NULL,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  content    TEXT NOT NULL CHECK (LENGTH(content) <= 300),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_posts_session    ON posts(session_id);
@@ -86,11 +87,11 @@ CREATE INDEX IF NOT EXISTS idx_post_comments_post ON post_comments(post_id);
 -- Tabla de interacciones del usuario (señales para el algoritmo de recomendación ML)
 -- action: 'view' (0.1), 'expand' (1.0), 'like' (3.0), 'comment' (2.5)
 CREATE TABLE IF NOT EXISTS user_interactions (
-  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  id           SERIAL PRIMARY KEY,
   session_id   TEXT NOT NULL,
   post_id      INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
   action       TEXT NOT NULL CHECK (action IN ('view', 'expand', 'like', 'comment')),
-  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_ui_session         ON user_interactions(session_id);
