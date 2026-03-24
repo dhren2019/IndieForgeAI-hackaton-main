@@ -83,6 +83,7 @@ export function ResultCard({
   onShare,
   showActions = true,
   onGlbGenerated,
+  onImageGenerated,
 }: ResultCardProps) {
   const [view, setView]               = useState<"fields" | "json">("fields");
   const [showIllustrator, setShowIllustrator] = useState(false);

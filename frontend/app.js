@@ -24959,7 +24959,8 @@ function ResultCard({
   onFavToggle,
   onShare,
   showActions = true,
-  onGlbGenerated
+  onGlbGenerated,
+  onImageGenerated
 }) {
   const [view, setView] = import_react6.useState("fields");
   const [showIllustrator, setShowIllustrator] = import_react6.useState(false);
@@ -25229,31 +25230,26 @@ function PublishModal({ gen, onClose, onPublished, onToast, initialGlbUrl, initi
             children: [
               /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("span", {
                 className: "form-field__label",
-                children: "Modelo 3D"
+                children: "Modelo 3D — se publicará con tu creación"
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
-                className: "publish-model3d-viewer",
-                children: [
-                  /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("model-viewer", {
-                    src: glbUrl,
-                    alt: "Modelo 3D",
-                    "auto-rotate": true,
-                    "camera-controls": true,
-                    "shadow-intensity": "1",
-                    "environment-image": "neutral",
-                    class: "publish-model3d-viewer__canvas"
-                  }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
-                    className: "publish-model3d-viewer__actions",
-                    children: /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("a", {
-                      href: glbUrl,
-                      download: "personaje-3d.glb",
-                      className: "publish-model3d-viewer__download",
-                      children: "⬇ Descargar .glb"
-                    }, undefined, false, undefined, this)
-                  }, undefined, false, undefined, this)
-                ]
-              }, undefined, true, undefined, this)
+                className: "publish-3d-viewer",
+                children: /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("model-viewer", {
+                  src: glbUrl,
+                  alt: "Vista previa del modelo 3D",
+                  "auto-rotate": true,
+                  "camera-controls": true,
+                  "shadow-intensity": "1",
+                  "environment-image": "neutral",
+                  class: "publish-3d-viewer__canvas"
+                }, undefined, false, undefined, this)
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("a", {
+                href: glbUrl,
+                download: "personaje-3d.glb",
+                className: "publish-glb-preview__download",
+                children: "⬇ Descargar .glb"
+              }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this)
         ]
@@ -25625,6 +25621,8 @@ function HistoryPage({ onToast }) {
           }, undefined, true, undefined, this),
           publishing && selected && /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(PublishModal, {
             gen: selected,
+            initialGlbUrl: selected.glb_url ?? undefined,
+            initialImageUrl: selected.image_url ?? undefined,
             onClose: () => setPublishing(false),
             onPublished: () => onToast("Publicado ✨"),
             onToast
@@ -25758,6 +25756,8 @@ function FavoritesPage({ onToast }) {
           }, undefined, true, undefined, this),
           publishing && selected && /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(PublishModal, {
             gen: selected,
+            initialGlbUrl: selected.glb_url ?? undefined,
+            initialImageUrl: selected.image_url ?? undefined,
             onClose: () => setPublishing(false),
             onPublished: () => onToast("Publicado ✨"),
             onToast
@@ -25981,17 +25981,33 @@ function FeedPost({
       }, undefined, true, undefined, this),
       post.image_url && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
         className: "post-image-wrap",
+        children: /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("img", {
+          src: post.image_url,
+          alt: "Hoja de diseño",
+          className: "post-image"
+        }, undefined, false, undefined, this)
+      }, undefined, false, undefined, this),
+      post.glb_url && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+        className: "post-3d-viewer",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("img", {
-            src: post.image_url,
-            alt: "Hoja de diseño",
-            className: "post-image"
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("model-viewer", {
+            src: post.glb_url,
+            alt: "Modelo 3D",
+            "auto-rotate": true,
+            "camera-controls": true,
+            "shadow-intensity": "1",
+            "environment-image": "neutral",
+            class: "post-3d-viewer__canvas"
           }, undefined, false, undefined, this),
-          post.glb_url && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("a", {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+            className: "post-3d-viewer__hint",
+            children: "\uD83D\uDDB1 Arrastra para rotar · Scroll para zoom"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("a", {
             href: post.glb_url,
             download: "personaje-3d.glb",
             className: "post-glb-download",
-            children: "\uD83E\uDDCA Descargar modelo 3D (.glb)"
+            children: "⬇ Descargar modelo 3D (.glb)"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),

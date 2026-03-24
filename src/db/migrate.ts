@@ -29,4 +29,12 @@ db.transaction(() => {
   }
 })();
 
+// Safe ALTER TABLE for columns added after initial deploy (SQLite ignores duplicate column errors)
+const alterations = [
+  "ALTER TABLE generations ADD COLUMN glb_url TEXT",
+];
+for (const alt of alterations) {
+  try { db.run(alt); } catch { /* column already exists — ignore */ }
+}
+
 console.log("✅ Migration complete");

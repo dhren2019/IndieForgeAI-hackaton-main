@@ -39,6 +39,7 @@ export interface Generation {
   raw_output: string | null;
   source: "model" | "fallback";
   image_url: string | null;
+  glb_url: string | null;
   created_at: string;
 }
 
@@ -130,6 +131,7 @@ function deserializeGeneration(row: Generation): Generation {
   return {
     ...row,
     image_url: row.image_url ?? null,
+    glb_url:   row.glb_url   ?? null,
     prompt_meta:
       typeof row.prompt_meta === "string"
         ? JSON.parse(row.prompt_meta)

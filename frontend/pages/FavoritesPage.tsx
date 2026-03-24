@@ -62,6 +62,8 @@ export function FavoritesPage({ onToast }: FavoritesPageProps) {
         {publishing && selected && (
           <PublishModal
             gen={selected}
+            initialGlbUrl={selected.glb_url ?? undefined}
+            initialImageUrl={selected.image_url ?? undefined}
             onClose={() => setPublishing(false)}
             onPublished={() => onToast("Publicado ✨")}
             onToast={onToast}
