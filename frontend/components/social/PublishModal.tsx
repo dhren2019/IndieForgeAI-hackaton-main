@@ -30,9 +30,15 @@ export function PublishModal({ gen, onClose, onPublished, onToast, initialGlbUrl
   const [glbUrl,   setGlbUrl]   = useState<string | undefined>(initialGlbUrl);
   const [loading,  setLoading]  = useState(false);
 
-  // Resolve a display name for this post
+  // Resolve a display name for this post — use full name or first+last name only.
+  // Explicitly avoid user.username which Clerk auto-generates as random words.
   const displayName = user
-    ? (user.fullName || user.username || user.primaryEmailAddress?.emailAddress || "").trim()
+    ? (
+        user.fullName ||
+        [user.firstName, user.lastName].filter(Boolean).join(" ") ||
+        user.primaryEmailAddress?.emailAddress?.split("@")[0] ||
+        ""
+      ).trim()
     : "";
 
   const meta = TYPE_META[gen.type];

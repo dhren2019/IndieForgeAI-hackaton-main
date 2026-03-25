@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@clerk/clerk-react";
+import { setTokenGetter } from "../lib/auth-token";
 import { apiFeed, apiTrending, apiExplore, apiMyPosts, apiFollowedTags, apiPopularTags, apiFollowTag, apiUnfollowTag } from "../lib/api";
 import type { Post, SocialSubTab, SortMode } from "../types/social";
 
@@ -11,9 +12,17 @@ export function useSocialFeed() {
   const [filterTag, setFilterTag]       = useState<string | null>(null);
   const [followedTags, setFollowedTags] = useState<Set<string>>(new Set());
   const [popularTags, setPopularTags]   = useState<Array<{ tag: string; count: number }>>([]);
-  const { userId, isLoaded } = useAuth();
+  const { userId, isLoaded, getToken, isSignedIn } = useAuth();
+  const reqCounter = useRef(0);
 
   const loadPosts = useCallback(async () => {
+    const reqId = ++reqCounter.current;
+    // Sync the auth token BEFORE making any API call — this ensures the
+    // Authorization header is attached even if this effect fires before
+    // ClerkTokenSync's effect (React fires effects bottom-up, so child
+    // components like this hook run before the top-level ClerkTokenSync).
+    setTokenGetter(isSignedIn ? getToken : null);
+
     setLoading(true);
     setPosts([]);  // Clear stale posts immediately when switching tabs
     let data: Post[] | null = null;
@@ -23,9 +32,11 @@ export function useSocialFeed() {
     else if (subTab === "explorar") ({ data } = await apiExplore(filterTag, sortMode));
     else                            ({ data } = await apiMyPosts());
 
-    setPosts(data ?? []);  // Always update, even on error (clears stale state)
+    // Discard result if a newer request has been started (race-condition guard)
+    if (reqId !== reqCounter.current) return;
+    setPosts(data ?? []);
     setLoading(false);
-  }, [subTab, filterTag, sortMode]);
+  }, [subTab, filterTag, sortMode, getToken, isSignedIn]);
 
   const loadMeta = useCallback(async () => {
     const [tags, popular] = await Promise.all([apiFollowedTags(), apiPopularTags()]);

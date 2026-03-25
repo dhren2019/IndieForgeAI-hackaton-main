@@ -121,6 +121,11 @@ input, textarea, select {
 }
 .nav-item__icon  { font-size: 1.1rem; flex-shrink: 0; width: 22px; text-align: center; }
 .nav-item__label { flex: 1; }
+
+/* Colored icons for generate & favorites — always on, regardless of active state */
+.nav-item--generate .nav-item__icon { color: #a78bfa; }
+.nav-item--favorites .nav-item__icon { color: #f59e0b; }
+
 .app-nav__footer {
   padding:    var(--sp-4);
   border-top: 1px solid var(--border);

@@ -3,25 +3,43 @@ var __getProtoOf = Object.getPrototypeOf;
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+function __accessProp(key) {
+  return this[key];
+}
+var __toESMCache_node;
+var __toESMCache_esm;
 var __toESM = (mod, isNodeMode, target) => {
+  var canCache = mod != null && typeof mod === "object";
+  if (canCache) {
+    var cache = isNodeMode ? __toESMCache_node ??= new WeakMap : __toESMCache_esm ??= new WeakMap;
+    var cached = cache.get(mod);
+    if (cached)
+      return cached;
+  }
   target = mod != null ? __create(__getProtoOf(mod)) : {};
   const to = isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target;
   for (let key of __getOwnPropNames(mod))
     if (!__hasOwnProp.call(to, key))
       __defProp(to, key, {
-        get: () => mod[key],
+        get: __accessProp.bind(mod, key),
         enumerable: true
       });
+  if (canCache)
+    cache.set(mod, to);
   return to;
 };
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
+var __returnValue = (v) => v;
+function __exportSetter(name, newValue) {
+  this[name] = __returnValue.bind(null, newValue);
+}
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, {
       get: all[name],
       enumerable: true,
       configurable: true,
-      set: (newValue) => all[name] = () => newValue
+      set: __exportSetter.bind(all, name)
     });
 };
 var __esm = (fn, res) => () => (fn && (res = fn(fn = 0)), res);
@@ -1831,8 +1849,9 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/index.js
 var require_react = __commonJS((exports, module) => {
+  var react_development = __toESM(require_react_development());
   if (false) {} else {
-    module.exports = require_react_development();
+    module.exports = react_development;
   }
 });
 
@@ -2281,15 +2300,16 @@ var require_scheduler_development = __commonJS((exports) => {
 
 // node_modules/scheduler/index.js
 var require_scheduler = __commonJS((exports, module) => {
+  var scheduler_development = __toESM(require_scheduler_development());
   if (false) {} else {
-    module.exports = require_scheduler_development();
+    module.exports = scheduler_development;
   }
 });
 
 // node_modules/react-dom/cjs/react-dom.development.js
 var require_react_dom_development = __commonJS((exports) => {
-  var React = __toESM(require_react(), 1);
-  var Scheduler = __toESM(require_scheduler(), 1);
+  var React = __toESM(require_react());
+  var Scheduler = __toESM(require_scheduler());
   if (true) {
     (function() {
       if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
@@ -22735,14 +22755,15 @@ You might need to use a local HTTP server (instead of file://): ` + "https://rea
 
 // node_modules/react-dom/index.js
 var require_react_dom = __commonJS((exports, module) => {
+  var react_dom_development = __toESM(require_react_dom_development());
   if (false) {} else {
-    module.exports = require_react_dom_development();
+    module.exports = react_dom_development;
   }
 });
 
 // node_modules/react-dom/client.js
 var require_client = __commonJS((exports) => {
-  var m = __toESM(require_react_dom(), 1);
+  var m = __toESM(require_react_dom());
   if (false) {} else {
     i = m.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
     exports.createRoot = function(c, o) {
@@ -22767,7 +22788,7 @@ var require_client = __commonJS((exports) => {
 
 // node_modules/use-sync-external-store/cjs/use-sync-external-store-shim.development.js
 var require_use_sync_external_store_shim_development = __commonJS((exports) => {
-  var React = __toESM(require_react(), 1);
+  var React = __toESM(require_react());
   (function() {
     function is(x, y) {
       return x === y && (x !== 0 || 1 / x === 1 / y) || x !== x && y !== y;
@@ -22826,7 +22847,7 @@ var require_shim = __commonJS((exports, module) => {
 
 // node_modules/react/cjs/react-jsx-dev-runtime.development.js
 var require_react_jsx_dev_runtime_development = __commonJS((exports) => {
-  var React9 = __toESM(require_react(), 1);
+  var React9 = __toESM(require_react());
   if (true) {
     (function() {
       var REACT_ELEMENT_TYPE = Symbol.for("react.element");
@@ -23707,8 +23728,9 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/jsx-dev-runtime.js
 var require_jsx_dev_runtime = __commonJS((exports, module) => {
+  var react_jsx_dev_runtime_development = __toESM(require_react_jsx_dev_runtime_development());
   if (false) {} else {
-    module.exports = require_react_jsx_dev_runtime_development();
+    module.exports = react_jsx_dev_runtime_development;
   }
 });
 
@@ -23771,6 +23793,7 @@ var init_fetcher = () => {};
 // frontend/lib/api.ts
 var exports_api = {};
 __export(exports_api, {
+  apiUpdateProject: () => apiUpdateProject,
   apiUnfollowTag: () => apiUnfollowTag,
   apiTrending: () => apiTrending,
   apiToggleLike: () => apiToggleLike,
@@ -23864,6 +23887,9 @@ async function apiGetProjects() {
 }
 async function apiCreateProject(name, emoji = "\uD83D\uDCC1") {
   return postJSON("/api/projects", { name, emoji });
+}
+async function apiUpdateProject(projectId, name, emoji) {
+  return postJSON(`/api/projects/${projectId}`, { name, emoji }, "PATCH");
 }
 async function apiDeleteProject(projectId) {
   return deleteJSON(`/api/projects/${projectId}`);
@@ -30319,6 +30345,12 @@ function useProjects() {
     await apiDeleteProject(projectId);
     setProjects((p) => p.filter((x) => x.id !== projectId));
   };
+  const updateProject = async (projectId, name, emoji) => {
+    const { data } = await apiUpdateProject(projectId, name, emoji);
+    if (data)
+      setProjects((p) => p.map((x) => x.id === projectId ? { ...x, name: data.name, emoji: data.emoji } : x));
+    return data ?? null;
+  };
   const addToProject = async (projectId, generationId) => {
     const { error } = await apiAddToProject(projectId, generationId);
     if (!error) {
@@ -30343,6 +30375,7 @@ function useProjects() {
     reload,
     createProject,
     deleteProject,
+    updateProject,
     addToProject,
     removeFromProject,
     getGenerationProjects
@@ -30778,7 +30811,7 @@ function LeftNav() {
                 children: "Navegación"
               }, undefined, false, undefined, this),
               NAV_ITEMS.map((item) => /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("button", {
-                className: `nav-item${tab === item.id ? " nav-item--active" : ""}`,
+                className: `nav-item nav-item--${item.id}${tab === item.id ? " nav-item--active" : ""}`,
                 onClick: () => setTab(item.id),
                 title: navCollapsed ? item.label : undefined,
                 children: [
@@ -31814,7 +31847,7 @@ function PublishModal({ gen, onClose, onPublished, onToast, initialGlbUrl, initi
   const [imageUrl, setImageUrl] = import_react43.useState(initialImageUrl ?? gen.image_url ?? undefined);
   const [glbUrl, setGlbUrl] = import_react43.useState(initialGlbUrl);
   const [loading, setLoading] = import_react43.useState(false);
-  const displayName = user ? (user.fullName || user.username || user.primaryEmailAddress?.emailAddress || "").trim() : "";
+  const displayName = user ? (user.fullName || [user.firstName, user.lastName].filter(Boolean).join(" ") || user.primaryEmailAddress?.emailAddress?.split("@")[0] || "").trim() : "";
   const meta = TYPE_META[gen.type];
   const addTag = (raw) => {
     const t = sanitizeTag(raw);
@@ -32045,8 +32078,8 @@ function PageContainer({ children, narrow = false, wide = false }) {
 }
 
 // frontend/hooks/useGenerate.ts
-var import_react44 = __toESM(require_react(), 1);
 init_api();
+var import_react44 = __toESM(require_react(), 1);
 function useGenerate() {
   const [state, setState] = import_react44.useState({
     loading: false,
@@ -32685,14 +32718,15 @@ function FeedPost({
   };
   const handleDelete = async (e) => {
     e.stopPropagation();
-    if (!confirm("¿Eliminar esta publicación?"))
+    if (!confirm(`¿Quitar esta publicación del feed?
+Tu contenido seguirá disponible en Historial, Favoritos y Proyectos.`))
       return;
     const { data } = await apiDeletePost(post.id);
     if (data !== null) {
       onDelete(post.id);
-      onToast("Publicación eliminada");
+      onToast("Publicación quitada del feed");
     } else
-      onToast("Error al eliminar", "error");
+      onToast("Error al quitar la publicación", "error");
   };
   const handleExpand = () => {
     const next = !expanded;
@@ -32854,8 +32888,8 @@ function FeedPost({
           isOwn && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("button", {
             className: "delete-btn",
             onClick: handleDelete,
-            title: "Eliminar publicación",
-            children: "\uD83D\uDDD1"
+            title: "Quitar del feed (el contenido se conserva)",
+            children: "✖ Dejar de compartir"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
@@ -32974,8 +33008,11 @@ function useSocialFeed() {
   const [filterTag, setFilterTag] = import_react52.useState(null);
   const [followedTags, setFollowedTags] = import_react52.useState(new Set);
   const [popularTags, setPopularTags] = import_react52.useState([]);
-  const { userId, isLoaded } = useAuth();
+  const { userId, isLoaded, getToken, isSignedIn } = useAuth();
+  const reqCounter = import_react52.useRef(0);
   const loadPosts = import_react52.useCallback(async () => {
+    const reqId = ++reqCounter.current;
+    setTokenGetter(isSignedIn ? getToken : null);
     setLoading(true);
     setPosts([]);
     let data = null;
@@ -32987,9 +33024,11 @@ function useSocialFeed() {
       ({ data } = await apiExplore(filterTag, sortMode));
     else
       ({ data } = await apiMyPosts());
+    if (reqId !== reqCounter.current)
+      return;
     setPosts(data ?? []);
     setLoading(false);
-  }, [subTab, filterTag, sortMode]);
+  }, [subTab, filterTag, sortMode, getToken, isSignedIn]);
   const loadMeta = import_react52.useCallback(async () => {
     const [tags, popular] = await Promise.all([apiFollowedTags(), apiPopularTags()]);
     if (tags.data)
@@ -33232,7 +33271,13 @@ var EMOJI_OPTIONS2 = ["\uD83D\uDCC1", "⚔️", "\uD83E\uDDD9", "\uD83C\uDFF0", 
 function ProjectsPage({ onToast }) {
   const { isSignedIn, isLoaded } = useAuth();
   const { openSignIn } = useClerk();
-  const { projects, loading: projLoading, createProject, deleteProject, reload } = useProjects();
+  const {
+    projects,
+    loading: projLoading,
+    createProject,
+    deleteProject,
+    updateProject
+  } = useProjects();
   const { favIds, toggle: toggleFav } = useFavorites();
   const [selected, setSelected] = import_react53.useState(null);
   const [items, setItems] = import_react53.useState([]);
@@ -33241,6 +33286,10 @@ function ProjectsPage({ onToast }) {
   const [newName, setNewName] = import_react53.useState("");
   const [newEmoji, setNewEmoji] = import_react53.useState("\uD83D\uDCC1");
   const [confirmDelete, setConfirmDelete] = import_react53.useState(null);
+  const [viewMode, setViewMode] = import_react53.useState("grid");
+  const [editingId, setEditingId] = import_react53.useState(null);
+  const [editName, setEditName] = import_react53.useState("");
+  const [editEmoji, setEditEmoji] = import_react53.useState("\uD83D\uDCC1");
   const openProject = import_react53.useCallback(async (p) => {
     setSelected(p);
     setItemsLoading(true);
@@ -33276,6 +33325,24 @@ function ProjectsPage({ onToast }) {
     }
     setConfirmDelete(null);
     onToast("Proyecto eliminado");
+  };
+  const startEdit = (p, e) => {
+    e.stopPropagation();
+    setEditingId(p.id);
+    setEditName(p.name);
+    setEditEmoji(p.emoji);
+    setConfirmDelete(null);
+  };
+  const handleUpdate = async () => {
+    if (!editName.trim() || editingId === null)
+      return;
+    const updated = await updateProject(editingId, editName.trim(), editEmoji);
+    if (updated) {
+      onToast("Proyecto actualizado");
+      if (selected?.id === editingId)
+        setSelected((s) => s ? { ...s, name: updated.name, emoji: updated.emoji } : s);
+    }
+    setEditingId(null);
   };
   if (isLoaded && !isSignedIn) {
     return /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
@@ -33457,48 +33524,104 @@ function ProjectsPage({ onToast }) {
                     className: "projects-sidebar__list",
                     children: projects.map((p) => /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
                       className: `projects-sidebar__item${selected?.id === p.id ? " projects-sidebar__item--active" : ""}`,
-                      children: [
-                        /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
-                          className: "projects-sidebar__item-btn",
-                          onClick: () => openProject(p),
-                          children: [
-                            /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
-                              className: "projects-sidebar__item-emoji",
-                              children: p.emoji
-                            }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
-                              className: "projects-sidebar__item-name",
-                              children: p.name
-                            }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
-                              className: "projects-sidebar__item-count",
-                              children: p.item_count
-                            }, undefined, false, undefined, this)
-                          ]
-                        }, undefined, true, undefined, this),
-                        confirmDelete === p.id ? /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
-                          className: "projects-sidebar__confirm",
-                          children: [
-                            /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
-                              className: "projects-modal__danger-btn",
-                              onClick: () => handleDelete(p.id),
-                              title: "Confirmar eliminación",
-                              children: "✓"
-                            }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
-                              className: "projects-modal__cancel-btn",
-                              onClick: () => setConfirmDelete(null),
-                              children: "✕"
-                            }, undefined, false, undefined, this)
-                          ]
-                        }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
-                          className: "projects-sidebar__del",
-                          onClick: () => setConfirmDelete(p.id),
-                          title: "Eliminar proyecto",
-                          children: "\uD83D\uDDD1"
-                        }, undefined, false, undefined, this)
-                      ]
-                    }, p.id, true, undefined, this))
+                      children: editingId === p.id ? /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+                        className: "projects-sidebar__edit",
+                        children: [
+                          /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+                            className: "proj-panel__emoji-row proj-panel__emoji-row--sm",
+                            children: EMOJI_OPTIONS2.map((e) => /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
+                              className: `proj-panel__emoji-opt${editEmoji === e ? " proj-panel__emoji-opt--active" : ""}`,
+                              onClick: () => setEditEmoji(e),
+                              children: e
+                            }, e, false, undefined, this))
+                          }, undefined, false, undefined, this),
+                          /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("input", {
+                            className: "proj-panel__input",
+                            value: editName,
+                            onChange: (e) => setEditName(e.target.value),
+                            onKeyDown: (e) => {
+                              if (e.key === "Enter")
+                                handleUpdate();
+                              if (e.key === "Escape")
+                                setEditingId(null);
+                            },
+                            autoFocus: true,
+                            maxLength: 100
+                          }, undefined, false, undefined, this),
+                          /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+                            className: "proj-panel__create-actions",
+                            children: [
+                              /* @__PURE__ */ jsx_dev_runtime34.jsxDEV(Button, {
+                                variant: "primary",
+                                size: "sm",
+                                onClick: handleUpdate,
+                                disabled: !editName.trim(),
+                                children: "Guardar"
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime34.jsxDEV(Button, {
+                                variant: "ghost",
+                                size: "sm",
+                                onClick: () => setEditingId(null),
+                                children: "Cancelar"
+                              }, undefined, false, undefined, this)
+                            ]
+                          }, undefined, true, undefined, this)
+                        ]
+                      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime34.jsxDEV(jsx_dev_runtime34.Fragment, {
+                        children: [
+                          /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
+                            className: "projects-sidebar__item-btn",
+                            onClick: () => openProject(p),
+                            children: [
+                              /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
+                                className: "projects-sidebar__item-emoji",
+                                children: p.emoji
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
+                                className: "projects-sidebar__item-name",
+                                children: p.name
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
+                                className: "projects-sidebar__item-count",
+                                children: p.item_count
+                              }, undefined, false, undefined, this)
+                            ]
+                          }, undefined, true, undefined, this),
+                          confirmDelete === p.id ? /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
+                            className: "projects-sidebar__confirm",
+                            children: [
+                              /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
+                                className: "projects-modal__danger-btn",
+                                onClick: () => handleDelete(p.id),
+                                title: "Confirmar eliminación",
+                                children: "✓"
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
+                                className: "projects-modal__cancel-btn",
+                                onClick: () => setConfirmDelete(null),
+                                children: "✕"
+                              }, undefined, false, undefined, this)
+                            ]
+                          }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
+                            className: "projects-sidebar__actions",
+                            children: [
+                              /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
+                                className: "projects-sidebar__edit-btn",
+                                onClick: (e) => startEdit(p, e),
+                                title: "Editar nombre/icono",
+                                children: "✏️"
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
+                                className: "projects-sidebar__del",
+                                onClick: () => setConfirmDelete(p.id),
+                                title: "Eliminar proyecto",
+                                children: "\uD83D\uDDD1"
+                              }, undefined, false, undefined, this)
+                            ]
+                          }, undefined, true, undefined, this)
+                        ]
+                      }, undefined, true, undefined, this)
+                    }, p.id, false, undefined, this))
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
@@ -33518,36 +33641,77 @@ function ProjectsPage({ onToast }) {
                   ]
                 }, undefined, true, undefined, this) : itemsLoading ? /* @__PURE__ */ jsx_dev_runtime34.jsxDEV(Loader, {
                   label: "Cargando contenido…"
-                }, undefined, false, undefined, this) : items.length === 0 ? /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
-                  className: "empty-state",
+                }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime34.jsxDEV(jsx_dev_runtime34.Fragment, {
                   children: [
                     /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
-                      className: "empty-state__icon",
-                      children: selected.emoji
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("p", {
-                      className: "empty-state__text",
+                      className: "projects-detail__header",
                       children: [
-                        "Este proyecto está vacío. Añade generaciones con el botón ",
-                        /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("strong", {
-                          children: "＋ Proyecto"
-                        }, undefined, false, undefined, this),
-                        " en cualquier tarjeta."
+                        /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
+                          className: "projects-detail__title",
+                          children: [
+                            /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
+                              children: selected.emoji
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
+                              children: selected.name
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
+                              className: "projects-sidebar__item-count",
+                              children: items.length
+                            }, undefined, false, undefined, this)
+                          ]
+                        }, undefined, true, undefined, this),
+                        /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
+                          className: "projects-detail__view-toggle",
+                          children: [
+                            /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
+                              className: `projects-detail__view-btn${viewMode === "grid" ? " projects-detail__view-btn--active" : ""}`,
+                              onClick: () => setViewMode("grid"),
+                              title: "Vista cuadrícula",
+                              children: "⊞"
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
+                              className: `projects-detail__view-btn${viewMode === "list" ? " projects-detail__view-btn--active" : ""}`,
+                              onClick: () => setViewMode("list"),
+                              title: "Vista lista",
+                              children: "☰"
+                            }, undefined, false, undefined, this)
+                          ]
+                        }, undefined, true, undefined, this)
                       ]
-                    }, undefined, true, undefined, this)
+                    }, undefined, true, undefined, this),
+                    items.length === 0 ? /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+                      className: "empty-state",
+                      children: [
+                        /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+                          className: "empty-state__icon",
+                          children: selected.emoji
+                        }, undefined, false, undefined, this),
+                        /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("p", {
+                          className: "empty-state__text",
+                          children: [
+                            "Este proyecto está vacío. Añade generaciones con el botón ",
+                            /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("strong", {
+                              children: "＋ Proyecto"
+                            }, undefined, false, undefined, this),
+                            " en cualquier tarjeta."
+                          ]
+                        }, undefined, true, undefined, this)
+                      ]
+                    }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+                      className: `projects-detail__grid projects-detail__grid--${viewMode}`,
+                      children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime34.jsxDEV(ResultCard, {
+                        gen,
+                        isFav: favIds.has(gen.id),
+                        onFavToggle: (id, add) => {
+                          toggleFav(id, add);
+                          onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
+                        },
+                        showActions: true
+                      }, gen.id, false, undefined, this))
+                    }, undefined, false, undefined, this)
                   ]
-                }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
-                  className: "projects-detail__grid",
-                  children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime34.jsxDEV(ResultCard, {
-                    gen,
-                    isFav: favIds.has(gen.id),
-                    onFavToggle: (id, add) => {
-                      toggleFav(id, add);
-                      onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
-                    },
-                    showActions: true
-                  }, gen.id, false, undefined, this))
-                }, undefined, false, undefined, this)
+                }, undefined, true, undefined, this)
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this)

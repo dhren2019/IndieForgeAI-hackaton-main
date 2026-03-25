@@ -390,6 +390,7 @@ export async function explorePosts(
 
 /** Posts propios del usuario (incluye posts del cookie-session si el usuario está en Clerk) */
 export async function getMyPosts(session_id: string, cookie_session_id?: string | null): Promise<Post[]> {
+  if (!session_id) return [];
   let rows: Record<string, unknown>[];
   if (cookie_session_id && cookie_session_id !== session_id) {
     // Clerk user: merge their Clerk posts + their old anonymous cookie posts

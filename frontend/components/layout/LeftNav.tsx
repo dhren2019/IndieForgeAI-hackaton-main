@@ -34,7 +34,7 @@ export function LeftNav() {
           {NAV_ITEMS.map(item => (
             <button
               key={item.id}
-              className={`nav-item${tab === item.id ? " nav-item--active" : ""}`}
+              className={`nav-item nav-item--${item.id}${tab === item.id ? " nav-item--active" : ""}`}
               onClick={() => setTab(item.id)}
               title={navCollapsed ? item.label : undefined}
             >
