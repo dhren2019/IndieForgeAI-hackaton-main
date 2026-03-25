@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS posts (
   result        TEXT NOT NULL,
   image_url     TEXT,
   glb_url       TEXT,
+  display_name  TEXT NOT NULL DEFAULT '',
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -98,3 +99,32 @@ CREATE INDEX IF NOT EXISTS idx_ui_session         ON user_interactions(session_i
 CREATE INDEX IF NOT EXISTS idx_ui_post            ON user_interactions(post_id);
 CREATE INDEX IF NOT EXISTS idx_ui_session_post    ON user_interactions(session_id, post_id);
 CREATE INDEX IF NOT EXISTS idx_ui_session_action  ON user_interactions(session_id, action);
+
+-- ---------------------------------------------------------------------------
+-- Projects: carpetas para organizar generaciones (requiere login con Clerk)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS projects (
+  id          SERIAL PRIMARY KEY,
+  session_id  TEXT NOT NULL,
+  name        TEXT NOT NULL CHECK (LENGTH(name) >= 1 AND LENGTH(name) <= 100),
+  emoji       TEXT NOT NULL DEFAULT '📁',
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS project_items (
+  project_id    INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  generation_id INTEGER NOT NULL REFERENCES generations(id) ON DELETE CASCADE,
+  added_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (project_id, generation_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_projects_session       ON projects(session_id);
+CREATE INDEX IF NOT EXISTS idx_project_items_project  ON project_items(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_items_gen      ON project_items(generation_id);
+
+-- ---------------------------------------------------------------------------
+-- Additive column migrations (idempotent — safe to run multiple times)
+-- ---------------------------------------------------------------------------
+
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS display_name TEXT NOT NULL DEFAULT '';

@@ -15,6 +15,7 @@ export function useSocialFeed() {
 
   const loadPosts = useCallback(async () => {
     setLoading(true);
+    setPosts([]);  // Clear stale posts immediately when switching tabs
     let data: Post[] | null = null;
 
     if (subTab === "feed")          ({ data } = await apiFeed());
@@ -22,7 +23,7 @@ export function useSocialFeed() {
     else if (subTab === "explorar") ({ data } = await apiExplore(filterTag, sortMode));
     else                            ({ data } = await apiMyPosts());
 
-    if (data) setPosts(data);
+    setPosts(data ?? []);  // Always update, even on error (clears stale state)
     setLoading(false);
   }, [subTab, filterTag, sortMode]);
 

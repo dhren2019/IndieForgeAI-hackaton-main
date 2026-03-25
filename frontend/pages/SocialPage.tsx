@@ -1,4 +1,5 @@
 import React from "react";
+import { useAuth }       from "@clerk/clerk-react";
 import { FeedList }      from "../components/social/FeedList";
 import { PageContainer } from "../components/layout/PageContainer";
 import { Sidebar, SidebarSection } from "../components/layout/Sidebar";
@@ -24,6 +25,7 @@ const SORT_OPTIONS: { id: SortMode; label: string }[] = [
 ];
 
 export function SocialPage({ onToast }: SocialPageProps) {
+  const { userId } = useAuth();
   const {
     posts, loading, subTab, sortMode, filterTag,
     followedTags, popularTags,
@@ -31,10 +33,11 @@ export function SocialPage({ onToast }: SocialPageProps) {
     toggleTag, removePost,
   } = useSocialFeed();
 
-  const mySessionId = document.cookie
+  // Prefer Clerk user ID for ownership checks; fall back to cookie for anonymous users
+  const mySessionId = userId ?? (document.cookie
     .split("; ")
     .find((r) => r.startsWith("session_id="))
-    ?.split("=")[1] ?? "";
+    ?.split("=")[1] ?? "");
 
   const hasSidebarContent = followedTags.size > 0 || popularTags.length > 0;
 

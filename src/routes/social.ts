@@ -22,7 +22,11 @@ import { ok, err } from "../utils/response";
 import type { UserInteractionType } from "../types/social";
 import type { GenerationType } from "../types/generate";
 
-export async function handleSocial(req: Request, sessionId: string): Promise<Response> {
+export async function handleSocial(
+  req: Request,
+  sessionId: string,
+  cookieSessionId?: string | null,
+): Promise<Response> {
   const url      = new URL(req.url);
   const pathname = url.pathname; // e.g. /api/social/posts/3/like
   const session  = sessionId;
@@ -46,7 +50,7 @@ export async function handleSocial(req: Request, sessionId: string): Promise<Res
 
   // GET   /api/social/misposts
   if (pathname === "/api/social/misposts" && method === "GET")
-    return handleMyPosts(session);
+    return handleMyPosts(session, cookieSessionId);
 
   // GET   /api/social/tags/populares
   if (pathname === "/api/social/tags/populares" && method === "GET")
@@ -93,14 +97,15 @@ async function handleCreatePost(req: Request, session: string): Promise<Response
   try { body = await req.json() as Record<string, unknown>; }
   catch { return err("JSON inválido"); }
 
-  const title       = String(body.title ?? "").trim();
-  const description = String(body.description ?? "").trim();
-  const type        = body.type as GenerationType;
-  const result      = body.result as Record<string, unknown>;
-  const tags        = Array.isArray(body.tags) ? body.tags.map(String) : [];
-  const gen_id      = typeof body.generation_id === "number" ? body.generation_id : null;
-  const image_url   = typeof body.image_url === "string" ? body.image_url : null;
-  const glb_url     = typeof body.glb_url === "string" ? body.glb_url : null;
+  const title        = String(body.title ?? "").trim();
+  const description  = String(body.description ?? "").trim();
+  const type         = body.type as GenerationType;
+  const result       = body.result as Record<string, unknown>;
+  const tags         = Array.isArray(body.tags) ? body.tags.map(String) : [];
+  const gen_id       = typeof body.generation_id === "number" ? body.generation_id : null;
+  const image_url    = typeof body.image_url === "string" ? body.image_url : null;
+  const glb_url      = typeof body.glb_url === "string" ? body.glb_url : null;
+  const display_name = typeof body.display_name === "string" ? body.display_name.trim().slice(0, 80) : "";
 
   if (!title)  return err("El título es obligatorio");
   if (!type || !["npc","quest","item","lore","weapon","enemy"].includes(type))
@@ -110,7 +115,7 @@ async function handleCreatePost(req: Request, session: string): Promise<Response
 
   const post = await createSocialPost({
     session_id: session, generation_id: gen_id,
-    title, description, type, result, tags, image_url, glb_url,
+    title, description, type, result, tags, image_url, glb_url, display_name,
   });
   return ok(post);
 }
@@ -132,8 +137,8 @@ async function handleExplore(url: URL, session: string): Promise<Response> {
   return ok(await exploreSocialPosts(session, tag, sort, limit));
 }
 
-async function handleMyPosts(session: string): Promise<Response> {
-  return ok(await getOwnPosts(session));
+async function handleMyPosts(session: string, cookieSessionId?: string | null): Promise<Response> {
+  return ok(await getOwnPosts(session, cookieSessionId));
 }
 
 async function handleGetPost(id: number, session: string): Promise<Response> {

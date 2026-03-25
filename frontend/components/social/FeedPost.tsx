@@ -3,7 +3,7 @@ import { Badge }       from "../ui/Badge";
 import { CommentList } from "./CommentList";
 import { ImagePreview } from "../results/ImagePreview";
 import { apiToggleLike, apiDeletePost, apiRecordInteraction } from "../../lib/api";
-import { authorName, timeAgo, labelFor } from "../../lib/formatters";
+import { timeAgo, labelFor } from "../../lib/formatters";
 import { TYPE_META }   from "../../types/generate";
 import type { Post }   from "../../types/social";
 
@@ -95,7 +95,7 @@ export function FeedPost({
           )}
         </div>
         <div className="post-card__meta">
-          <span className="post-card__author">{authorName(post.session_id)}</span>
+          <span className="post-card__author">{post.author}</span>
           <span className="post-card__time">{timeAgo(post.created_at)}</span>
         </div>
         <span className="post-card__chevron">{expanded ? "▲" : "▼"}</span>

@@ -11,12 +11,14 @@ interface ResultActionsProps {
   showIllustrator: boolean;
   viewMode:     "fields" | "json";
   onToggleView: () => void;
+  /** Called when user clicks "Add to project" — only shown when signed in */
+  onAddToProject?: () => void;
 }
 
 export function ResultActions({
   isFav, onFavToggle, onCopy, onExport,
   onShare, onIllustrate, showIllustrator,
-  viewMode, onToggleView,
+  viewMode, onToggleView, onAddToProject,
 }: ResultActionsProps) {
   return (
     <div className="result-actions">
@@ -29,6 +31,18 @@ export function ResultActions({
       >
         {isFav ? "Guardado" : "Guardar"}
       </Button>
+
+      {onAddToProject && (
+        <Button
+          variant="ghost"
+          size="sm"
+          icon="＋"
+          onClick={onAddToProject}
+          title="Añadir a proyecto"
+        >
+          Proyecto
+        </Button>
+      )}
 
       <Button variant="ghost" size="sm" onClick={onToggleView}>
         {viewMode === "fields" ? "</> JSON" : "⊞ Campos"}

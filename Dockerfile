@@ -17,6 +17,7 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/bun.lockb*   ./
 COPY --from=builder /app/src           ./src
 COPY --from=builder /app/frontend      ./frontend
+COPY --from=builder /app/public        ./public
 
 # Prod install (no devDeps)
 RUN bun install --production --frozen-lockfile

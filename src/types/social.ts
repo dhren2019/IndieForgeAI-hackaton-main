@@ -15,6 +15,7 @@ export interface Post {
   comment_count: number;
   tags: string[];
   liked_by_me: boolean;
+  author: string;
 }
 
 export interface PostComment {
@@ -36,6 +37,7 @@ export interface CreatePostInput {
   tags: string[];
   image_url: string | null;
   glb_url?: string | null;
+  display_name?: string;
 }
 
 export type UserInteractionType = "view" | "expand" | "like" | "comment";

@@ -132,6 +132,7 @@ export interface Post {
   comment_count: number;
   tags: string[];
   liked_by_me: boolean;
+  author: string;        // display_name from DB, or computed "Aventurero #XXXX"
 }
 
 export interface Comment {
@@ -143,7 +144,7 @@ export interface Comment {
   created_at: string;
 }
 
-/** Crea una publicaciÃ³n y asocia etiquetas */
+/** Crea una publicación y asocia etiquetas */
 export async function createPost(params: {
   session_id: string;
   generation_id: number | null;
@@ -154,20 +155,22 @@ export async function createPost(params: {
   tags: string[];
   image_url?: string | null;
   glb_url?: string | null;
+  display_name?: string;
 }): Promise<Post> {
+  const displayName = (params.display_name ?? "").slice(0, 80);
   const rows = await sql`
-    INSERT INTO posts (session_id, generation_id, title, description, type, result, image_url, glb_url)
+    INSERT INTO posts (session_id, generation_id, title, description, type, result, image_url, glb_url, display_name)
     VALUES (${params.session_id}, ${params.generation_id},
             ${params.title.slice(0, 120)}, ${params.description.slice(0, 500)},
             ${params.type}, ${JSON.stringify(params.result)},
-            ${params.image_url ?? null}, ${params.glb_url ?? null})
+            ${params.image_url ?? null}, ${params.glb_url ?? null}, ${displayName})
     RETURNING *
   `;
   const post = rows[0] as Record<string, unknown>;
 
   const cleanTags = params.tags
     .slice(0, 8)
-    .map((t) => t.toLowerCase().replace(/[^a-z0-9Ã¡Ã©Ã­Ã³ÃºÃ±_-]/gi, "").slice(0, 30))
+    .map((t) => t.toLowerCase().replace(/[^a-z0-9\u00e0-\u00ff_-]/gi, "").slice(0, 30))
     .filter(Boolean);
 
   for (const tag of cleanTags) {
@@ -385,13 +388,23 @@ export async function explorePosts(
   return results;
 }
 
-/** Posts propios del usuario */
-export async function getMyPosts(session_id: string): Promise<Post[]> {
-  const rows = await sql`
-    SELECT * FROM posts WHERE session_id = ${session_id} ORDER BY created_at DESC
-  `;
+/** Posts propios del usuario (incluye posts del cookie-session si el usuario está en Clerk) */
+export async function getMyPosts(session_id: string, cookie_session_id?: string | null): Promise<Post[]> {
+  let rows: Record<string, unknown>[];
+  if (cookie_session_id && cookie_session_id !== session_id) {
+    // Clerk user: merge their Clerk posts + their old anonymous cookie posts
+    rows = await sql`
+      SELECT * FROM posts
+      WHERE session_id = ${session_id} OR session_id = ${cookie_session_id}
+      ORDER BY created_at DESC
+    ` as Record<string, unknown>[];
+  } else {
+    rows = await sql`
+      SELECT * FROM posts WHERE session_id = ${session_id} ORDER BY created_at DESC
+    ` as Record<string, unknown>[];
+  }
   const results: Post[] = [];
-  for (const row of rows as Record<string, unknown>[]) {
+  for (const row of rows) {
     results.push(await enrichPost(row, session_id));
   }
   return results;
@@ -531,6 +544,7 @@ async function enrichPost(
   const tags          = (tagRows as { tag: string }[]).map((t) => t.tag);
   const liked_by_me   = likedRows.length > 0;
 
+  const storedName = (row.display_name as string | null) ?? "";
   return {
     id:            postId,
     session_id:    row.session_id as string,
@@ -548,6 +562,7 @@ async function enrichPost(
     comment_count,
     tags,
     liked_by_me,
+    author: storedName || authorName(row.session_id as string),
   };
 }
 
@@ -557,4 +572,100 @@ function authorName(session_id: string): string {
   let hash = 0;
   for (let i = 0; i < raw.length; i++) hash = (hash * 31 + raw.charCodeAt(i)) & 0x7fff;
   return `Aventurero #${hash % 9000 + 1000}`;
+}
+
+// ---------------------------------------------------------------------------
+// Projects
+// ---------------------------------------------------------------------------
+
+export interface Project {
+  id:         number;
+  session_id: string;
+  name:       string;
+  emoji:      string;
+  created_at: string;
+  item_count: number;
+}
+
+export async function createProject(session_id: string, name: string, emoji = "📁"): Promise<Project> {
+  const rows = await sql`
+    INSERT INTO projects (session_id, name, emoji)
+    VALUES (${session_id}, ${name.slice(0, 100)}, ${emoji})
+    RETURNING *
+  `;
+  return { ...(rows[0] as Record<string, unknown>), item_count: 0 } as unknown as Project;
+}
+
+export async function getProjects(session_id: string): Promise<Project[]> {
+  const rows = await sql`
+    SELECT p.*, COALESCE(i.c, 0) as item_count
+    FROM projects p
+    LEFT JOIN (
+      SELECT project_id, COUNT(*) as c FROM project_items GROUP BY project_id
+    ) i ON i.project_id = p.id
+    WHERE p.session_id = ${session_id}
+    ORDER BY p.created_at DESC
+  `;
+  return rows as unknown as Project[];
+}
+
+export async function deleteProject(id: number, session_id: string): Promise<boolean> {
+  const res = await sql`
+    DELETE FROM projects WHERE id = ${id} AND session_id = ${session_id} RETURNING id
+  `;
+  return res.length > 0;
+}
+
+export async function addToProject(project_id: number, generation_id: number, session_id: string): Promise<boolean> {
+  // verify ownership of the project
+  const own = await sql`SELECT 1 FROM projects WHERE id = ${project_id} AND session_id = ${session_id}`;
+  if (own.length === 0) return false;
+  await sql`
+    INSERT INTO project_items (project_id, generation_id) VALUES (${project_id}, ${generation_id})
+    ON CONFLICT DO NOTHING
+  `;
+  return true;
+}
+
+export async function removeFromProject(project_id: number, generation_id: number, session_id: string): Promise<boolean> {
+  const own = await sql`SELECT 1 FROM projects WHERE id = ${project_id} AND session_id = ${session_id}`;
+  if (own.length === 0) return false;
+  await sql`
+    DELETE FROM project_items WHERE project_id = ${project_id} AND generation_id = ${generation_id}
+  `;
+  return true;
+}
+
+export async function getProjectItems(project_id: number, session_id: string): Promise<Generation[]> {
+  const own = await sql`SELECT 1 FROM projects WHERE id = ${project_id} AND session_id = ${session_id}`;
+  if (own.length === 0) return [];
+  const rows = await sql`
+    SELECT g.* FROM generations g
+    INNER JOIN project_items pi ON pi.generation_id = g.id
+    WHERE pi.project_id = ${project_id}
+    ORDER BY pi.added_at DESC
+  `;
+  return (rows as Record<string, unknown>[]).map(deserializeGeneration);
+}
+
+export async function updateProject(id: number, session_id: string, name: string, emoji: string): Promise<Project | null> {
+  const rows = await sql`
+    UPDATE projects SET name = ${name.slice(0, 100)}, emoji = ${emoji}
+    WHERE id = ${id} AND session_id = ${session_id}
+    RETURNING *
+  `;
+  if (rows.length === 0) return null;
+  const cnt = await sql`SELECT COUNT(*) as c FROM project_items WHERE project_id = ${id}`;
+  const item_count = Number((cnt[0] as { c: string }).c);
+  return { ...(rows[0] as Record<string, unknown>), item_count } as unknown as Project;
+}
+
+/** Returns a set of project_ids that contain a given generation (for the current user) */
+export async function getGenerationProjects(generation_id: number, session_id: string): Promise<number[]> {
+  const rows = await sql`
+    SELECT pi.project_id FROM project_items pi
+    INNER JOIN projects p ON p.id = pi.project_id
+    WHERE pi.generation_id = ${generation_id} AND p.session_id = ${session_id}
+  `;
+  return (rows as { project_id: number }[]).map((r) => r.project_id);
 }

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useUser }     from "@clerk/clerk-react";
 import { Modal }        from "../ui/Modal";
 import { Button }       from "../ui/Button";
 import { Badge }        from "../ui/Badge";
@@ -20,6 +21,7 @@ interface PublishModalProps {
 const MAX_TAGS = 8;
 
 export function PublishModal({ gen, onClose, onPublished, onToast, initialGlbUrl, initialImageUrl }: PublishModalProps) {
+  const { user } = useUser();
   const [title,    setTitle]    = useState(getGenerationTitle(gen.result, gen.type, gen.id));
   const [desc,     setDesc]     = useState("");
   const [tagInput, setTagInput] = useState("");
@@ -27,6 +29,11 @@ export function PublishModal({ gen, onClose, onPublished, onToast, initialGlbUrl
   const [imageUrl, setImageUrl] = useState<string | undefined>(initialImageUrl ?? gen.image_url ?? undefined);
   const [glbUrl,   setGlbUrl]   = useState<string | undefined>(initialGlbUrl);
   const [loading,  setLoading]  = useState(false);
+
+  // Resolve a display name for this post
+  const displayName = user
+    ? (user.fullName || user.username || user.primaryEmailAddress?.emailAddress || "").trim()
+    : "";
 
   const meta = TYPE_META[gen.type];
 
@@ -52,13 +59,14 @@ export function PublishModal({ gen, onClose, onPublished, onToast, initialGlbUrl
     if (!title.trim()) { onToast("El título es obligatorio", "error"); return; }
     setLoading(true);
     const { data, error } = await apiCreatePost({
-      title:       title.trim(),
-      description: desc.trim(),
-      type:        gen.type,
-      result:      gen.result,
+      title:        title.trim(),
+      description:  desc.trim(),
+      type:         gen.type,
+      result:       gen.result,
       tags,
-      image_url:   imageUrl ?? null,
-      glb_url:     glbUrl ?? null,
+      image_url:    imageUrl ?? null,
+      glb_url:      glbUrl ?? null,
+      display_name: displayName,
     });
     setLoading(false);
     if (error) { onToast("Error al publicar: " + error, "error"); return; }

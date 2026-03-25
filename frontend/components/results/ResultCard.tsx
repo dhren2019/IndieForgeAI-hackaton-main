@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useAuth } from "@clerk/clerk-react";
 import { Card }          from "../ui/Card";
 import { Badge }         from "../ui/Badge";
 import { Modal }         from "../ui/Modal";
 import { ResultActions } from "./ResultActions";
 import { ResultJson }    from "./ResultJson";
 import { ImagePreview }  from "./ImagePreview";
+import { AddToProjectPanel } from "../projects/ProjectModal";
 import { TYPE_META, FIELD_LABELS } from "../../types/generate";
 import { getGenerationTitle, labelFor } from "../../lib/formatters";
 import type { Generation } from "../../types/generate";
@@ -90,6 +92,8 @@ export function ResultCard({
   const [view, setView]               = useState<"fields" | "json">("fields");
   const [showIllustrator, setShowIllustrator] = useState(false);
   const [fieldModal, setFieldModal]   = useState<FieldModal | null>(null);
+  const [showAddProject, setShowAddProject] = useState(false);
+  const { isSignedIn } = useAuth();
 
   const handleImageReady = (url: string) => {
     onImageGenerated?.(url);
@@ -132,6 +136,7 @@ export function ResultCard({
             showIllustrator={showIllustrator}
             viewMode={view}
             onToggleView={() => setView((v) => v === "fields" ? "json" : "fields")}
+            onAddToProject={isSignedIn ? () => setShowAddProject(true) : undefined}
           />
         )}
       </div>
@@ -160,6 +165,20 @@ export function ResultCard({
           size="md"
         >
           <p className="field-modal__text">{fieldModal.value}</p>
+        </Modal>
+      )}
+
+      {showAddProject && (
+        <Modal
+          open
+          onClose={() => setShowAddProject(false)}
+          title="📁 Añadir a proyecto"
+          size="sm"
+        >
+          <AddToProjectPanel
+            generationId={gen.id}
+            onClose={() => setShowAddProject(false)}
+          />
         </Modal>
       )}
     </Card>

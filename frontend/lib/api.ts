@@ -88,6 +88,7 @@ export async function apiCreatePost(data: {
   generation_id?: number;
   image_url?: string | null;
   glb_url?: string | null;
+  display_name?: string;
 }) {
   return postJSON<Post>("/api/social/posts", data);
 }
@@ -108,7 +109,46 @@ export async function apiGetComments(postId: number) {
 export async function apiAddComment(postId: number, content: string) {
   return postJSON<PostComment>(`/api/social/posts/${postId}/comentarios`, { content });
 }
+// ── Projects ──────────────────────────────────────────────────────────────────
+export interface ProjectData {
+  id: number;
+  name: string;
+  emoji: string;
+  item_count: number;
+  created_at: string;
+}
 
+export async function apiGetProjects() {
+  return fetcher<ProjectData[]>("/api/projects");
+}
+
+export async function apiCreateProject(name: string, emoji = "📁") {
+  return postJSON<ProjectData>("/api/projects", { name, emoji });
+}
+
+export async function apiUpdateProject(projectId: number, name: string, emoji: string) {
+  return postJSON<ProjectData>(`/api/projects/${projectId}`, { name, emoji }, "PATCH");
+}
+
+export async function apiDeleteProject(projectId: number) {
+  return deleteJSON(`/api/projects/${projectId}`);
+}
+
+export async function apiAddToProject(projectId: number, generationId: number) {
+  return postJSON("/api/projects/" + projectId + "/items", { generation_id: generationId });
+}
+
+export async function apiRemoveFromProject(projectId: number, generationId: number) {
+  return deleteJSON(`/api/projects/${projectId}/items/${generationId}`);
+}
+
+export async function apiGetProjectItems(projectId: number) {
+  return fetcher<import("../types/generate").Generation[]>(`/api/projects/${projectId}/items`);
+}
+
+export async function apiGetGenerationProjects(generationId: number) {
+  return fetcher<number[]>(`/api/projects/generation/${generationId}`);
+}
 // ── Tags ──────────────────────────────────────────────────────────────────────
 export async function apiFollowedTags() {
   return fetcher<string[]>("/api/social/tags/siguiendo");

@@ -15,6 +15,7 @@ export interface Post {
   comment_count: number;
   tags: string[];
   liked_by_me: boolean;
+  author: string;
 }
 
 export interface PostComment {
