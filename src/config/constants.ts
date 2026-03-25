@@ -16,8 +16,8 @@ export const GENERATION_TYPES: GenerationType[] = [
 
 export const CORS_HEADERS = {
   "Access-Control-Allow-Origin":  "*",
-  "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "GET,POST,DELETE,PATCH,OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type,Authorization",
 } as const;
 
 export const SESSION_COOKIE = {

@@ -3,7 +3,7 @@ import { Badge }       from "../ui/Badge";
 import { CommentList } from "./CommentList";
 import { ImagePreview } from "../results/ImagePreview";
 import { apiToggleLike, apiDeletePost, apiRecordInteraction } from "../../lib/api";
-import { authorName, timeAgo, labelFor } from "../../lib/formatters";
+import { timeAgo, labelFor } from "../../lib/formatters";
 import { TYPE_META }   from "../../types/generate";
 import type { Post }   from "../../types/social";
 
@@ -65,10 +65,10 @@ export function FeedPost({
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm("¿Eliminar esta publicación?")) return;
+    if (!confirm("¿Quitar esta publicación del feed?\nTu contenido seguirá disponible en Historial, Favoritos y Proyectos.")) return;
     const { data } = await apiDeletePost(post.id);
-    if (data !== null) { onDelete(post.id); onToast("Publicación eliminada"); }
-    else onToast("Error al eliminar", "error");
+    if (data !== null) { onDelete(post.id); onToast("Publicación quitada del feed"); }
+    else onToast("Error al quitar la publicación", "error");
   };
 
   const handleExpand = () => {
@@ -95,7 +95,7 @@ export function FeedPost({
           )}
         </div>
         <div className="post-card__meta">
-          <span className="post-card__author">{authorName(post.session_id)}</span>
+          <span className="post-card__author">{post.author}</span>
           <span className="post-card__time">{timeAgo(post.created_at)}</span>
         </div>
         <span className="post-card__chevron">{expanded ? "▲" : "▼"}</span>
@@ -185,8 +185,8 @@ export function FeedPost({
         )}
 
         {isOwn && (
-          <button className="delete-btn" onClick={handleDelete} title="Eliminar publicación">
-            🗑
+          <button className="delete-btn" onClick={handleDelete} title="Quitar del feed (el contenido se conserva)">
+            ✖ Dejar de compartir
           </button>
         )}
       </div>

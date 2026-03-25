@@ -1,157 +1,152 @@
+<!-- Proyecto: IndieForge AI - README profesional en español -->
 # IndieForge AI — Generador Creativo de Contenido y Assets 3D
 
-> Plataforma para generar contenido de juego (texto, imágenes) y convertir hojas de diseño en modelos 3D interactivos. Full‑stack, pensada para prototipado rápido y compartición en comunidad.
+![Imagen del proyecto](public/images-doc/imagen-proyecto.png)
+
+<!-- Badges -->
+![Bun](https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react)
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![HuggingFace](https://img.shields.io/badge/HuggingFace-FBAE17?style=for-the-badge&logo=huggingface&logoColor=black)
+![PostgreSQL](https://img.shields.io/badge/Postgres-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 
 ---
 
-**Contenido**
-- Resumen
-- Highlights (rápido vistazo)
-- Diagrama de arquitectura
-- Flujo: imagen → 3D
-- Stack y tecnologías
-- Modelos IA (incluye tu Qwen 0.6B fine‑tuned *uncensored*)
-- Endpoints clave
-- Cómo ejecutar (dev + migraciones)
-- Contribuir
+**Descripción breve**
+- IndieForge AI es una plataforma full‑stack para generar contenido de juego (texto, imágenes) y transformar hojas de diseño en modelos 3D listos para integrar en pipelines de juego (.glb/.obj). Está diseñada para prototipado rápido, colaboración y publicación de assets.
+
+**Contenido del README**
+- Resumen y objetivos
+- Badges y recursos visuales
+- Modelos IA disponibles (LLM & multimodal)
+- Pipeline Image → 3D y modelos incorporados
+- Cómo ejecutar (desarrollo y despliegue)
+- Endpoints principales y recomendaciones de producción
 
 ---
 
-## Resumen
-IndieForge AI ayuda a desarrolladores y creadores a generar contenido estructurado (NPCs, misiones, objetos, lore) y a transformar hojas de diseño 2D en modelos 3D (.glb/.obj). Está pensado para integrarse en pipelines de juegos: outputs en JSON listos para importar.
-
-Puntos fuertes:
-- Outputs como JSON validado (fácil de consumir por motores de juego).
-- Pipeline de imagen → 3D con varias opciones de calidad/velocidad.
-- Persistencia de imágenes y modelos 3D en la DB (`image_url`, `glb_url`).
-- Feed social para publicar y compartir assets.
-
----
-
-## Highlights
-- Generación rápida y fiable gracias a fallback pool.
-- Soporta tu modelo personalizado **Qwen 0.6B (fine‑tuned, uncensored)** para generación de texto.
-- Integración con modelos gratuitos (Groq) para imágenes y con HF Spaces para reconstrucción 3D.
-- Visualización 3D con `<model-viewer>` en el modal de publicación.
-
----
-
-## Diagrama de alto nivel
-```mermaid
-flowchart LR
-  FE[Frontend React + ModelViewer] -->|POST /api/generate| BE(Bun Backend)
-  BE --> DB[(SQLite / Postgres)]
-  BE -->|call| HF[Hugging Face Spaces / Inference]
-  HF -->|returns| BE
-  BE --> FE
-  subgraph 3D
-    HF3[InstantMesh / TRELLIS / Shap-E] -->|.glb/.obj| BE
-  end
-```
-
----
-
-## Flujo: Image → 3D (resumen visual)
-1. Usuario genera o sube una hoja de diseño (frontal + trasera).
-2. `Model3DPreview` recorta la mitad frontal y llama al endpoint elegido (`instant-mesh`, `trellis`, `shap-e`).
-3. El Space/pipeline genera multi‑view y luego reconstruye a 3D; devuelve URL del `.glb` o `.obj`.
-4. La app guarda la URL en `generations.glb_url` y muestra el asset en `PublishModal` con `<model-viewer>`.
+## Visión y objetivos
+- Producir assets reutilizables (JSON + media) para motores de juego.
+- Permitir a diseñadores convertir hojas 2D en modelos 3D mediante pipelines automáticos.
+- Ofrecer una experiencia colaborativa con feed social y publicaciones de assets.
 
 ---
 
 ## Stack y tecnologías
 - Backend: Bun (TypeScript)
-- Base de datos: SQLite (por defecto) — migraciones con `src/db/migrate.ts` (soporta Postgres)
-- Frontend: React + TypeScript, componentes propios
-- IA: Hugging Face Spaces (`@gradio/client`), Groq (imágenes), Shap-E/Trellis/InstantMesh (3D)
+- Frontend: Next.js + React + TypeScript
+- Base de datos: PostgreSQL
+- IA: Hugging Face Spaces, Groq, Shap‑E, Trellis2, ImagenGen
 - Visual: `<model-viewer>` para inspección 3D
-- Docker: `docker-compose` para despliegues locales
+- Docker / Docker Compose para despliegues locales
+
+
+## Recursos visuales
+- Hoja de diseño de personaje: ![Personaje](public/images-doc/personaje.jfif)
+- Creación de modelos 3D: ![Model3D](public/images-doc/model3.png)
 
 ---
 
-## Modelos IA (detalles importantes)
+## Modelos LLM disponibles (detallado)
+Presentamos varios modelos LLM integrados — desde tu modelo personalizado hasta modelos de gran escala. Selecciona según latencia, coste y alcance:
 
-- Tu modelo: **Qwen 0.6B — Fine‑tuned & uncensored**
-  - Uso principal: generación de texto estructurado (prompt → JSON) con estilo propio.
-  - Ventajas: latencia baja, costos controlados, respuestas alineadas a tu tono.
-  - Precaución: al ser "uncensored" debes añadir validaciones y moderación si el servicio se hace público.
+- **Qwen3-0.6B Heretic (Dhren Model)** — Este es mi modelo fine‑tuned (0.6B parámetros) y no tiene censura.
+  - Lo afiné para adaptar el tono, la estructura de salida y el manejo de prompts de personaje.
+  - Uso ideal: generar texto estructurado y plantillas JSON (NPC, diálogos, descripciones, stats).
+  - Ventajas: baja latencia, coste eficiente y control fino del estilo.
+  - Nota importante: al no tener censura, recomiendo implementar moderación y validaciones en el backend antes de exponerlo a usuarios públicos.
 
-- Modelos gratuitos y auxiliares:
-  - **Groq**: opción para generación de imágenes rápida y sin coste elevado.
-  - **InstantMesh** (SIGMitch): rápido, buen balance calidad/tiempo.
-  - **TRELLIS.2** (Microsoft): mejor calidad, puede necesitar cuenta PRO / mayor cuota GPU.
-  - **Shap‑E**: muy rápido, calidad básica — útil para pruebas.
+- **Llama 3.3** — Modelo de alta calidad para tareas creativas y contextos extensos.
+- **Llama 3.1** — Opción alternativa con buen balance calidad/velocidad.
+- **Mixtral 8x7B** — Potente para generación coherente en escenarios largos.
+- **Gemma 2 (9B)** — Excelente para instrucciones y completions detalladas.
+- **QwQ 32B** — Modelo de alta capacidad para tareas críticas que requieren mayor contexto.
 
-Arquitectura recomendada: usar Qwen-finetuned para texto (prompt → JSON), Groq para imágenes y ofrecer InstantMesh/TRELLIS/Shap-E como opciones para 3D.
-
----
-
-## Endpoints clave
-- `POST /api/generate` — generar contenido (JSON).
-- `PATCH /api/generations/:id/image` — guardar `image_url`.
-- `PATCH /api/generations/:id/glb` — guardar `glb_url` (3D models).
-- `POST /api/instant-mesh`, `/api/trellis`, `/api/shap-e` — reconstrucción 3D a partir de imagen.
-- `POST /api/social/posts` — crear post con `image_url` y `glb_url`.
+Cada modelo puede configurarse en la app (selector de modelo) y se recomienda elegir por costo/latencia y por la complejidad de la tarea.
 
 ---
 
-## Cómo ejecutar (dev)
+## Pipelines Image → 3D (modelos incorporados)
+La app soporta tres motores / pipelines para convertir imágenes y vistas en modelos 3D:
+
+- **Shap‑E**
+  - Rápido, ideal para prototipos y previews.
+  - Produce resultados en formatos comunes (.glb/.obj) con calidad suficiente para pruebas.
+
+- **Trellis2 (trellis2)**
+  - Reconstrucción de mayor fidelidad, recomendado para assets finales.
+  - Requiere más recursos (GPU) y puede tener costes asociados en Spaces o infra propia.
+
+- **ImagenGen / imagegen**
+  - Pipeline híbrido que mejora texturización y generación de vistas multi‑ángulo antes de la reconstrucción.
+  - Buena opción cuando se parte de ilustraciones o hojas de diseño detalladas.
+
+En la UI el usuario puede elegir el motor (rápido → Shap‑E, calidad → Trellis2, texturizado → ImagenGen). El backend coordina la cola de trabajos y guarda `glb_url` en la entidad de generación.
+
+---
+
+## Funcionamiento (resumen técnico)
+1. Generación: `POST /api/generate` — recibe prompt + metadatos → ejecuta LLM seleccionado (ej. Qwen3-0.6B) → devuelve JSON estructurado.
+2. Imagen: el usuario sube o genera imágenes (HF/Groq) — `PATCH /api/generations/:id/image` guarda `image_url`.
+3. 3D: llamada a `/api/shap-e`, `/api/trellis` o `/api/imagegen` según selección → pipeline genera `.glb`/`.obj` → `PATCH /api/generations/:id/glb` guarda `glb_url`.
+4. Visualización: `PublishModal` + `<model-viewer>` permiten inspeccionar y descargar el asset.
+
+---
+
+## Endpoints clave (rápido)
+- `POST /api/generate` — prompt → generación (JSON)
+- `PATCH /api/generations/:id/image` — guardar `image_url`
+- `PATCH /api/generations/:id/glb` — guardar `glb_url`
+- `POST /api/shap-e`, `POST /api/trellis`, `POST /api/imagegen` — reconstrucción 3D
+- `POST /api/social/posts` — crear post con `image_url` y `glb_url`
+
+---
+
+## Desarrollo local
 1. Instalar dependencias:
 
 ```bash
 bun install
 ```
 
-2. Configurar variables (`.env`):
+2. Copiar `.env` de ejemplo y completar variables (HF_TOKEN, URLs de modelos, DB):
 
 ```bash
 cp .env.example .env
-# Rellenar HF_TOKEN, HF_MODEL_URL si usas Inference API
+# Rellenar HF_TOKEN, HF_SPACES_URL, etc.
 ```
 
-3. Migraciones (aplica `glb_url` si falta):
+3. Migraciones (usa el script en `src/db/migrate.ts`):
 
 ```bash
 bun run src/db/migrate.ts
 ```
 
-4. Ejecutar servidor (dev):
+4. Ejecutar backend (desarrollo):
 
 ```bash
 bun run dev
 ```
 
-5. Ejecutar frontend (si procede):
+5. Ejecutar frontend (según scripts del proyecto):
 
 ```bash
-# según el script del proyecto (por ejemplo)
 bun run build
-# o bun run dev-frontend
+# o bun run dev-frontend (si existe)
 ```
 
 ---
 
-## Recomendaciones de producción
-- Añadir límites de tasa y caching para llamadas a HF Spaces.
-- Monitorizar coste de TRELLIS (GPU) y ofrecer alternativas por defecto.
-- Implementar moderación si el modelo uncensored se expone a usuarios externos.
+## Recomendaciones de despliegue y seguridad
+- Aplicar límites de tasa y caching en llamadas a HF Spaces.
+- Monitorizar costes de Trellis2 y agrupar trabajos para optimizar GPU.
+- Añadir moderación automatizada y filtros si expones modelos uncensored.
+- En producción, usar Postgres detrás de migraciones y backups regulares.
 
 ---
 
-## Contribuir
-- Abrir issues para mejoras o bugs.
-- Pull requests: incluye tests en rutas y migraciones si modificas DB.
-- Prioridad a la robustez de la persistencia (`src/db/client.ts`) y a la trazabilidad de pipelines 3D.
+**Archivos de interés**: [src/server.ts](src/server.ts), [src/routes/generate.ts](src/routes/generate.ts), [frontend/components/results/Model3DPreview.tsx](frontend/components/results/Model3DPreview.tsx)
 
 ---
-
-Si quieres, puedo generar también:
-- Una versión en inglés.
-- Un `README_DEMO.md` con capturas y GIFs (suminístrame las imágenes).
-- Diagramas más detallados por subsistema (DB, backend, frontend).
-
-Archivo actualizado: [README.md](README.md)
-
----
-
-© IndieForge AI — documentación creada y organizada automáticamente. Pregunta si quieres adaptaciones visuales o versión para presentación.

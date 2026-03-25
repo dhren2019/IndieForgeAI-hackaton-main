@@ -42,8 +42,8 @@ export async function getTrending(sessionId: string, limit = 20): Promise<Post[]
   return getTrendingPosts(sessionId, limit) as Promise<Post[]>;
 }
 
-export async function getOwnPosts(sessionId: string): Promise<Post[]> {
-  return getMyPosts(sessionId) as Promise<Post[]>;
+export async function getOwnPosts(sessionId: string, cookieSessionId?: string | null): Promise<Post[]> {
+  return getMyPosts(sessionId, cookieSessionId) as Promise<Post[]>;
 }
 
 export async function deleteSocialPost(postId: number, sessionId: string): Promise<boolean> {

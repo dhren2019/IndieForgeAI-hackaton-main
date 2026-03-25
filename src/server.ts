@@ -23,6 +23,7 @@ import { trellisRoute }               from "./routes/trellis";
 import { instantMeshRoute }           from "./routes/instant-mesh";
 import { shapERoute }                 from "./routes/shap-e";
 import { healthRoute }                from "./routes/health";
+import { projectsRoute }              from "./routes/projects";
 import { sql }                          from "bun";
 import { logger }                     from "./utils/logger";
 import { readFileSync }               from "fs";
@@ -65,7 +66,7 @@ async function serveStatic(pathname: string): Promise<Response | null> {
 }
 
 // ── Router ────────────────────────────────────────────────────────────────────
-async function router(req: Request, sessionId: string): Promise<Response> {
+async function router(req: Request, sessionId: string, cookieSessionId?: string | null): Promise<Response> {
   const url      = new URL(req.url);
   const pathname = url.pathname;
   const method   = req.method;
@@ -101,7 +102,10 @@ async function router(req: Request, sessionId: string): Promise<Response> {
   if (pathname.startsWith("/api/favorite"))                return favoritesRoute(req, sessionId);
 
   // Social
-  if (pathname.startsWith("/api/social"))                  return handleSocial(req, sessionId);
+  if (pathname.startsWith("/api/social"))                  return handleSocial(req, sessionId, cookieSessionId);
+
+  // Projects
+  if (pathname.startsWith("/api/projects"))               return projectsRoute(req, sessionId);
 
   // Static files (compiled frontend)
   const staticRes = await serveStatic(pathname);
@@ -116,11 +120,11 @@ Bun.serve({
   async fetch(req) {
     if (req.method === "OPTIONS") return corsPreflightResponse();
 
-    const { sessionId, setCookie } = await resolveSession(req);
+    const { sessionId, cookieSessionId, setCookie } = await resolveSession(req);
 
     let res: Response;
     try {
-      res = await router(req, sessionId);
+      res = await router(req, sessionId, cookieSessionId);
     } catch (e) {
       res = handleError(e);
     }
