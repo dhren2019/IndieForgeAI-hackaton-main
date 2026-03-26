@@ -5,11 +5,12 @@ import { ProjectsModal } from "../projects/ProjectModal";
 import type { AppTab } from "../../types/ui";
 
 const NAV_ITEMS: { id: AppTab; label: string; icon: string }[] = [
-  { id: "generate",  label: "Generar",   icon: "✦" },
-  { id: "history",   label: "Historial", icon: "📖" },
-  { id: "favorites", label: "Favoritos", icon: "★" },
-  { id: "social",    label: "Social",    icon: "🌐" },
-  { id: "projects",  label: "Proyectos", icon: "🗂️" },
+  { id: "generate",     label: "Generar",       icon: "✦" },
+  { id: "history",      label: "Historial",     icon: "📖" },
+  { id: "favorites",    label: "Favoritos",     icon: "★" },
+  { id: "social",       label: "Social",        icon: "🌐" },
+  { id: "projects",     label: "Proyectos",     icon: "🗂️" },
+  { id: "worldcreator", label: "World Creator", icon: "🌍" },
 ];
 
 export function LeftNav() {

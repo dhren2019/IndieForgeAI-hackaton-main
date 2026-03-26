@@ -150,3 +150,55 @@ bun run build
 **Archivos de interés**: [src/server.ts](src/server.ts), [src/routes/generate.ts](src/routes/generate.ts), [frontend/components/results/Model3DPreview.tsx](frontend/components/results/Model3DPreview.tsx)
 
 ---
+
+## 🌍 World Creator — Mapa del Mundo 3D Procedural
+
+### Cómo funciona
+
+1. Accede a la sección **World Creator** en el menú lateral
+2. Escribe una descripción libre de tu mundo en el cuadro de texto
+3. La IA (Groq) analiza tu prompt y genera:
+   - Una **descripción vívida** del mundo (lore, clima, peligros, magia)
+   - Los **parámetros de terreno**: bioma, rugosidad, nivel de agua, altura de montañas, peligro, misticismo, colores, semillas procedurales, densidad de vegetación y estilo de asentamiento
+4. Se renderiza un **mapa 3D WebGL interactivo** directamente en el navegador
+
+### El efecto "wow"
+
+- **Terreno procedural único** — fBm con 6 octavas de Simplex Noise, semillas generadas por IA para cada mundo
+- **5 zonas de color por altura** — aguas profundas → playa → vegetación → alturas → nieve/roca
+- **Agua animada** — desplazamiento de vértices con ondas sinusoidales y efecto de transparencia
+- **Árboles procedurales** — InstancedMesh (cono + cilindro), densidad y color según el bioma: bosque, llanuras, pantano, místico
+- **Asentamientos generados** — aldeas con casas y tejados cónicos / fortalezas con torres y almenas / ruinas / torres oscuras, colocados en terreno habitable
+- **Partículas místicas** — nube de partículas flotantes para mundos con alta magia
+- **Iluminación dinámica** — sol coloreado según peligro (cálido → rojo sangre), niebla atmosférica, luz ambiental hemisférica
+- **Controles OrbitControls + WASD** — orbitar (clic + arrastrar), zoom (scroll), explorar a pie (W/A/S/D o flechas)
+- **Modo pantalla completa** — botón para abrir el mapa en pantalla completa con la API nativa del navegador
+- **HUD flotante** — nombre de región, bioma, nivel de peligro y misticismo superpuestos sobre el mapa
+
+### Navegación del mapa
+
+| Acción | Control |
+|---|---|
+| Orbitar / rotar | Clic izquierdo + arrastrar |
+| Zoom | Rueda del ratón |
+| Paneo | Clic derecho + arrastrar |
+| Explorar a pie | Botón "🚶 Explorar" → W / A / S / D |
+| Pantalla completa | Botón ⛶ (esquina inferior derecha) |
+
+### Stack (100% open source / gratuito)
+
+| Tecnología | Uso |
+|---|---|
+| **Three.js** | Renderizado WebGL 3D en el navegador |
+| **simplex-noise** | Generación procedural de terreno (fBm) |
+| **Groq API** | Extracción de parámetros + descripción del mundo |
+
+### Archivos clave
+
+| Archivo | Descripción |
+|---|---|
+| [src/routes/worldmap.ts](src/routes/worldmap.ts) | Endpoint `POST /api/worldmap` — acepta prompt libre o contenido RPG |
+| [frontend/components/results/WorldMap3D.tsx](frontend/components/results/WorldMap3D.tsx) | Motor Three.js: terreno, agua, árboles, edificios, WASD |
+| [frontend/pages/WorldCreatorPage.tsx](frontend/pages/WorldCreatorPage.tsx) | Página World Creator con textarea + descripción IA + mapa |
+
+---

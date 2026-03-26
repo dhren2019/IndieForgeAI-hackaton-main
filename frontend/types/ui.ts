@@ -1,4 +1,4 @@
-export type AppTab = "generate" | "history" | "favorites" | "social" | "projects";
+export type AppTab = "generate" | "history" | "favorites" | "social" | "projects" | "worldcreator";
 
 export interface ToastMessage {
   id: string;
