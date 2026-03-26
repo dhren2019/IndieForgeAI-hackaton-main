@@ -1889,6 +1889,76 @@
   margin-bottom: var(--sp-8);
 }
 
+/* Hero random section */
+.wc-hero-random {
+  display:       flex;
+  align-items:   center;
+  gap:           var(--sp-4);
+  margin-top:    var(--sp-5);
+  padding:       var(--sp-4) var(--sp-5);
+  background:    rgba(124,58,237,0.07);
+  border:        1px dashed rgba(124,58,237,0.3);
+  border-radius: var(--r-xl);
+  flex-wrap:     wrap;
+}
+.wc-hero-random__label {
+  font-size: 0.85rem;
+  color:     var(--text-2);
+  flex:      1;
+  min-width: 0;
+}
+.wc-hero-random-btn {
+  background:     rgba(124,58,237,0.25);
+  border:         1px solid rgba(124,58,237,0.6);
+  border-radius:  var(--r-lg);
+  color:          var(--text);
+  font-size:      0.9rem;
+  font-weight:    700;
+  padding:        var(--sp-3) var(--sp-6);
+  cursor:         pointer;
+  white-space:    nowrap;
+  transition:     background var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+  box-shadow:     0 0 16px rgba(124,58,237,0.25);
+}
+.wc-hero-random-btn:hover:not(:disabled) {
+  background: rgba(124,58,237,0.45);
+  transform:  translateY(-2px);
+  box-shadow: 0 0 24px rgba(124,58,237,0.5);
+}
+.wc-hero-random-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Regenerate bar above the map */
+.wc-map-regen-bar {
+  display:       flex;
+  align-items:   center;
+  gap:           var(--sp-3);
+  margin-bottom: var(--sp-3);
+  flex-wrap:     wrap;
+}
+.wc-map-regen-bar__label {
+  font-size:  0.78rem;
+  color:      var(--text-2);
+  flex:       1;
+  min-width:  0;
+}
+.wc-map-regen-btn {
+  background:     rgba(124,58,237,0.15);
+  border:         1px solid rgba(124,58,237,0.4);
+  border-radius:  var(--r-lg);
+  color:          var(--accent-light, #c4b5fd);
+  font-size:      0.82rem;
+  font-weight:    700;
+  padding:        var(--sp-2) var(--sp-5);
+  cursor:         pointer;
+  white-space:    nowrap;
+  transition:     background var(--t-fast), transform var(--t-fast);
+}
+.wc-map-regen-btn:hover {
+  background: rgba(124,58,237,0.3);
+  transform: translateY(-1px);
+}
+.wc-map-regen-btn:active { transform: translateY(0); }
+
 /* Map canvas wrapper — the panel */
 .wc-map-canvas-wrap {
   position:      relative;

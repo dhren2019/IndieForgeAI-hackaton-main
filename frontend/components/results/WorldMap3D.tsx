@@ -235,9 +235,11 @@ function computeH(
   features: TerrainFeatures,
 ): number {
   const noiseScale = 0.55 + p.terrain_roughness * 1.5;
-  const [s0, s1]   = p.seeds;
-  const baseNx = wx / MAP_SIZE * noiseScale + s0 * 0.0041;
-  const baseNz = wz / MAP_SIZE * noiseScale + s1 * 0.0037;
+  const [s0, s1, s2] = p.seeds;
+  // Large offsets so different seeds sample completely different regions of the noise field
+  // (s * 0.17 → seeds 1-99999 create offsets 0.17–16999, guaranteed unique terrain every time)
+  const baseNx = wx / MAP_SIZE * noiseScale + s0 * 0.17 + s2 * 0.031;
+  const baseNz = wz / MAP_SIZE * noiseScale + s1 * 0.13 + s0 * 0.027;
 
   // Domain warping
   const warpStr = 0.35 + p.terrain_roughness * 0.3;
@@ -1193,7 +1195,12 @@ export function WorldMapPanel({ params }: WorldMapPanelProps) {
     }
 
     // ── Terrain ───────────────────────────────────────────────────────
-    const rng       = mulberry32((params.seeds[0] ?? 42) * 1000 + (params.seeds[1] ?? 137) * 10 + (params.seeds[2] ?? 555));
+    // Combine all 3 seeds with prime multipliers for better entropy
+    const rng       = mulberry32(
+      ((params.seeds[0] ?? 42) * 73856093) ^
+      ((params.seeds[1] ?? 137) * 19349663) ^
+      ((params.seeds[2] ?? 555) * 83492791)
+    );
     const noise2D   = createNoise2D(() => rng());
     const warpNoise = createNoise2D(() => rng());
     const features  = generateFeatures(params, rng);

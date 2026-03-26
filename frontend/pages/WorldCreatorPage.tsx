@@ -17,11 +17,179 @@ const EXAMPLES = [
   "Desierto de dunas doradas con pirámides enterradas hasta la mitad. Bajo la arena duerme un dios olvidado",
 ];
 
+function freshSeeds(): [number, number, number] {
+  return [
+    Math.floor(Math.random() * 99999) + 1,
+    Math.floor(Math.random() * 99999) + 1,
+    Math.floor(Math.random() * 99999) + 1,
+  ];
+}
+
+// ── Fully client-side random world generator (no AI needed) ──────────────────
+
+type BiomeKey = "forest" | "desert" | "tundra" | "swamp" | "volcanic" | "ocean" | "plains" | "mountains" | "dungeon" | "mystic";
+
+const BIOME_POOL: BiomeKey[] = ["forest", "desert", "tundra", "swamp", "volcanic", "ocean", "plains", "mountains", "dungeon", "mystic"];
+
+const BIOME_DATA: Record<BiomeKey, {
+  terrain_color_1: string; terrain_color_2: string; terrain_color_3: string;
+  water_color: string; sky_color: string; settlement_style: string;
+  tree_density: number; terrain_style: string; has_lava: boolean;
+  ambient_particles: string; lava_color: string; accent_color: string;
+  landmarks: string[]; names: string[]; fog_density: number;
+  water_level: [number, number]; mountain_height: [number, number];
+  terrain_roughness: [number, number]; danger_level: [number, number]; mysticism: [number, number];
+}> = {
+  forest: {
+    terrain_color_1: "3d6b35", terrain_color_2: "2a5224", terrain_color_3: "1e4a1a",
+    water_color: "1d6fa0", sky_color: "1a2e1a", settlement_style: "village",
+    tree_density: 0.75, terrain_style: "rolling", has_lava: false,
+    ambient_particles: "fireflies", lava_color: "ff4500", accent_color: "44ff88",
+    landmarks: ["giant_tree", "ancient_ruins", "watchtower"],
+    names: ["Bosque Eterno", "El Gran Bosque", "Selva Primordial", "Bosque de las Sombras", "Arboleda Encantada", "Bosque Esmeralda", "El Corazón Verde"],
+    fog_density: 0.22, water_level: [0.2, 0.32], mountain_height: [0.3, 0.55],
+    terrain_roughness: [0.35, 0.6], danger_level: [0.2, 0.55], mysticism: [0.3, 0.7],
+  },
+  desert: {
+    terrain_color_1: "c9a76c", terrain_color_2: "a0845a", terrain_color_3: "d4b483",
+    water_color: "2a6a8a", sky_color: "4a3010", settlement_style: "ruins",
+    tree_density: 0.03, terrain_style: "rolling", has_lava: false,
+    ambient_particles: "ash", lava_color: "ff4500", accent_color: "ffd700",
+    landmarks: ["pyramid", "ancient_ruins", "obelisk"],
+    names: ["Mar de Arena", "Desierto Eterno", "Las Dunas Rojas", "El Desierto del Olvido", "Tierras Áridas", "Llanura del Sol", "El Gran Desierto"],
+    fog_density: 0.08, water_level: [0.03, 0.12], mountain_height: [0.2, 0.5],
+    terrain_roughness: [0.3, 0.65], danger_level: [0.35, 0.65], mysticism: [0.1, 0.45],
+  },
+  tundra: {
+    terrain_color_1: "c8d8e8", terrain_color_2: "8aa4b8", terrain_color_3: "d8e8f0",
+    water_color: "2a4a6a", sky_color: "1a2030", settlement_style: "fortress",
+    tree_density: 0.08, terrain_style: "rolling", has_lava: false,
+    ambient_particles: "snow", lava_color: "ff4500", accent_color: "88ccff",
+    landmarks: ["ice_spikes", "watchtower", "ancient_ruins"],
+    names: ["Tundra Helada", "Los Campos de Hielo", "El Norte Eterno", "Glaciar de las Almas", "Tierras Congeladas", "El Ártico Perdido", "Permafrost"],
+    fog_density: 0.28, water_level: [0.15, 0.3], mountain_height: [0.4, 0.7],
+    terrain_roughness: [0.5, 0.8], danger_level: [0.4, 0.75], mysticism: [0.2, 0.5],
+  },
+  swamp: {
+    terrain_color_1: "2d4a1a", terrain_color_2: "3a5a22", terrain_color_3: "4a6a2a",
+    water_color: "1a3a1a", sky_color: "0a1a0a", settlement_style: "ruins",
+    tree_density: 0.4, terrain_style: "flat", has_lava: false,
+    ambient_particles: "spores", lava_color: "ff4500", accent_color: "44cc44",
+    landmarks: ["ancient_ruins", "pillars"],
+    names: ["El Pantano Oscuro", "Ciénaga Maldita", "Los Humedales", "Pantano de las Almas", "El Fango Profundo", "Marisma Negra", "Ciénaga Olvidada"],
+    fog_density: 0.35, water_level: [0.35, 0.5], mountain_height: [0.1, 0.3],
+    terrain_roughness: [0.15, 0.35], danger_level: [0.4, 0.7], mysticism: [0.35, 0.65],
+  },
+  volcanic: {
+    terrain_color_1: "1a0a0a", terrain_color_2: "2a0a0a", terrain_color_3: "3a1a08",
+    water_color: "3a0a00", sky_color: "1a0500", settlement_style: "none",
+    tree_density: 0.02, terrain_style: "crater", has_lava: true,
+    ambient_particles: "embers", lava_color: "ff4500", accent_color: "ff8800",
+    landmarks: ["volcano", "lava_river", "altar"],
+    names: ["Volcán Primordial", "Las Tierras de Fuego", "Infierno de Roca", "El Corazón del Volcán", "Caldera Eterna", "Montañas de Magma", "El Núcleo Ardiente"],
+    fog_density: 0.3, water_level: [0.05, 0.15], mountain_height: [0.6, 1.0],
+    terrain_roughness: [0.6, 0.9], danger_level: [0.65, 1.0], mysticism: [0.2, 0.5],
+  },
+  ocean: {
+    terrain_color_1: "1a3a5a", terrain_color_2: "1a4a6a", terrain_color_3: "2a5a7a",
+    water_color: "083070", sky_color: "0a1a2a", settlement_style: "village",
+    tree_density: 0.15, terrain_style: "archipelago", has_lava: false,
+    ambient_particles: "none", lava_color: "ff4500", accent_color: "00aaff",
+    landmarks: ["watchtower", "ancient_ruins"],
+    names: ["Archipiélago Perdido", "Las Islas del Sur", "Mar Profundo", "Islas Flotantes", "El Laberinto de Islas", "Costas del Olvido", "Mares Eternos"],
+    fog_density: 0.2, water_level: [0.5, 0.6], mountain_height: [0.25, 0.55],
+    terrain_roughness: [0.3, 0.6], danger_level: [0.25, 0.6], mysticism: [0.15, 0.5],
+  },
+  plains: {
+    terrain_color_1: "5a8a35", terrain_color_2: "4a7a28", terrain_color_3: "8a9a3a",
+    water_color: "1d6fa0", sky_color: "0a1a3a", settlement_style: "village",
+    tree_density: 0.25, terrain_style: "rolling", has_lava: false,
+    ambient_particles: "none", lava_color: "ff4500", accent_color: "ffdd44",
+    landmarks: ["watchtower", "pillars"],
+    names: ["Llanuras del Viento", "Praderas Infinitas", "Las Tierras Abiertas", "Campo Eterno", "La Gran Llanura", "Praderas del Horizonte", "Tierras Verdes"],
+    fog_density: 0.08, water_level: [0.18, 0.3], mountain_height: [0.2, 0.45],
+    terrain_roughness: [0.2, 0.5], danger_level: [0.15, 0.45], mysticism: [0.1, 0.35],
+  },
+  mountains: {
+    terrain_color_1: "5a5a5a", terrain_color_2: "4a4a4a", terrain_color_3: "7a7a7a",
+    water_color: "1d6fa0", sky_color: "0a1020", settlement_style: "fortress",
+    tree_density: 0.2, terrain_style: "jagged", has_lava: false,
+    ambient_particles: "none", lava_color: "ff4500", accent_color: "aaaaff",
+    landmarks: ["watchtower", "ancient_ruins", "pillars", "crystal"],
+    names: ["Picos del Mundo", "Las Montañas Eternas", "Cumbres Perdidas", "El Techo del Mundo", "Sierra Oscura", "Los Picos Nevados", "Montañas del Dragón"],
+    fog_density: 0.2, water_level: [0.1, 0.25], mountain_height: [0.65, 1.0],
+    terrain_roughness: [0.65, 0.95], danger_level: [0.35, 0.65], mysticism: [0.2, 0.5],
+  },
+  dungeon: {
+    terrain_color_1: "1a1a1a", terrain_color_2: "2a2a2a", terrain_color_3: "3a3a3a",
+    water_color: "0a0a1a", sky_color: "030308", settlement_style: "towers",
+    tree_density: 0.0, terrain_style: "canyon", has_lava: false,
+    ambient_particles: "magic", lava_color: "8800ff", accent_color: "8800ff",
+    landmarks: ["pillars", "altar", "obelisk", "ancient_ruins"],
+    names: ["Mazmorra Negra", "Las Catacumbas", "Cripta Eterna", "El Laberinto de Piedra", "Cuevas del Olvido", "Dungeon Primordial", "Abismo de Roca"],
+    fog_density: 0.38, water_level: [0.05, 0.15], mountain_height: [0.3, 0.6],
+    terrain_roughness: [0.5, 0.85], danger_level: [0.55, 0.95], mysticism: [0.4, 0.8],
+  },
+  mystic: {
+    terrain_color_1: "2a1a4a", terrain_color_2: "3a1a5a", terrain_color_3: "4a2a6a",
+    water_color: "1a0a3a", sky_color: "05020f", settlement_style: "towers",
+    tree_density: 0.3, terrain_style: "rolling", has_lava: false,
+    ambient_particles: "magic", lava_color: "cc00ff", accent_color: "cc00ff",
+    landmarks: ["crystal", "floating_rocks", "obelisk", "altar", "temple"],
+    names: ["El Plano Astral", "Tierras del Éter", "Dimensión Arcana", "El Vacío Místico", "Nexo Mágico", "Reinos de Sombra", "El Umbral"],
+    fog_density: 0.3, water_level: [0.15, 0.3], mountain_height: [0.35, 0.65],
+    terrain_roughness: [0.4, 0.75], danger_level: [0.45, 0.8], mysticism: [0.65, 1.0],
+  },
+};
+
+function rndBetween(a: number, b: number): number {
+  return a + Math.random() * (b - a);
+}
+function pickRandom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function generateRandomWorldParams(): WorldMapParams {
+  const biomeKey = pickRandom(BIOME_POOL);
+  const d = BIOME_DATA[biomeKey];
+  // Use 1-3 random landmarks from the biome's pool
+  const landmarkCount = 1 + Math.floor(Math.random() * Math.min(3, d.landmarks.length));
+  const shuffled = [...d.landmarks].sort(() => Math.random() - 0.5);
+  const landmarks = shuffled.slice(0, landmarkCount);
+  const name = pickRandom(d.names);
+  return {
+    biome:             biomeKey,
+    terrain_roughness: rndBetween(...d.terrain_roughness),
+    water_level:       rndBetween(...d.water_level),
+    mountain_height:   rndBetween(...d.mountain_height),
+    danger_level:      rndBetween(...d.danger_level),
+    mysticism:         rndBetween(...d.mysticism),
+    terrain_color_1:   d.terrain_color_1,
+    terrain_color_2:   d.terrain_color_2,
+    terrain_color_3:   d.terrain_color_3,
+    water_color:       d.water_color,
+    sky_color:         d.sky_color,
+    fog_density:       d.fog_density,
+    region_name:       name,
+    seeds:             freshSeeds(),
+    settlement_style:  d.settlement_style,
+    tree_density:      d.tree_density,
+    terrain_style:     d.terrain_style,
+    has_lava:          d.has_lava,
+    ambient_particles: d.ambient_particles,
+    lava_color:        d.lava_color,
+    accent_color:      d.accent_color,
+    landmarks,
+  };
+}
+
 export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
   const [prompt,      setPrompt]      = useState("");
   const [loading,     setLoading]     = useState(false);
   const [description, setDescription] = useState<string | null>(null);
   const [params,      setParams]      = useState<WorldMapParams | null>(null);
+  // Base params without seeds — lets us regenerate terrain shape without re-calling the AI
+  const baseParamsRef = useRef<WorldMapParams | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleCreate = async () => {
@@ -37,16 +205,47 @@ export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ prompt: trimmed }),
       });
-      if (!res.ok) throw new Error(`Error ${res.status}`);
+
+      if (!res.ok) {
+        // AI failed — fall back silently to client-side random world, show a warning
+        let errDetail = "";
+        try {
+          const errJson = await res.json() as { error?: string };
+          if (errJson.error) errDetail = errJson.error;
+        } catch { /* ignore */ }
+        console.warn("[WorldCreator] AI failed:", errDetail || res.status);
+        const fallback = generateRandomWorldParams();
+        baseParamsRef.current = fallback;
+        setParams(fallback);
+        onToast("⚠️ La IA no está disponible — generando mapa aleatorio", "error");
+        return;
+      }
+
       const json = await res.json() as { data: { description: string; params: WorldMapParams } };
+      // Always inject fresh random seeds — world TYPE comes from AI, terrain SHAPE is always unique
+      const withFreshSeeds: WorldMapParams = { ...json.data.params, seeds: freshSeeds() };
+      baseParamsRef.current = withFreshSeeds;
       setDescription(json.data.description);
-      setParams(json.data.params);
+      setParams(withFreshSeeds);
       onToast("¡Mundo generado! 🌍");
     } catch (e) {
-      onToast(e instanceof Error ? e.message : "Error de red", "error");
+      // Network error — also fall back to random
+      console.warn("[WorldCreator] Network error:", e);
+      const fallback = generateRandomWorldParams();
+      baseParamsRef.current = fallback;
+      setParams(fallback);
+      onToast("⚠️ Error de red — generando mapa aleatorio", "error");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRandom = () => {
+    const p = generateRandomWorldParams();
+    baseParamsRef.current = p;
+    setDescription(null);
+    setParams(p);
+    onToast(`🎲 Mundo aleatorio generado: ${p.region_name}`);
   };
 
   const handleExample = (ex: string) => {
@@ -74,6 +273,12 @@ export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
           <p className="page-hero__sub">
             Describe tu mundo en palabras. La IA lo imaginará y construirá un mapa 3D interactivo en tiempo real.
           </p>
+          <div className="wc-hero-random">
+            <span className="wc-hero-random__label">¿Sin ideas? Genera un mapa completamente aleatorio al instante:</span>
+            <button className="wc-hero-random-btn" onClick={handleRandom} disabled={loading}>
+              🎲 Mapa Aleatorio
+            </button>
+          </div>
         </div>
 
         {/* Prompt area */}
@@ -153,6 +358,29 @@ export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
         {/* 3D Map Panel */}
         {params && !loading && (
           <div className="wc-map-section">
+            <div className="wc-map-regen-bar">
+              <span className="wc-map-regen-bar__label">
+                🌐 Cada mapa es único:
+              </span>
+              <button
+                className="wc-map-regen-btn"
+                onClick={() => {
+                  if (!baseParamsRef.current) return;
+                  const newParams = { ...baseParamsRef.current, seeds: freshSeeds() };
+                  baseParamsRef.current = newParams;
+                  setParams(newParams);
+                  onToast("🎲 ¡Nuevo terreno generado!");
+                }}
+              >
+                🎲 Nueva Forma
+              </button>
+              <button
+                className="wc-map-regen-btn"
+                onClick={handleRandom}
+              >
+                🌍 Mundo Aleatorio
+              </button>
+            </div>
             <WorldMapPanel params={params} />
           </div>
         )}

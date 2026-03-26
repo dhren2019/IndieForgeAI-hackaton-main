@@ -163,9 +163,9 @@ function sanitize(raw: Record<string, unknown>): WorldMapParams {
   };
 
   const seeds = Array.isArray(raw.seeds)
-    ? raw.seeds.slice(0, 3).map((s) => Math.max(1, Math.min(9999, Number(s) || 1)))
-    : [Math.floor(Math.random() * 9999) + 1, Math.floor(Math.random() * 9999) + 1, Math.floor(Math.random() * 9999) + 1];
-  while (seeds.length < 3) seeds.push(Math.floor(Math.random() * 9999) + 1);
+    ? raw.seeds.slice(0, 3).map((s) => Math.max(1, Math.min(99999, Number(s) || 1)))
+    : [Math.floor(Math.random() * 99999) + 1, Math.floor(Math.random() * 99999) + 1, Math.floor(Math.random() * 99999) + 1];
+  while (seeds.length < 3) seeds.push(Math.floor(Math.random() * 99999) + 1);
 
   const landmarks = Array.isArray(raw.landmarks)
     ? raw.landmarks.filter((l) => validLandmarks.has(String(l))).map(String)
@@ -232,18 +232,7 @@ export async function worldMapRoute(req: Request, _sessionId: string): Promise<R
   const groqRes = await callGroq(prompt, model);
 
   if (!groqRes.ok) {
-    const fallbackParams = sanitize({
-      biome: "plains", terrain_roughness: 0.5, water_level: 0.2,
-      mountain_height: 0.5, danger_level: 0.3, mysticism: 0.2,
-      terrain_color_1: "4a6741", terrain_color_2: "2d5a27", terrain_color_3: "8b7355",
-      water_color: "1d6fa0", sky_color: "1a2a3a", fog_density: 0.1,
-      region_name: "Tierras del Horizonte",
-      seeds: [Math.floor(Math.random() * 9999) + 1, Math.floor(Math.random() * 9999) + 1, Math.floor(Math.random() * 9999) + 1],
-      settlement_style: "village", tree_density: 0.2,
-      landmarks: [], terrain_style: "rolling", has_lava: false,
-      ambient_particles: "none", lava_color: "ff4500", accent_color: "ffaa00",
-    });
-    return ok({ description: "", params: fallbackParams });
+    return err(groqRes.error ?? "La IA no pudo generar los parámetros del mundo. Intenta de nuevo.", 503);
   }
 
   let parsed: Record<string, unknown>;
