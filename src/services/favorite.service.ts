@@ -9,6 +9,6 @@ export async function removeFromFavorites(sessionId: string, generationId: numbe
   await removeFavorite(sessionId, generationId);
 }
 
-export async function getUserFavorites(sessionId: string): Promise<Generation[]> {
-  return getFavorites(sessionId) as Promise<Generation[]>;
+export async function getUserFavorites(sessionId: string, cookieSessionId?: string | null): Promise<Generation[]> {
+  return getFavorites(sessionId, cookieSessionId) as Promise<Generation[]>;
 }

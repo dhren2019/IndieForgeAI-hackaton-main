@@ -221,6 +221,138 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ==================================
+   FEED SKELETON LOADER
+   ================================== */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+@keyframes orb-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1);   opacity: .5; }
+  50%       { transform: translate(18px, -24px) scale(1.2); opacity: .25; }
+}
+@keyframes orb-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1);   opacity: .4; }
+  50%       { transform: translate(-20px, 16px) scale(0.85); opacity: .2; }
+}
+@keyframes orb-float-3 {
+  0%, 100% { transform: translate(0, 0) scale(1);   opacity: .35; }
+  50%       { transform: translate(10px, 22px) scale(1.15); opacity: .15; }
+}
+@keyframes card-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.feed-skeleton {
+  position: relative;
+  display:  flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-2) 0 var(--sp-8);
+  overflow: hidden;
+}
+
+.feed-skeleton__orbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.feed-skeleton__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+}
+.feed-skeleton__orb--1 {
+  width: 220px; height: 220px;
+  top: -40px; left: -60px;
+  background: radial-gradient(circle, rgba(124,58,237,0.22), transparent 70%);
+  animation: orb-float-1 5s ease-in-out infinite;
+}
+.feed-skeleton__orb--2 {
+  width: 180px; height: 180px;
+  top: 40%; right: -50px;
+  background: radial-gradient(circle, rgba(219,39,119,0.18), transparent 70%);
+  animation: orb-float-2 6.5s ease-in-out infinite;
+}
+.feed-skeleton__orb--3 {
+  width: 140px; height: 140px;
+  bottom: 30px; left: 30%;
+  background: radial-gradient(circle, rgba(59,130,246,0.14), transparent 70%);
+  animation: orb-float-3 7s ease-in-out infinite;
+}
+
+.feed-skeleton__card {
+  position: relative;
+  z-index: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  padding: var(--sp-4) var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  animation: card-rise .45s ease both;
+}
+
+.feed-skeleton__header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.feed-skeleton__avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, var(--border) 25%, var(--card-hover) 50%, var(--border) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+.feed-skeleton__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.feed-skeleton__line {
+  border-radius: var(--r-full);
+  height: 11px;
+  background: linear-gradient(90deg, var(--border) 25%, var(--card-hover) 50%, var(--border) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+.feed-skeleton__line--name  { width: 38%; height: 13px; }
+.feed-skeleton__line--date  { width: 22%; height: 9px; opacity: .6; }
+.feed-skeleton__line--title { width: 70%; height: 16px; }
+.feed-skeleton__line--body  { width: 90%; }
+.feed-skeleton__line--short { width: 55%; }
+
+.feed-skeleton__image {
+  width: 100%;
+  height: 180px;
+  border-radius: var(--r-xl);
+  background: linear-gradient(90deg, var(--border) 25%, var(--card-hover) 50%, var(--border) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+
+.feed-skeleton__footer {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.feed-skeleton__pill {
+  height: 24px; width: 58px;
+  border-radius: var(--r-full);
+  background: linear-gradient(90deg, var(--border) 25%, var(--card-hover) 50%, var(--border) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+.feed-skeleton__pill--wide { width: 90px; }
+
+/* ==================================
    MODAL
    ================================== */
 .modal-overlay {
@@ -1095,6 +1227,7 @@
   border:        1px solid var(--border);
   border-radius: var(--r-xl);
   overflow:      hidden;
+  position:      relative;
   transition:    border-color var(--t-base), box-shadow var(--t-base), background var(--t-base);
   animation:     fadeIn .25s ease;
 }
@@ -1102,6 +1235,48 @@
   border-color: var(--border-hover);
   box-shadow:   var(--shadow-md);
   background:   var(--card-hover);
+}
+
+/* Floating unshare button — top-right, only visible on own posts */
+.post-card__unshare {
+  position:      absolute;
+  top:           var(--sp-3);
+  right:         var(--sp-3);
+  z-index:       2;
+  display:       inline-flex;
+  align-items:   center;
+  gap:           5px;
+  padding:       5px 10px;
+  border-radius: var(--r-full);
+  font-size:     var(--text-xs);
+  font-weight:   600;
+  color:         var(--muted);
+  background:    var(--surface);
+  border:        1px solid var(--border);
+  cursor:        pointer;
+  opacity:       0;
+  transform:     translateY(-4px);
+  transition:    opacity var(--t-fast), transform var(--t-fast), color var(--t-fast),
+                 border-color var(--t-fast), background var(--t-fast);
+  white-space:   nowrap;
+}
+.post-card--own:hover .post-card__unshare,
+.post-card__unshare:focus-visible {
+  opacity:   1;
+  transform: translateY(0);
+}
+.post-card__unshare:hover {
+  color:        var(--danger);
+  border-color: rgba(239,68,68,0.5);
+  background:   rgba(239,68,68,0.1);
+}
+.post-card__unshare svg {
+  flex-shrink: 0;
+}
+/* Hide the label on narrow cards, show only the icon */
+@media (max-width: 480px) {
+  .post-card__unshare-label { display: none; }
+  .post-card__unshare { padding: 5px 7px; }
 }
 
 /* Thin type-colored accent bar at the top */

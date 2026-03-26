@@ -1,7 +1,9 @@
-import { createClerkClient } from "@clerk/backend";
+import { verifyToken } from "@clerk/backend";
 import { SESSION_COOKIE } from "../config/constants";
 import { newSessionId } from "../utils/ids";
 import { ENV } from "../config/env";
+import { upsertUser, migrateAnonymousSession } from "../db/client";
+import { logger } from "../utils/logger";
 
 export interface SessionContext {
   sessionId:       string;
@@ -10,15 +12,45 @@ export interface SessionContext {
   setCookie:       string | null;
 }
 
-// Lazily initialised so the server still starts if CLERK_SECRET_KEY is empty
-let _clerkClient: ReturnType<typeof createClerkClient> | null = null;
-function getClerkClient() {
-  if (!_clerkClient && ENV.CLERK_SECRET_KEY) {
-    _clerkClient = createClerkClient({ secretKey: ENV.CLERK_SECRET_KEY });
+// ---------------------------------------------------------------------------
+// JWT verification using the standalone verifyToken export from @clerk/backend
+// Tries secretKey first (network JWKS lookup), then publishableKey (public JWKS).
+// ---------------------------------------------------------------------------
+async function verifyClerkToken(token: string): Promise<string | null> {
+  if (!ENV.CLERK_SECRET_KEY && !ENV.CLERK_PUBLISHABLE_KEY) {
+    logger.warn(
+      "[session] CLERK_SECRET_KEY y CLERK_PUBLISHABLE_KEY no están configuradas. " +
+      "Añade ambas claves en tu archivo .env (ver .env.example)."
+    );
+    return null;
   }
-  return _clerkClient;
+
+  // Primary: secretKey (recommended — uses JWKS endpoint securely)
+  if (ENV.CLERK_SECRET_KEY) {
+    try {
+      const payload = await verifyToken(token, { secretKey: ENV.CLERK_SECRET_KEY });
+      return payload.sub;
+    } catch (e) {
+      logger.warn("[session] verifyToken(secretKey) failed:", (e as Error).message ?? e);
+    }
+  }
+
+  // Fallback: publishableKey alone (derives JWKS URL from the public key)
+  if (ENV.CLERK_PUBLISHABLE_KEY) {
+    try {
+      const payload = await verifyToken(token, { publishableKey: ENV.CLERK_PUBLISHABLE_KEY });
+      return payload.sub;
+    } catch (e) {
+      logger.warn("[session] verifyToken(publishableKey) failed:", (e as Error).message ?? e);
+    }
+  }
+
+  return null;
 }
 
+// ---------------------------------------------------------------------------
+// Main resolve function
+// ---------------------------------------------------------------------------
 export async function resolveSession(req: Request): Promise<SessionContext> {
   // Always extract the cookie session (used as a fallback / dual-lookup)
   const cookie  = req.headers.get("cookie") ?? "";
@@ -34,18 +66,22 @@ export async function resolveSession(req: Request): Promise<SessionContext> {
   const authHeader = req.headers.get("authorization") ?? "";
   if (authHeader.startsWith("Bearer ")) {
     const token = authHeader.slice(7).trim();
-    const clerk = getClerkClient();
-    if (clerk && token) {
-      try {
-        const payload = await clerk.verifyToken(token);
-        // payload.sub is the Clerk user ID (e.g. "user_2abc123")
+    if (token) {
+      const clerkId = await verifyClerkToken(token);
+      if (clerkId) {
+        // Upsert user in DB so data is always associated to this Clerk ID
+        const { mergedCookie } = await upsertUser(clerkId);
+
+        // Migrate anonymous cookie data → Clerk ID (once per device cookie)
+        if (cookieId && cookieId !== clerkId && mergedCookie !== cookieId) {
+          await migrateAnonymousSession(clerkId, cookieId);
+        }
+
         return {
-          sessionId:       payload.sub,
-          cookieSessionId: cookieId, // also keep the cookie session for dual-lookup
+          sessionId:       clerkId,
+          cookieSessionId: cookieId,
           setCookie:       null,
         };
-      } catch {
-        // Invalid / expired token — fall through to cookie session
       }
     }
   }
@@ -61,3 +97,4 @@ export function applySession(res: Response, setCookie: string | null): Response 
   headers.set("Set-Cookie", setCookie);
   return new Response(res.body, { status: res.status, headers });
 }
+

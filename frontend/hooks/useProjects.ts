@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/clerk-react";
+import { setTokenGetter } from "../lib/auth-token";
 import {
   apiGetProjects,
   apiCreateProject,
@@ -14,15 +15,18 @@ import {
 export function useProjects() {
   const [projects, setProjects]   = useState<ProjectData[]>([]);
   const [loading, setLoading]     = useState(false);
-  const { isSignedIn, isLoaded }  = useAuth();
+  const { isSignedIn, isLoaded, getToken }  = useAuth();
 
   const reload = useCallback(async () => {
+    // Sync auth token before any API call (guards against the React effect
+    // bottom-up firing order where this hook runs before ClerkTokenSync)
+    setTokenGetter(isSignedIn ? getToken : null);
     if (!isSignedIn) { setProjects([]); return; }
     setLoading(true);
     const { data } = await apiGetProjects();
     if (data) setProjects(data);
     setLoading(false);
-  }, [isSignedIn]);
+  }, [isSignedIn, getToken]);
 
   useEffect(() => {
     if (isLoaded) reload();

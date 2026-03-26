@@ -46,6 +46,25 @@ async function runMigration(): Promise<void> {
   logger.info("DB ready");
 }
 
+// ── Startup checks ────────────────────────────────────────────────────────────
+function checkConfig(): void {
+  if (!ENV.CLERK_SECRET_KEY && !ENV.CLERK_PUBLISHABLE_KEY) {
+    logger.warn(
+      "⚠️  CLERK_SECRET_KEY y CLERK_PUBLISHABLE_KEY no están configuradas.\n" +
+      "   Los usuarios autenticados con Clerk serán tratados como anónimos.\n" +
+      "   Añade ambas claves en tu archivo .env (ver .env.example)."
+    );
+  } else if (!ENV.CLERK_SECRET_KEY) {
+    logger.warn(
+      "⚠️  CLERK_SECRET_KEY no está configurada. Se usará CLERK_PUBLISHABLE_KEY " +
+      "para verificar tokens (JWKS público). Para mayor seguridad añade CLERK_SECRET_KEY."
+    );
+  }
+  if (!ENV.DATABASE_URL) {
+    logger.warn("⚠️  DATABASE_URL no está configurada.");
+  }
+}
+
 // ── Static file server ────────────────────────────────────────────────────────
 async function serveStatic(pathname: string): Promise<Response | null> {
   const frontendBase = join(import.meta.dir, "../frontend");
@@ -74,11 +93,18 @@ async function router(req: Request, sessionId: string, cookieSessionId?: string 
   // Health check
   if (pathname === "/api/health")                          return healthRoute();
 
+  // Debug session (dev only) — confirms whether Clerk token was recognized
+  if (pathname === "/api/debug/session" && method === "GET" && ENV.NODE_ENV !== "production") {
+    return new Response(
+      JSON.stringify({ sessionId, cookieSessionId, isClerk: sessionId.startsWith("user_") }),
+      { headers: { "Content-Type": "application/json" } }
+    );
+  }
   // Generate
   if (pathname === "/api/generate" && method === "POST")   return generateRoute(req, sessionId);
 
   // Image generation
-  if (pathname === "/api/imagen" && method === "POST")     return imageRoute(req);
+  if (pathname === "/api/imagen" && method === "POST")     return imageRoute(req, sessionId);
 
   // Save generation image
   const genImgMatch = pathname.match(/^\/api\/generations\/(\d+)\/image$/);
@@ -96,16 +122,16 @@ async function router(req: Request, sessionId: string, cookieSessionId?: string 
   if (pathname === "/api/shap-e"       && method === "POST") return shapERoute(req, sessionId);
 
   // History
-  if (pathname === "/api/history" && method === "GET")     return historyRoute(req, sessionId);
+  if (pathname === "/api/history" && method === "GET")     return historyRoute(req, sessionId, cookieSessionId);
 
   // Favorites
-  if (pathname.startsWith("/api/favorite"))                return favoritesRoute(req, sessionId);
+  if (pathname.startsWith("/api/favorite"))                return favoritesRoute(req, sessionId, cookieSessionId);
 
   // Social
   if (pathname.startsWith("/api/social"))                  return handleSocial(req, sessionId, cookieSessionId);
 
   // Projects
-  if (pathname.startsWith("/api/projects"))               return projectsRoute(req, sessionId);
+  if (pathname.startsWith("/api/projects"))               return projectsRoute(req, sessionId, cookieSessionId);
 
   // Static files (compiled frontend)
   const staticRes = await serveStatic(pathname);
@@ -113,6 +139,7 @@ async function router(req: Request, sessionId: string, cookieSessionId?: string 
 }
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
+checkConfig();
 await runMigration();
 
 Bun.serve({

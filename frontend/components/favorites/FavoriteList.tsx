@@ -1,6 +1,6 @@
 import React from "react";
 import { HistoryItem } from "../history/HistoryItem";
-import { Loader }      from "../ui/Loader";
+import { FeedSkeleton } from "../ui/Skeletons";
 import type { Generation } from "../../types/generate";
 
 interface FavoriteListProps {
@@ -11,7 +11,7 @@ interface FavoriteListProps {
 }
 
 export function FavoriteList({ items, loading, onSelect }: FavoriteListProps) {
-  if (loading) return <Loader center label="Cargando favoritos…" />;
+  if (loading) return <FeedSkeleton />;
 
   if (items.length === 0) {
     return (

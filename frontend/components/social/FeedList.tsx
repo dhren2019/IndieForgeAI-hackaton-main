@@ -1,6 +1,6 @@
 import React from "react";
 import { FeedPost } from "./FeedPost";
-import { Loader }   from "../ui/Loader";
+import { FeedSkeleton } from "../ui/Skeletons";
 import type { Post } from "../../types/social";
 
 interface FeedListProps {
@@ -18,7 +18,7 @@ export function FeedList({
   posts, loading, followedTags, onTagFilter, onTagToggle,
   ownSessionId, onDelete, onToast,
 }: FeedListProps) {
-  if (loading) return <Loader label="Cargando publicaciones..." />;
+  if (loading) return <FeedSkeleton />;
 
   if (posts.length === 0) {
     return (

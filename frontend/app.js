@@ -3,43 +3,25 @@ var __getProtoOf = Object.getPrototypeOf;
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-function __accessProp(key) {
-  return this[key];
-}
-var __toESMCache_node;
-var __toESMCache_esm;
 var __toESM = (mod, isNodeMode, target) => {
-  var canCache = mod != null && typeof mod === "object";
-  if (canCache) {
-    var cache = isNodeMode ? __toESMCache_node ??= new WeakMap : __toESMCache_esm ??= new WeakMap;
-    var cached = cache.get(mod);
-    if (cached)
-      return cached;
-  }
   target = mod != null ? __create(__getProtoOf(mod)) : {};
   const to = isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target;
   for (let key of __getOwnPropNames(mod))
     if (!__hasOwnProp.call(to, key))
       __defProp(to, key, {
-        get: __accessProp.bind(mod, key),
+        get: () => mod[key],
         enumerable: true
       });
-  if (canCache)
-    cache.set(mod, to);
   return to;
 };
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
-var __returnValue = (v) => v;
-function __exportSetter(name, newValue) {
-  this[name] = __returnValue.bind(null, newValue);
-}
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, {
       get: all[name],
       enumerable: true,
       configurable: true,
-      set: __exportSetter.bind(all, name)
+      set: (newValue) => all[name] = () => newValue
     });
 };
 var __esm = (fn, res) => () => (fn && (res = fn(fn = 0)), res);
@@ -1849,9 +1831,8 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/index.js
 var require_react = __commonJS((exports, module) => {
-  var react_development = __toESM(require_react_development());
   if (false) {} else {
-    module.exports = react_development;
+    module.exports = require_react_development();
   }
 });
 
@@ -2300,16 +2281,15 @@ var require_scheduler_development = __commonJS((exports) => {
 
 // node_modules/scheduler/index.js
 var require_scheduler = __commonJS((exports, module) => {
-  var scheduler_development = __toESM(require_scheduler_development());
   if (false) {} else {
-    module.exports = scheduler_development;
+    module.exports = require_scheduler_development();
   }
 });
 
 // node_modules/react-dom/cjs/react-dom.development.js
 var require_react_dom_development = __commonJS((exports) => {
-  var React = __toESM(require_react());
-  var Scheduler = __toESM(require_scheduler());
+  var React = __toESM(require_react(), 1);
+  var Scheduler = __toESM(require_scheduler(), 1);
   if (true) {
     (function() {
       if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
@@ -22755,15 +22735,14 @@ You might need to use a local HTTP server (instead of file://): ` + "https://rea
 
 // node_modules/react-dom/index.js
 var require_react_dom = __commonJS((exports, module) => {
-  var react_dom_development = __toESM(require_react_dom_development());
   if (false) {} else {
-    module.exports = react_dom_development;
+    module.exports = require_react_dom_development();
   }
 });
 
 // node_modules/react-dom/client.js
 var require_client = __commonJS((exports) => {
-  var m = __toESM(require_react_dom());
+  var m = __toESM(require_react_dom(), 1);
   if (false) {} else {
     i = m.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
     exports.createRoot = function(c, o) {
@@ -22788,7 +22767,7 @@ var require_client = __commonJS((exports) => {
 
 // node_modules/use-sync-external-store/cjs/use-sync-external-store-shim.development.js
 var require_use_sync_external_store_shim_development = __commonJS((exports) => {
-  var React = __toESM(require_react());
+  var React = __toESM(require_react(), 1);
   (function() {
     function is(x, y) {
       return x === y && (x !== 0 || 1 / x === 1 / y) || x !== x && y !== y;
@@ -22847,7 +22826,7 @@ var require_shim = __commonJS((exports, module) => {
 
 // node_modules/react/cjs/react-jsx-dev-runtime.development.js
 var require_react_jsx_dev_runtime_development = __commonJS((exports) => {
-  var React9 = __toESM(require_react());
+  var React9 = __toESM(require_react(), 1);
   if (true) {
     (function() {
       var REACT_ELEMENT_TYPE = Symbol.for("react.element");
@@ -23728,9 +23707,8 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/jsx-dev-runtime.js
 var require_jsx_dev_runtime = __commonJS((exports, module) => {
-  var react_jsx_dev_runtime_development = __toESM(require_react_jsx_dev_runtime_development());
   if (false) {} else {
-    module.exports = react_jsx_dev_runtime_development;
+    module.exports = require_react_jsx_dev_runtime_development();
   }
 });
 
@@ -30319,8 +30297,9 @@ init_api();
 function useProjects() {
   const [projects, setProjects] = import_react36.useState([]);
   const [loading, setLoading] = import_react36.useState(false);
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn, isLoaded, getToken } = useAuth();
   const reload = import_react36.useCallback(async () => {
+    setTokenGetter(isSignedIn ? getToken : null);
     if (!isSignedIn) {
       setProjects([]);
       return;
@@ -30330,7 +30309,7 @@ function useProjects() {
     if (data)
       setProjects(data);
     setLoading(false);
-  }, [isSignedIn]);
+  }, [isSignedIn, getToken]);
   import_react36.useEffect(() => {
     if (isLoaded)
       reload();
@@ -32078,8 +32057,8 @@ function PageContainer({ children, narrow = false, wide = false }) {
 }
 
 // frontend/hooks/useGenerate.ts
-init_api();
 var import_react44 = __toESM(require_react(), 1);
+init_api();
 function useGenerate() {
   const [state, setState] = import_react44.useState({
     loading: false,
@@ -32106,8 +32085,9 @@ function useFavorites() {
   const [favorites, setFavorites] = import_react45.useState([]);
   const [favIds, setFavIds] = import_react45.useState(new Set);
   const [loading, setLoading] = import_react45.useState(false);
-  const { userId, isLoaded } = useAuth();
+  const { userId, isLoaded, getToken, isSignedIn } = useAuth();
   const reload = import_react45.useCallback(async () => {
+    setTokenGetter(isSignedIn ? getToken : null);
     setLoading(true);
     const { data } = await apiFavorites();
     if (data) {
@@ -32115,7 +32095,7 @@ function useFavorites() {
       setFavIds(new Set(data.map((f) => f.id)));
     }
     setLoading(false);
-  }, []);
+  }, [getToken, isSignedIn]);
   import_react45.useEffect(() => {
     if (isLoaded)
       reload();
@@ -32316,14 +32296,15 @@ init_api();
 function useHistory() {
   const [history, setHistory] = import_react47.useState([]);
   const [loading, setLoading] = import_react47.useState(false);
-  const { userId, isLoaded } = useAuth();
+  const { userId, isLoaded, getToken, isSignedIn } = useAuth();
   const reload = import_react47.useCallback(async () => {
+    setTokenGetter(isSignedIn ? getToken : null);
     setLoading(true);
-    const { data } = await apiHistory(30);
+    const { data } = await apiHistory(10);
     if (data)
       setHistory(data);
     setLoading(false);
-  }, []);
+  }, [getToken, isSignedIn]);
   import_react47.useEffect(() => {
     if (isLoaded)
       reload();
@@ -32703,6 +32684,7 @@ function FeedPost({
   const [liked, setLiked] = import_react51.useState(post.liked_by_me);
   const [likeCount, setLikeCount] = import_react51.useState(post.like_count);
   const [cmtCount, setCmtCount] = import_react51.useState(post.comment_count);
+  const [showUnshareModal, setShowUnshareModal] = import_react51.useState(false);
   import_react51.useEffect(() => {
     apiRecordInteraction(post.id, "view");
   }, [post.id]);
@@ -32716,17 +32698,19 @@ function FeedPost({
       setLikeCount((c) => data.liked ? c + 1 : Math.max(0, c - 1));
     }
   };
-  const handleDelete = async (e) => {
+  const openUnshare = (e) => {
     e.stopPropagation();
-    if (!confirm(`¿Quitar esta publicación del feed?
-Tu contenido seguirá disponible en Historial, Favoritos y Proyectos.`))
-      return;
+    setShowUnshareModal(true);
+  };
+  const performUnshare = async () => {
     const { data } = await apiDeletePost(post.id);
     if (data !== null) {
+      setShowUnshareModal(false);
       onDelete(post.id);
       onToast("Publicación quitada del feed");
-    } else
+    } else {
       onToast("Error al quitar la publicación", "error");
+    }
   };
   const handleExpand = () => {
     const next = !expanded;
@@ -32735,12 +32719,69 @@ Tu contenido seguirá disponible en Historial, Favoritos y Proyectos.`))
       apiRecordInteraction(post.id, "expand");
   };
   return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("article", {
-    className: "post-card",
+    className: `post-card${isOwn ? " post-card--own" : ""}`,
     style: { "--type-color": meta.color },
     children: [
       /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
         className: "post-card__accent"
       }, undefined, false, undefined, this),
+      isOwn && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("button", {
+        className: "post-card__unshare",
+        onClick: openUnshare,
+        title: "Dejar de compartir (el contenido se conserva en tu historial)",
+        "aria-label": "Dejar de compartir",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("svg", {
+            width: "14",
+            height: "14",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: "2.2",
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("circle", {
+                cx: "18",
+                cy: "5",
+                r: "3"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("circle", {
+                cx: "6",
+                cy: "12",
+                r: "3"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("circle", {
+                cx: "18",
+                cy: "19",
+                r: "3"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("line", {
+                x1: "8.59",
+                y1: "13.51",
+                x2: "15.42",
+                y2: "17.49"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("line", {
+                x1: "15.41",
+                y1: "6.51",
+                x2: "8.59",
+                y2: "10.49"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("line", {
+                x1: "3",
+                y1: "3",
+                x2: "21",
+                y2: "21"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("span", {
+            className: "post-card__unshare-label",
+            children: "Dejar de compartir"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
       /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("header", {
         className: "post-card__header",
         onClick: handleExpand,
@@ -32884,18 +32925,35 @@ Tu contenido seguirá disponible en Historial, Favoritos y Proyectos.`))
               "# ",
               post.tags[0]
             ]
-          }, undefined, true, undefined, this),
-          isOwn && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("button", {
-            className: "delete-btn",
-            onClick: handleDelete,
-            title: "Quitar del feed (el contenido se conserva)",
-            children: "✖ Dejar de compartir"
-          }, undefined, false, undefined, this)
+          }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
       showCmts && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(CommentList, {
         postId: post.id,
         onToast
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Modal, {
+        open: showUnshareModal,
+        onClose: () => setShowUnshareModal(false),
+        title: "Dejar de compartir",
+        footer: /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
+          style: { display: "flex", gap: "8px", justifyContent: "flex-end" },
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Button, {
+              variant: "ghost",
+              onClick: () => setShowUnshareModal(false),
+              children: "Cancelar"
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Button, {
+              variant: "danger",
+              onClick: performUnshare,
+              children: "Dejar de compartir"
+            }, undefined, false, undefined, this)
+          ]
+        }, undefined, true, undefined, this),
+        children: /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("p", {
+          children: "¿Quieres dejar de compartir esta publicación en la comunidad? No se eliminará de tu Historial, Favoritos ni Proyectos."
+        }, undefined, false, undefined, this)
       }, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this);
@@ -32903,6 +32961,79 @@ Tu contenido seguirá disponible en Historial, Favoritos y Proyectos.`))
 
 // frontend/components/social/FeedList.tsx
 var jsx_dev_runtime30 = __toESM(require_jsx_dev_runtime(), 1);
+function FeedSkeleton() {
+  return /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+    className: "feed-skeleton",
+    children: [
+      [0, 1, 2].map((i) => /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+        className: "feed-skeleton__card",
+        style: { animationDelay: `${i * 0.12}s` },
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+            className: "feed-skeleton__header",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+                className: "feed-skeleton__avatar"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+                className: "feed-skeleton__meta",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+                    className: "feed-skeleton__line feed-skeleton__line--name"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+                    className: "feed-skeleton__line feed-skeleton__line--date"
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+            className: "feed-skeleton__line feed-skeleton__line--title"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+            className: "feed-skeleton__line feed-skeleton__line--body"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+            className: "feed-skeleton__line feed-skeleton__line--body feed-skeleton__line--short"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+            className: "feed-skeleton__image"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+            className: "feed-skeleton__footer",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+                className: "feed-skeleton__pill"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+                className: "feed-skeleton__pill"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+                className: "feed-skeleton__pill feed-skeleton__pill--wide"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this)
+        ]
+      }, i, true, undefined, this)),
+      /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+        className: "feed-skeleton__orbs",
+        "aria-hidden": "true",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
+            className: "feed-skeleton__orb feed-skeleton__orb--1"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
+            className: "feed-skeleton__orb feed-skeleton__orb--2"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
+            className: "feed-skeleton__orb feed-skeleton__orb--3"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
 function FeedList({
   posts,
   loading,
@@ -32914,9 +33045,7 @@ function FeedList({
   onToast
 }) {
   if (loading)
-    return /* @__PURE__ */ jsx_dev_runtime30.jsxDEV(Loader, {
-      label: "Cargando publicaciones..."
-    }, undefined, false, undefined, this);
+    return /* @__PURE__ */ jsx_dev_runtime30.jsxDEV(FeedSkeleton, {}, undefined, false, undefined, this);
   if (posts.length === 0) {
     return /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
       className: "empty-state",

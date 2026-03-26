@@ -14,8 +14,8 @@ export async function createUserProject(sessionId: string, name: string, emoji?:
   return createProject(sessionId, name, emoji);
 }
 
-export async function getUserProjects(sessionId: string): Promise<Project[]> {
-  return getProjects(sessionId);
+export async function getUserProjects(sessionId: string, cookieSessionId?: string | null): Promise<Project[]> {
+  return getProjects(sessionId, cookieSessionId);
 }
 
 export async function deleteUserProject(projectId: number, sessionId: string): Promise<boolean> {

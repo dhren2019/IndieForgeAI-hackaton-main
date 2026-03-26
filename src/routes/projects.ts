@@ -21,14 +21,14 @@ import {
 } from "../services/project.service";
 import { ok, err } from "../utils/response";
 
-export async function projectsRoute(req: Request, sessionId: string): Promise<Response> {
+export async function projectsRoute(req: Request, sessionId: string, cookieSessionId?: string | null): Promise<Response> {
   const url      = new URL(req.url);
   const pathname = url.pathname;
   const method   = req.method;
 
   // GET /api/projects
   if (pathname === "/api/projects" && method === "GET") {
-    const projects = await getUserProjects(sessionId);
+    const projects = await getUserProjects(sessionId, cookieSessionId);
     return ok(projects);
   }
 

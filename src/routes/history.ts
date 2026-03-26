@@ -4,10 +4,10 @@
 import { getGenerationHistory } from "../services/history.service";
 import { ok } from "../utils/response";
 
-export async function historyRoute(req: Request, sessionId: string): Promise<Response> {
+export async function historyRoute(req: Request, sessionId: string, cookieSessionId?: string | null): Promise<Response> {
   const url   = new URL(req.url);
-  const limit = Math.min(Number(url.searchParams.get("limit") ?? "20"), 100);
-  const rows  = await getGenerationHistory(sessionId, limit);
+  const limit = Math.min(Number(url.searchParams.get("limit") ?? "10"), 100);
+  const rows  = await getGenerationHistory(sessionId, limit, cookieSessionId);
   return ok(rows);
 }
 

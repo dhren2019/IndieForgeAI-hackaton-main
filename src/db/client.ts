@@ -1,4 +1,5 @@
 ﻿import { sql } from "bun";
+import { logger } from "../utils/logger";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -28,7 +29,78 @@ export interface Favorite {
 
 /** No-op kept for backwards-compat â€” callers can be cleaned up over time */
 export function getDB(): null { return null; }
+// ---------------------------------------------------------------------------
+// Users
+// ---------------------------------------------------------------------------
 
+/**
+ * Upserts a Clerk user into the users table.
+ * Returns the stored merged_cookie so callers can decide whether to migrate.
+ */
+export async function upsertUser(clerkId: string): Promise<{ mergedCookie: string | null }> {
+  const rows = await sql`
+    INSERT INTO users (session_id)
+    VALUES (${clerkId})
+    ON CONFLICT (session_id) DO UPDATE SET merged_cookie = users.merged_cookie
+    RETURNING merged_cookie
+  `;
+  return { mergedCookie: (rows[0] as Record<string, unknown>)?.merged_cookie as string | null ?? null };
+}
+
+/**
+ * Migrates all data owned by anonymous cookieId to the Clerk user clerkId.
+ * This is called once per device cookie after first Clerk sign-in.
+ * All UPDATE statements are safe no-ops when there is nothing to migrate.
+ */
+export async function migrateAnonymousSession(clerkId: string, cookieId: string): Promise<void> {
+  try {
+    // 1. Generations
+    await sql`UPDATE generations SET session_id = ${clerkId} WHERE session_id = ${cookieId}`;
+
+    // 2. Favorites — unique(session_id, generation_id): delete Clerk dupes first
+    await sql`
+      DELETE FROM favorites
+      WHERE session_id = ${clerkId}
+        AND generation_id IN (SELECT generation_id FROM favorites WHERE session_id = ${cookieId})
+    `;
+    await sql`UPDATE favorites SET session_id = ${clerkId} WHERE session_id = ${cookieId}`;
+
+    // 3. Projects
+    await sql`UPDATE projects SET session_id = ${clerkId} WHERE session_id = ${cookieId}`;
+
+    // 4. Posts
+    await sql`UPDATE posts SET session_id = ${clerkId} WHERE session_id = ${cookieId}`;
+
+    // 5. tag_follows — PRIMARY KEY(session_id, tag)
+    await sql`
+      DELETE FROM tag_follows
+      WHERE session_id = ${clerkId}
+        AND tag IN (SELECT tag FROM tag_follows WHERE session_id = ${cookieId})
+    `;
+    await sql`UPDATE tag_follows SET session_id = ${clerkId} WHERE session_id = ${cookieId}`;
+
+    // 6. post_likes — PRIMARY KEY(session_id, post_id)
+    await sql`
+      DELETE FROM post_likes
+      WHERE session_id = ${clerkId}
+        AND post_id IN (SELECT post_id FROM post_likes WHERE session_id = ${cookieId})
+    `;
+    await sql`UPDATE post_likes SET session_id = ${clerkId} WHERE session_id = ${cookieId}`;
+
+    // 7. post_comments
+    await sql`UPDATE post_comments SET session_id = ${clerkId} WHERE session_id = ${cookieId}`;
+
+    // 8. user_interactions
+    await sql`UPDATE user_interactions SET session_id = ${clerkId} WHERE session_id = ${cookieId}`;
+
+    // Mark migration done so we don't re-run it on every request
+    await sql`UPDATE users SET merged_cookie = ${cookieId} WHERE session_id = ${clerkId}`;
+
+    logger.info(`[migration] Merged anonymous session ${cookieId} → ${clerkId}`);
+  } catch (e) {
+    logger.error("[migration] Failed to migrate anonymous session:", e);
+  }
+}
 function deserializeGeneration(row: Record<string, unknown>): Generation {
   return {
     id:          row.id as number,
@@ -70,14 +142,24 @@ export async function insertGeneration(params: {
   return deserializeGeneration(rows[0] as Record<string, unknown>);
 }
 
-export async function getHistory(session_id: string, limit = 20): Promise<Generation[]> {
-  const rows = await sql`
-    SELECT * FROM generations
-    WHERE session_id = ${session_id}
-    ORDER BY created_at DESC
-    LIMIT ${limit}
-  `;
-  return (rows as Record<string, unknown>[]).map(deserializeGeneration);
+export async function getHistory(session_id: string, limit = 20, cookie_session_id?: string | null): Promise<Generation[]> {
+  let rows: Record<string, unknown>[];
+  if (cookie_session_id && cookie_session_id !== session_id) {
+    rows = await sql`
+      SELECT * FROM generations
+      WHERE session_id = ${session_id} OR session_id = ${cookie_session_id}
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+    ` as Record<string, unknown>[];
+  } else {
+    rows = await sql`
+      SELECT * FROM generations
+      WHERE session_id = ${session_id}
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+    ` as Record<string, unknown>[];
+  }
+  return rows.map(deserializeGeneration);
 }
 
 export async function addFavorite(session_id: string, generation_id: number): Promise<void> {
@@ -95,14 +177,24 @@ export async function removeFavorite(session_id: string, generation_id: number):
   `;
 }
 
-export async function getFavorites(session_id: string): Promise<Generation[]> {
-  const rows = await sql`
-    SELECT g.* FROM generations g
-    INNER JOIN favorites f ON f.generation_id = g.id
-    WHERE f.session_id = ${session_id}
-    ORDER BY f.created_at DESC
-  `;
-  return (rows as Record<string, unknown>[]).map(deserializeGeneration);
+export async function getFavorites(session_id: string, cookie_session_id?: string | null): Promise<Generation[]> {
+  let rows: Record<string, unknown>[];
+  if (cookie_session_id && cookie_session_id !== session_id) {
+    rows = await sql`
+      SELECT g.* FROM generations g
+      INNER JOIN favorites f ON f.generation_id = g.id
+      WHERE f.session_id = ${session_id} OR f.session_id = ${cookie_session_id}
+      ORDER BY f.created_at DESC
+    ` as Record<string, unknown>[];
+  } else {
+    rows = await sql`
+      SELECT g.* FROM generations g
+      INNER JOIN favorites f ON f.generation_id = g.id
+      WHERE f.session_id = ${session_id}
+      ORDER BY f.created_at DESC
+    ` as Record<string, unknown>[];
+  }
+  return rows.map(deserializeGeneration);
 }
 
 export async function updateGenerationImage(id: number, image_url: string): Promise<void> {
@@ -597,16 +689,29 @@ export async function createProject(session_id: string, name: string, emoji = "�
   return { ...(rows[0] as Record<string, unknown>), item_count: 0 } as unknown as Project;
 }
 
-export async function getProjects(session_id: string): Promise<Project[]> {
-  const rows = await sql`
-    SELECT p.*, COALESCE(i.c, 0) as item_count
-    FROM projects p
-    LEFT JOIN (
-      SELECT project_id, COUNT(*) as c FROM project_items GROUP BY project_id
-    ) i ON i.project_id = p.id
-    WHERE p.session_id = ${session_id}
-    ORDER BY p.created_at DESC
-  `;
+export async function getProjects(session_id: string, cookie_session_id?: string | null): Promise<Project[]> {
+  let rows: Record<string, unknown>[];
+  if (cookie_session_id && cookie_session_id !== session_id) {
+    rows = await sql`
+      SELECT p.*, COALESCE(i.c, 0) as item_count
+      FROM projects p
+      LEFT JOIN (
+        SELECT project_id, COUNT(*) as c FROM project_items GROUP BY project_id
+      ) i ON i.project_id = p.id
+      WHERE p.session_id = ${session_id} OR p.session_id = ${cookie_session_id}
+      ORDER BY p.created_at DESC
+    ` as Record<string, unknown>[];
+  } else {
+    rows = await sql`
+      SELECT p.*, COALESCE(i.c, 0) as item_count
+      FROM projects p
+      LEFT JOIN (
+        SELECT project_id, COUNT(*) as c FROM project_items GROUP BY project_id
+      ) i ON i.project_id = p.id
+      WHERE p.session_id = ${session_id}
+      ORDER BY p.created_at DESC
+    ` as Record<string, unknown>[];
+  }
   return rows as unknown as Project[];
 }
 

@@ -6,8 +6,8 @@
 import { addToFavorites, removeFromFavorites, getUserFavorites } from "../services/favorite.service";
 import { ok, err } from "../utils/response";
 
-export async function favoritesRoute(req: Request, sessionId: string): Promise<Response> {
-  if (req.method === "GET")    return ok(await getUserFavorites(sessionId));
+export async function favoritesRoute(req: Request, sessionId: string, cookieSessionId?: string | null): Promise<Response> {
+  if (req.method === "GET")    return ok(await getUserFavorites(sessionId, cookieSessionId));
   if (req.method === "POST")   return addFavoriteRoute(req, sessionId);
   if (req.method === "DELETE") return removeFavoriteRoute(req, sessionId);
   return err("Method not allowed", 405);

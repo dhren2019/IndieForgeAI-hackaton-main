@@ -6,7 +6,7 @@ import { ok, err }               from "../utils/response";
 import { isValidGenerationType } from "../utils/validators";
 import type { GenerationType }   from "../types/generate";
 
-export async function imageRoute(req: Request): Promise<Response> {
+export async function imageRoute(req: Request, _sessionId?: string): Promise<Response> {
   let body: Record<string, unknown>;
   try {
     body = (await req.json()) as Record<string, unknown>;

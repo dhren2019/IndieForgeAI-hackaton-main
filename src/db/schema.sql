@@ -128,3 +128,4 @@ CREATE INDEX IF NOT EXISTS idx_project_items_gen      ON project_items(generatio
 -- ---------------------------------------------------------------------------
 
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS display_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS merged_cookie TEXT;

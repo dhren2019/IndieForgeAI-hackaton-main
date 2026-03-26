@@ -1,6 +1,6 @@
 import React from "react";
 import { HistoryItem } from "./HistoryItem";
-import { Loader }      from "../ui/Loader";
+import { FeedSkeleton } from "../ui/Skeletons";
 import type { Generation } from "../../types/generate";
 
 interface HistoryListProps {
@@ -12,7 +12,7 @@ interface HistoryListProps {
 }
 
 export function HistoryList({ items, loading, onSelect, emptyMsg }: HistoryListProps) {
-  if (loading) return <Loader center label="Cargando historial…" />;
+  if (loading) return <FeedSkeleton />;
 
   if (items.length === 0) {
     return (

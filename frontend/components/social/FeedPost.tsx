@@ -6,6 +6,8 @@ import { apiToggleLike, apiDeletePost, apiRecordInteraction } from "../../lib/ap
 import { timeAgo, labelFor } from "../../lib/formatters";
 import { TYPE_META }   from "../../types/generate";
 import type { Post }   from "../../types/social";
+import { Modal } from "../ui/Modal";
+import { Button } from "../ui/Button";
 
 interface FeedPostProps {
   post:          Post;
@@ -43,6 +45,7 @@ export function FeedPost({
   const [liked, setLiked]         = useState(post.liked_by_me);
   const [likeCount, setLikeCount] = useState(post.like_count);
   const [cmtCount, setCmtCount]   = useState(post.comment_count);
+  const [showUnshareModal, setShowUnshareModal] = useState(false);
 
   useEffect(() => {
     apiRecordInteraction(post.id, "view");
@@ -63,12 +66,20 @@ export function FeedPost({
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent) => {
+  const openUnshare = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm("¿Quitar esta publicación del feed?\nTu contenido seguirá disponible en Historial, Favoritos y Proyectos.")) return;
+    setShowUnshareModal(true);
+  };
+
+  const performUnshare = async () => {
     const { data } = await apiDeletePost(post.id);
-    if (data !== null) { onDelete(post.id); onToast("Publicación quitada del feed"); }
-    else onToast("Error al quitar la publicación", "error");
+    if (data !== null) {
+      setShowUnshareModal(false);
+      onDelete(post.id);
+      onToast("Publicación quitada del feed");
+    } else {
+      onToast("Error al quitar la publicación", "error");
+    }
   };
 
   const handleExpand = () => {
@@ -79,11 +90,31 @@ export function FeedPost({
 
   return (
     <article
-      className="post-card"
+      className={`post-card${isOwn ? " post-card--own" : ""}`}
       style={{ "--type-color": meta.color } as React.CSSProperties}
     >
       {/* Accent top border via CSS var */}
       <div className="post-card__accent" />
+
+      {/* Unshare floating button — only for own posts */}
+      {isOwn && (
+        <button
+          className="post-card__unshare"
+          onClick={openUnshare}
+          title="Dejar de compartir (el contenido se conserva en tu historial)"
+          aria-label="Dejar de compartir"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            <line x1="3" y1="3" x2="21" y2="21" />
+          </svg>
+          <span className="post-card__unshare-label">Dejar de compartir</span>
+        </button>
+      )}
 
       {/* Header row */}
       <header className="post-card__header" onClick={handleExpand}>
@@ -183,17 +214,25 @@ export function FeedPost({
             # {post.tags[0]}
           </button>
         )}
-
-        {isOwn && (
-          <button className="delete-btn" onClick={handleDelete} title="Quitar del feed (el contenido se conserva)">
-            ✖ Dejar de compartir
-          </button>
-        )}
       </div>
 
       {showCmts && (
         <CommentList postId={post.id} onToast={onToast} />
       )}
+
+      <Modal
+        open={showUnshareModal}
+        onClose={() => setShowUnshareModal(false)}
+        title="Dejar de compartir"
+        footer={(
+          <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+            <Button variant="ghost" onClick={() => setShowUnshareModal(false)}>Cancelar</Button>
+            <Button variant="danger" onClick={performUnshare}>Dejar de compartir</Button>
+          </div>
+        )}
+      >
+        <p>¿Quieres dejar de compartir esta publicación en la comunidad? No se eliminará de tu Historial, Favoritos ni Proyectos.</p>
+      </Modal>
     </article>
   );
 }
