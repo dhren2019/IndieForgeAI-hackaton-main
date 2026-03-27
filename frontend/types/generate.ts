@@ -1,4 +1,4 @@
-export type GenerationType = "npc" | "quest" | "item" | "lore" | "weapon" | "enemy";
+export type GenerationType = "npc" | "quest" | "item" | "lore" | "weapon" | "enemy" | "worldmap";
 export type GenerationSource = "model" | "fallback";
 
 export const AI_MODELS = [
@@ -36,12 +36,13 @@ export interface Generation {
 }
 
 export const TYPE_META = {
-  npc:    { icon: "🧙", label: "NPC",       desc: "Personajes y personalidades",       color: "#f59e0b" },
-  quest:  { icon: "⚔️", label: "Misión",    desc: "Misiones y objetivos",              color: "#3b82f6" },
-  item:   { icon: "💎", label: "Objeto",    desc: "Armaduras, reliquias y objetos",    color: "#10b981" },
-  lore:   { icon: "📜", label: "Trasfondo", desc: "Historia del mundo y secretos",     color: "#a78bfa" },
-  weapon: { icon: "🗡️", label: "Arma",     desc: "Espadas, bastones y armas",         color: "#ef4444" },
-  enemy:  { icon: "💀", label: "Enemigo",   desc: "Bestias, demonios y jefes",         color: "#6b7280" },
+  npc:      { icon: "🧙", label: "NPC",        desc: "Personajes y personalidades",       color: "#f59e0b" },
+  quest:    { icon: "⚔️", label: "Misín",     desc: "Misiones y objetivos",              color: "#3b82f6" },
+  item:     { icon: "💎", label: "Objeto",    desc: "Armaduras, reliquias y objetos",    color: "#10b981" },
+  lore:     { icon: "📜", label: "Trasfondo", desc: "Historia del mundo y secretos",     color: "#a78bfa" },
+  weapon:   { icon: "🗡️", label: "Arma",      desc: "Espadas, bastones y armas",         color: "#ef4444" },
+  enemy:    { icon: "💀", label: "Enemigo",   desc: "Bestias, demonios y jefes",         color: "#6b7280" },
+  worldmap: { icon: "🌍", label: "Mundo 3D",   desc: "Mapas de terreno procedurales",     color: "#22d3ee" },
 } as const;
 
 export const GENEROS         = ["Fantasía", "Ciencia Ficción", "Cyberpunk", "Western", "Terror", "Steampunk", "Post-Apocalíptico"];
@@ -58,6 +59,7 @@ export const TIPOS_ENEMIGO   = ["Bestia", "No-muerto", "Demonio", "Mecánico", "
 export const FIELD_LABELS: Record<string, string> = {
   name: "Nombre", role: "Rol", race: "Raza", personality: "Personalidad",
   secret: "Secreto", dialogue: "Diálogo", title: "Título", type: "Tipo",
+  region_name: "Nombre del mundo", biome: "Bioma", description: "Descripción",
   objective: "Objetivo", reward: "Recompensa", location: "Ubicación", twist: "Giro",
   rarity: "Rareza", description: "Descripción", effect: "Efecto", value: "Valor",
   era: "Era", summary: "Resumen", factions: "Facciones", element: "Elemento",

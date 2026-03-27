@@ -109,6 +109,14 @@ export async function apiGetComments(postId: number) {
 export async function apiAddComment(postId: number, content: string) {
   return postJSON<PostComment>(`/api/social/posts/${postId}/comentarios`, { content });
 }
+export async function apiSaveWorld(payload: {
+  prompt: string;
+  description: string;
+  params: Record<string, unknown>;
+}) {
+  return postJSON<import("../types/generate").Generation>("/api/worldmap/save", payload);
+}
+
 // ── Projects ──────────────────────────────────────────────────────────────────
 export interface ProjectData {
   id: number;

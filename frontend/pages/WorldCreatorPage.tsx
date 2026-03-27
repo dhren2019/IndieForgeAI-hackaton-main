@@ -1,8 +1,10 @@
 import React, { useState, useRef } from "react";
-import { PageContainer }   from "../components/layout/PageContainer";
-import { WorldMapPanel }   from "../components/results/WorldMap3D";
-import { Button }          from "../components/ui/Button";
-import { Loader }          from "../components/ui/Loader";
+import { PageContainer }       from "../components/layout/PageContainer";
+import { WorldMapPanel }       from "../components/results/WorldMap3D";
+import { Button }              from "../components/ui/Button";
+import { Loader }              from "../components/ui/Loader";
+import { Modal }               from "../components/ui/Modal";
+import { AddToProjectPanel }   from "../components/projects/ProjectModal";
 import type { WorldMapParams } from "../components/results/WorldMap3D";
 
 interface WorldCreatorPageProps {
@@ -15,6 +17,12 @@ const EXAMPLES = [
   "Tundra helada con torres de hielo negro que emergen de la nieve. Los muertos caminan bajo las auroras boreales",
   "Pantanos traicioneros de color verde putrefacto, llenos de ruinas hundidas de una civilización ahogada. Cocodrilos gigantes patrullan las aguas oscuras",
   "Desierto de dunas doradas con pirámides enterradas hasta la mitad. Bajo la arena duerme un dios olvidado",
+  "Una gran ciudad imperial amurallada con mercados bulliciosos, torres de vigilancia y callejones oscuros donde operan los gremios de ladrones",
+  "Aldea campesina tranquila rodeada de campos de trigo dorado y molinos de viento. El río serpentea entre granjas y huertos",
+  "Selva tropical densa donde la lluvia no cesa. Templos mayas olvidados entre las raíces de árboles de 50 metros con coloridas aves exóticas",
+  "Costa salvaje con acantilados batidos por olas gigantes. Faros abandonados y barcos naufragados en la arena bajo tormentas perpetuas",
+  "Badlands de roca roja erosionada por el viento con agujas de piedra y cañones profundos. Forajidos y criaturas del desierto acechan entre las sombras",
+  "Mundo subterráneo con cavernas iluminadas por hongos bioluminiscentes y cristales flotantes. Una civilización enana construyó sus ciudades en estas profundidades",
 ];
 
 function freshSeeds(): [number, number, number] {
@@ -27,9 +35,15 @@ function freshSeeds(): [number, number, number] {
 
 // ── Fully client-side random world generator (no AI needed) ──────────────────
 
-type BiomeKey = "forest" | "desert" | "tundra" | "swamp" | "volcanic" | "ocean" | "plains" | "mountains" | "dungeon" | "mystic";
+type BiomeKey = "forest" | "desert" | "tundra" | "swamp" | "volcanic" | "ocean" | "plains" | "mountains" | "dungeon" | "mystic"
+             | "jungle" | "savanna" | "glacier" | "canyon" | "mushroom" | "wasteland" | "sky" | "infernal"
+             | "city" | "town" | "village_biome" | "farmland" | "coast" | "arctic" | "badlands" | "rainforest" | "steppe" | "underground";
 
-const BIOME_POOL: BiomeKey[] = ["forest", "desert", "tundra", "swamp", "volcanic", "ocean", "plains", "mountains", "dungeon", "mystic"];
+const BIOME_POOL: BiomeKey[] = [
+  "forest", "desert", "tundra", "swamp", "volcanic", "ocean", "plains", "mountains", "dungeon", "mystic",
+  "jungle", "savanna", "glacier", "canyon", "mushroom", "wasteland", "sky", "infernal",
+  "city", "town", "village_biome", "farmland", "coast", "arctic", "badlands", "rainforest", "steppe", "underground",
+];
 
 const BIOME_DATA: Record<BiomeKey, {
   terrain_color_1: string; terrain_color_2: string; terrain_color_3: string;
@@ -140,6 +154,186 @@ const BIOME_DATA: Record<BiomeKey, {
     fog_density: 0.3, water_level: [0.15, 0.3], mountain_height: [0.35, 0.65],
     terrain_roughness: [0.4, 0.75], danger_level: [0.45, 0.8], mysticism: [0.65, 1.0],
   },
+  jungle: {
+    terrain_color_1: "1e4d0a", terrain_color_2: "0e2d05", terrain_color_3: "2a6a10",
+    water_color: "1a4a2a", sky_color: "0a1a0a", settlement_style: "ruins",
+    tree_density: 0.90, terrain_style: "rolling", has_lava: false,
+    ambient_particles: "spores", lava_color: "ff4500", accent_color: "44ff44",
+    landmarks: ["giant_tree", "ancient_ruins", "pillars", "temple"],
+    names: ["Jungla Primordial", "Selva Eterna", "El Bosque Infinito", "Selva de las Sombras", "Jungla del Tiempo Perdido", "Las Lianas Eternas"],
+    fog_density: 0.35, water_level: [0.25, 0.4], mountain_height: [0.25, 0.5],
+    terrain_roughness: [0.3, 0.6], danger_level: [0.4, 0.8], mysticism: [0.3, 0.7],
+  },
+  savanna: {
+    terrain_color_1: "c8a050", terrain_color_2: "a07830", terrain_color_3: "d0b860",
+    water_color: "1060a0", sky_color: "3a2808", settlement_style: "village",
+    tree_density: 0.12, terrain_style: "flat", has_lava: false,
+    ambient_particles: "ash", lava_color: "ff4500", accent_color: "ffd700",
+    landmarks: ["watchtower", "ancient_ruins"],
+    names: ["Gran Sabana", "Pradera Dorada", "Las Llanuras Secas", "Savanna del Horizonte", "Las Estepas Doradas", "Tierra de los Leones"],
+    fog_density: 0.06, water_level: [0.05, 0.15], mountain_height: [0.15, 0.4],
+    terrain_roughness: [0.2, 0.45], danger_level: [0.3, 0.65], mysticism: [0.1, 0.35],
+  },
+  glacier: {
+    terrain_color_1: "e8f0f8", terrain_color_2: "c0d8f0", terrain_color_3: "a0c0e0",
+    water_color: "0a2040", sky_color: "0a1828", settlement_style: "none",
+    tree_density: 0.03, terrain_style: "jagged", has_lava: false,
+    ambient_particles: "snow", lava_color: "ff4500", accent_color: "88ccff",
+    landmarks: ["ice_spikes", "ancient_ruins", "crystal"],
+    names: ["Glaciar Eterno", "Las Murallas de Hielo", "El Manto Glacial", "Tundra Cristalina", "El Gran Casquete", "Hielos del Fin del Mundo"],
+    fog_density: 0.32, water_level: [0.1, 0.22], mountain_height: [0.65, 1.0],
+    terrain_roughness: [0.65, 0.92], danger_level: [0.35, 0.7], mysticism: [0.15, 0.45],
+  },
+  canyon: {
+    terrain_color_1: "a02818", terrain_color_2: "c04028", terrain_color_3: "8a2010",
+    water_color: "503818", sky_color: "200808", settlement_style: "ruins",
+    tree_density: 0.06, terrain_style: "canyon", has_lava: false,
+    ambient_particles: "ash", lava_color: "ff4500", accent_color: "ff8800",
+    landmarks: ["ancient_ruins", "pillars", "watchtower"],
+    names: ["Gran Cañón", "Las Gargantas Rojas", "Desfiladero del Diablo", "Cañones Perdidos", "El Abismo Rojo", "Rocas del Tiempo"],
+    fog_density: 0.1, water_level: [0.05, 0.15], mountain_height: [0.5, 0.85],
+    terrain_roughness: [0.55, 0.85], danger_level: [0.3, 0.65], mysticism: [0.15, 0.4],
+  },
+  mushroom: {
+    terrain_color_1: "3a1a4a", terrain_color_2: "501a3a", terrain_color_3: "4a2a5a",
+    water_color: "2a1050", sky_color: "050010", settlement_style: "none",
+    tree_density: 0.60, terrain_style: "rolling", has_lava: false,
+    ambient_particles: "spores", lava_color: "ff00cc", accent_color: "ff44cc",
+    landmarks: ["giant_tree", "pillars", "crystal", "ancient_ruins"],
+    names: ["Bosque de Hongos", "Valle de las Setas", "El Bosque Etéreo", "Setas Gigantes", "Colonia Fúngica", "El Reino de los Hongos"],
+    fog_density: 0.3, water_level: [0.15, 0.3], mountain_height: [0.2, 0.5],
+    terrain_roughness: [0.25, 0.55], danger_level: [0.3, 0.65], mysticism: [0.55, 0.9],
+  },
+  wasteland: {
+    terrain_color_1: "3a2a1a", terrain_color_2: "2a1a0a", terrain_color_3: "4a3a2a",
+    water_color: "1a1010", sky_color: "1a1608", settlement_style: "ruins",
+    tree_density: 0.04, terrain_style: "flat", has_lava: false,
+    ambient_particles: "ash", lava_color: "ff4500", accent_color: "aa5500",
+    landmarks: ["ancient_ruins", "pillars", "watchtower"],
+    names: ["El Páramo", "Las Tierras Yermas", "Ruinas del Mundo", "Terra Desolata", "El Desierto Gris", "Llanuras Olvidadas"],
+    fog_density: 0.2, water_level: [0.02, 0.1], mountain_height: [0.2, 0.5],
+    terrain_roughness: [0.3, 0.6], danger_level: [0.5, 0.85], mysticism: [0.15, 0.4],
+  },
+  sky: {
+    terrain_color_1: "a0c8f0", terrain_color_2: "c0d8ff", terrain_color_3: "80a8d0",
+    water_color: "406090", sky_color: "0820c0", settlement_style: "towers",
+    tree_density: 0.30, terrain_style: "archipelago", has_lava: false,
+    ambient_particles: "magic", lava_color: "ff4500", accent_color: "ffffff",
+    landmarks: ["floating_rocks", "crystal", "watchtower", "temple"],
+    names: ["Islas del Cielo", "Archipiélago Etéreo", "Los Reinos del Viento", "Islas Flotantes", "El Paraíso Nublado", "Altiplano Celestial"],
+    fog_density: 0.15, water_level: [0.2, 0.35], mountain_height: [0.4, 0.75],
+    terrain_roughness: [0.35, 0.65], danger_level: [0.3, 0.7], mysticism: [0.5, 0.85],
+  },
+  infernal: {
+    terrain_color_1: "3a0000", terrain_color_2: "500000", terrain_color_3: "200000",
+    water_color: "cc0000", sky_color: "180000", settlement_style: "towers",
+    tree_density: 0.01, terrain_style: "crater", has_lava: true,
+    ambient_particles: "embers", lava_color: "ff0000", accent_color: "ff4400",
+    landmarks: ["volcano", "lava_river", "altar", "pillars", "obelisk"],
+    names: ["Las Llamas Eternas", "Plano Infernal", "Infierno Rojo", "El Averno", "Las Catacumbas del Fuego", "Tierra de los Condenados"],
+    fog_density: 0.35, water_level: [0.05, 0.12], mountain_height: [0.55, 0.95],
+    terrain_roughness: [0.65, 0.95], danger_level: [0.75, 1.0], mysticism: [0.4, 0.75],
+  },
+  city: {
+    terrain_color_1: "8a7a6a", terrain_color_2: "6a5a4a", terrain_color_3: "aaa090",
+    water_color: "2a6a9a", sky_color: "2a3a5a", settlement_style: "fortress",
+    tree_density: 0.08, terrain_style: "flat", has_lava: false,
+    ambient_particles: "none", lava_color: "ff4500", accent_color: "ffd700",
+    landmarks: ["watchtower", "pillars", "ancient_ruins"],
+    names: ["Ciudad Imperial", "Metrópolis Antigua", "La Gran Ciudad", "Ciudad Amurallada", "Urbs Magna", "Capital del Reino", "Ciudad Eterna"],
+    fog_density: 0.12, water_level: [0.12, 0.25], mountain_height: [0.1, 0.3],
+    terrain_roughness: [0.1, 0.3], danger_level: [0.2, 0.55], mysticism: [0.1, 0.4],
+  },
+  town: {
+    terrain_color_1: "7a8a5a", terrain_color_2: "5a7a3a", terrain_color_3: "9a9a6a",
+    water_color: "3a7aaa", sky_color: "3a4a6a", settlement_style: "village",
+    tree_density: 0.20, terrain_style: "rolling", has_lava: false,
+    ambient_particles: "none", lava_color: "ff4500", accent_color: "ffcc44",
+    landmarks: ["watchtower", "ancient_ruins"],
+    names: ["Pueblo de Piedra", "Villa del Río", "Aldea del Cruce", "Poblado del Valle", "El Burgo", "Villa Mercader", "Pueblo Frontera"],
+    fog_density: 0.1, water_level: [0.15, 0.28], mountain_height: [0.1, 0.35],
+    terrain_roughness: [0.15, 0.4], danger_level: [0.1, 0.4], mysticism: [0.05, 0.3],
+  },
+  village_biome: {
+    terrain_color_1: "5a8a40", terrain_color_2: "3a6a28", terrain_color_3: "7a9a55",
+    water_color: "2a6090", sky_color: "2a3a5a", settlement_style: "village",
+    tree_density: 0.35, terrain_style: "rolling", has_lava: false,
+    ambient_particles: "fireflies", lava_color: "ff4500", accent_color: "ffdd55",
+    landmarks: ["ancient_ruins", "watchtower"],
+    names: ["Aldea de los Robles", "El Villorrio", "Pueblo Campesino", "Aldea Serena", "Villar del Bosque", "La Aldea", "Pueblo del Lago"],
+    fog_density: 0.1, water_level: [0.18, 0.3], mountain_height: [0.1, 0.3],
+    terrain_roughness: [0.1, 0.3], danger_level: [0.05, 0.25], mysticism: [0.05, 0.25],
+  },
+  farmland: {
+    terrain_color_1: "8aaa50", terrain_color_2: "6a8838", terrain_color_3: "c0c060",
+    water_color: "2a80b0", sky_color: "3a5080", settlement_style: "village",
+    tree_density: 0.10, terrain_style: "flat", has_lava: false,
+    ambient_particles: "none", lava_color: "ff4500", accent_color: "ffee66",
+    landmarks: ["watchtower"],
+    names: ["Tierras de Cultivo", "Los Campos Eternos", "Llanura Fértil", "Las Granjas del Norte", "El Granero", "Campos del Valle", "Tierras Sembradas"],
+    fog_density: 0.07, water_level: [0.15, 0.25], mountain_height: [0.05, 0.2],
+    terrain_roughness: [0.05, 0.2], danger_level: [0.05, 0.2], mysticism: [0.0, 0.15],
+  },
+  coast: {
+    terrain_color_1: "9ab870", terrain_color_2: "7a9840", terrain_color_3: "c8d890",
+    water_color: "1050a0", sky_color: "1840a0", settlement_style: "village",
+    tree_density: 0.22, terrain_style: "rolling", has_lava: false,
+    ambient_particles: "none", lava_color: "ff4500", accent_color: "00ddff",
+    landmarks: ["watchtower", "ancient_ruins"],
+    names: ["Costa Dorada", "Orilla del Mar", "Bahía Perdida", "Costa de los Vientos", "El Litoral", "Playa Esmeralda", "Costa Eterna"],
+    fog_density: 0.15, water_level: [0.38, 0.52], mountain_height: [0.15, 0.45],
+    terrain_roughness: [0.2, 0.5], danger_level: [0.2, 0.55], mysticism: [0.1, 0.4],
+  },
+  arctic: {
+    terrain_color_1: "d0e8ff", terrain_color_2: "b0c8e8", terrain_color_3: "e8f4ff",
+    water_color: "0a1838", sky_color: "051228", settlement_style: "none",
+    tree_density: 0.02, terrain_style: "flat", has_lava: false,
+    ambient_particles: "snow", lava_color: "ff4500", accent_color: "88eeff",
+    landmarks: ["ice_spikes", "ancient_ruins"],
+    names: ["El Ártico Perdido", "Polo Eterno", "Gran Tundra", "Las Nieves Perpetuas", "Campo de Hielo", "Blancura Infinita"],
+    fog_density: 0.25, water_level: [0.05, 0.15], mountain_height: [0.2, 0.5],
+    terrain_roughness: [0.2, 0.5], danger_level: [0.3, 0.65], mysticism: [0.1, 0.35],
+  },
+  badlands: {
+    terrain_color_1: "9a4a28", terrain_color_2: "7a3818", terrain_color_3: "c06040",
+    water_color: "4a3010", sky_color: "281408", settlement_style: "ruins",
+    tree_density: 0.03, terrain_style: "canyon", has_lava: false,
+    ambient_particles: "ash", lava_color: "ff4500", accent_color: "ff8844",
+    landmarks: ["ancient_ruins", "pillars", "obelisk"],
+    names: ["Las Badlands", "Tierras Malvadas", "El Desierto Rojo", "Cañones Oxidados", "Las Tierras Áridas", "Roca Pelada"],
+    fog_density: 0.08, water_level: [0.03, 0.1], mountain_height: [0.35, 0.7],
+    terrain_roughness: [0.5, 0.85], danger_level: [0.4, 0.75], mysticism: [0.1, 0.35],
+  },
+  rainforest: {
+    terrain_color_1: "1a5a0a", terrain_color_2: "0a3a04", terrain_color_3: "2a7010",
+    water_color: "0a4a2a", sky_color: "041208", settlement_style: "ruins",
+    tree_density: 0.95, terrain_style: "rolling", has_lava: false,
+    ambient_particles: "spores", lava_color: "ff4500", accent_color: "44ff88",
+    landmarks: ["giant_tree", "ancient_ruins", "temple"],
+    names: ["Selva Tropical", "La Gran Lluvia", "Bosque Pluvial", "Jungla Densa", "Selva de las Lluvias", "El Edén Verde"],
+    fog_density: 0.42, water_level: [0.3, 0.45], mountain_height: [0.2, 0.45],
+    terrain_roughness: [0.3, 0.6], danger_level: [0.45, 0.85], mysticism: [0.35, 0.75],
+  },
+  steppe: {
+    terrain_color_1: "b09050", terrain_color_2: "907838", terrain_color_3: "c8a860",
+    water_color: "2a6080", sky_color: "304868", settlement_style: "village",
+    tree_density: 0.06, terrain_style: "rolling", has_lava: false,
+    ambient_particles: "none", lava_color: "ff4500", accent_color: "ffc844",
+    landmarks: ["watchtower", "ancient_ruins"],
+    names: ["Gran Estepa", "Pradera del Viento", "Llanuras Kazaras", "El Mar de Hierba", "Estepa Infinita", "Tierras de los Nómadas"],
+    fog_density: 0.06, water_level: [0.08, 0.2], mountain_height: [0.15, 0.4],
+    terrain_roughness: [0.15, 0.35], danger_level: [0.2, 0.55], mysticism: [0.05, 0.3],
+  },
+  underground: {
+    terrain_color_1: "1a1a2a", terrain_color_2: "0a0a18", terrain_color_3: "2a2a3a",
+    water_color: "0a1a4a", sky_color: "000005", settlement_style: "towers",
+    tree_density: 0.0, terrain_style: "canyon", has_lava: false,
+    ambient_particles: "magic", lava_color: "8800ff", accent_color: "aa44ff",
+    landmarks: ["pillars", "altar", "crystal", "ancient_ruins", "cave_entrance"],
+    names: ["Las Profundidades", "Mundo Subterráneo", "Las Catacumbas", "Abismo Sin Fondo", "El Mundo Interior", "Reino de las Sombras"],
+    fog_density: 0.38, water_level: [0.1, 0.25], mountain_height: [0.5, 0.85],
+    terrain_roughness: [0.55, 0.9], danger_level: [0.5, 0.9], mysticism: [0.45, 0.85],
+  },
 };
 
 function rndBetween(a: number, b: number): number {
@@ -189,15 +383,33 @@ function parsePromptLocally(prompt: string): WorldMapParams {
 
   // ── Detección de bioma (primera coincidencia gana) ─────────────────────────
   let biomeKey: BiomeKey = "plains";
-  if      (/volcan|lava|magma|obsidian|ceniza|ignea/.test(p))                 biomeKey = "volcanic";
-  else if (/hielo|nieve|tundra|helad|glaciar|ártico|artico|permafrost/.test(p)) biomeKey = "tundra";
-  else if (/pantano|ciénaga|cienaga|marisma|fango|turba|swamp/.test(p))       biomeKey = "swamp";
-  else if (/bosque|selva|árbol|arbol|forest|jungla|jungle/.test(p))           biomeKey = "forest";
-  else if (/desierto|arena|dunas|desert|árido|arid/.test(p))                  biomeKey = "desert";
-  else if (/océano|ocean|mar\b|sea\b|isla\b|archipiélago|archipelago/.test(p)) biomeKey = "ocean";
-  else if (/montaña|montañas|sierra|pico|cumbre|mountain|colina/.test(p))     biomeKey = "mountains";
-  else if (/mazmorra|cripta|dungeon|catacumba|catacomba|cueva|subterr/.test(p)) biomeKey = "dungeon";
-  else if (/místico|arcano|éter|astral|mágico|mystic|arcane|planar/.test(p))  biomeKey = "mystic";
+  if      (/volcan|lava|magma|obsidian|ceniza|ignea/.test(p))                    biomeKey = "volcanic";
+  else if (/infiern|infernal|averno|demoni|gehenna|hell\b/.test(p))              biomeKey = "infernal";
+  else if (/glaci[ae]r|iceberg|ventisquero|ice.*cliff/.test(p))                  biomeKey = "glacier";
+  else if (/\bártico\b|\bartico\b|tundra.*polar|polo.*norte/.test(p))            biomeKey = "arctic";
+  else if (/hielo|nieve|tundra|helad|permafrost/.test(p))                        biomeKey = "tundra";
+  else if (/pantano|ciénaga|cienaga|marisma|fango|turba|swamp/.test(p))          biomeKey = "swamp";
+  else if (/selva.*lluvia|bosque.*pluvial|rain.*forest|lluvias.*tropic/.test(p)) biomeKey = "rainforest";
+  else if (/selva|jungla|jungle|tropical|lianas/.test(p))                        biomeKey = "jungle";
+  else if (/bosque|árbol|arbol|forest/.test(p))                                  biomeKey = "forest";
+  else if (/sabana|savanna|pradera.*seca|africano/.test(p))                      biomeKey = "savanna";
+  else if (/cañon|cañón|desfiladero|barranco|canyon|roca.*roja/.test(p))         biomeKey = "canyon";
+  else if (/\bbadlands?\b|tierras.*malvadas|desierto.*rojo/.test(p))             biomeKey = "badlands";
+  else if (/hongo|seta\b|mushroom/.test(p))                                      biomeKey = "mushroom";
+  else if (/páramo|baldio|baldío|wasteland|post-apocalip|yermo|desolad/.test(p)) biomeKey = "wasteland";
+  else if (/cielo.*flotan|isla.*flotan|flotando|sky.*island|isla.*celest/.test(p)) biomeKey = "sky";
+  else if (/desierto|arena|dunas|desert|árido|arid/.test(p))                     biomeKey = "desert";
+  else if (/estepa|pradera.*nómad|pastizal.*seco/.test(p))                       biomeKey = "steppe";
+  else if (/\bcosta\b|litoral|\bplaya\b|orilla.*mar|bahía/.test(p))              biomeKey = "coast";
+  else if (/océano|ocean|\bmar\b|\bsea\b|archipiélago|archipelago/.test(p))      biomeKey = "ocean";
+  else if (/ciudad.*gran|gran.*ciudad|metrópoli|metropolis|capital|ciudad.*imperial/.test(p)) biomeKey = "city";
+  else if (/\bpueblo\b|\bpoblado\b|pequeña.*ciudad|villa.*comercial/.test(p))    biomeKey = "town";
+  else if (/\baldea\b|villorrio|caserío|hamlet/.test(p))                         biomeKey = "village_biome";
+  else if (/granja|campo.*cultiv|tierras.*cultiv|farmland|cosecha|siembra/.test(p)) biomeKey = "farmland";
+  else if (/subterr|cueva.*profund|\bprofundidades\b|underground/.test(p))       biomeKey = "underground";
+  else if (/montaña|montañas|sierra|pico|cumbre|mountain|colina/.test(p))        biomeKey = "mountains";
+  else if (/mazmorra|cripta|dungeon|catacumba|catacomba|\bcueva\b/.test(p))      biomeKey = "dungeon";
+  else if (/místico|arcano|éter|astral|mágico|mystic|arcane|planar/.test(p))     biomeKey = "mystic";
 
   const d = BIOME_DATA[biomeKey];
 
@@ -218,11 +430,20 @@ function parsePromptLocally(prompt: string): WorldMapParams {
   if (/pico.*hielo|hielo.*pico|ice.*spike/.test(p))                      lset.add("ice_spikes");
   if (/subterr/.test(p))                                                 lset.add("pillars");
   // Garantías por bioma
-  if (biomeKey === "volcanic") { lset.add("volcano"); lset.add("lava_river"); }
-  if (biomeKey === "tundra")   lset.add("ice_spikes");
-  if (biomeKey === "mystic")   { lset.add("crystal"); lset.add("obelisk"); }
-  if (biomeKey === "desert")   lset.add("pyramid");
-  if (biomeKey === "dungeon")  { lset.add("pillars"); lset.add("altar"); }
+  if (biomeKey === "volcanic")     { lset.add("volcano"); lset.add("lava_river"); }
+  if (biomeKey === "infernal")     { lset.add("volcano"); lset.add("lava_river"); lset.add("altar"); }
+  if (biomeKey === "tundra")       lset.add("ice_spikes");
+  if (biomeKey === "glacier")      lset.add("ice_spikes");
+  if (biomeKey === "arctic")       lset.add("ice_spikes");
+  if (biomeKey === "mystic")       { lset.add("crystal"); lset.add("obelisk"); }
+  if (biomeKey === "mushroom")     lset.add("giant_tree");
+  if (biomeKey === "sky")          { lset.add("floating_rocks"); lset.add("crystal"); }
+  if (biomeKey === "desert")       lset.add("pyramid");
+  if (biomeKey === "dungeon")      { lset.add("pillars"); lset.add("altar"); }
+  if (biomeKey === "canyon")       lset.add("pillars");
+  if (biomeKey === "badlands")     lset.add("ancient_ruins");
+  if (biomeKey === "underground")  { lset.add("pillars"); lset.add("cave_entrance"); }
+  if (biomeKey === "city")         { lset.add("watchtower"); lset.add("pillars"); }
   const landmarks = Array.from(lset);
 
   // ── Nivel de peligro ───────────────────────────────────────────────────────
@@ -282,14 +503,45 @@ function parsePromptLocally(prompt: string): WorldMapParams {
 }
 
 export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
-  const [prompt,      setPrompt]      = useState("");
-  const [loading,     setLoading]     = useState(false);
-  const [description, setDescription] = useState<string | null>(null);
-  const [params,      setParams]      = useState<WorldMapParams | null>(null);
-  const [useAssets,   setUseAssets]   = useState(false);
+  const [prompt,        setPrompt]        = useState("");
+  const [loading,       setLoading]       = useState(false);
+  const [description,   setDescription]   = useState<string | null>(null);
+  const [params,        setParams]        = useState<WorldMapParams | null>(null);
+  const [useAssets,     setUseAssets]     = useState(false);
+  const [savedGenId,    setSavedGenId]    = useState<number | null>(null);
+  const [saving,        setSaving]        = useState(false);
+  const [showAddProj,   setShowAddProj]   = useState(false);
   // Base params without seeds — lets us regenerate terrain shape without re-calling the AI
   const baseParamsRef = useRef<WorldMapParams | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef   = useRef<HTMLTextAreaElement>(null);
+
+  const handleSave = async () => {
+    if (!params) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/worldmap/save", {
+        method:      "POST",
+        headers:     { "Content-Type": "application/json" },
+        credentials: "include",
+        body:        JSON.stringify({
+          prompt,
+          description: description ?? "",
+          params:      { ...params, use_assets: undefined },
+        }),
+      });
+      const json = await res.json() as { data?: { id: number } };
+      if (json.data?.id) {
+        setSavedGenId(json.data.id);
+        onToast("🌍 Mundo guardado en tu historial");
+      } else {
+        onToast("Error al guardar el mundo", "error");
+      }
+    } catch {
+      onToast("Error al guardar el mundo", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleCreate = async () => {
     const trimmed = prompt.trim();
@@ -297,6 +549,7 @@ export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
     setLoading(true);
     setDescription(null);
     setParams(null);
+    setSavedGenId(null);
 
     try {
       const res = await fetch("/api/worldmap", {
@@ -321,7 +574,19 @@ export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
         return;
       }
 
-      const json = await res.json() as { data: { description: string; params: WorldMapParams } };
+      const json = await res.json() as { data: { description: string; params: WorldMapParams; fallback?: boolean } };
+
+      // If server returned a fallback (Groq unavailable), use client-side parser instead
+      // so the map actually reflects what the user typed
+      if (json.data?.fallback) {
+        const local = parsePromptLocally(trimmed);
+        const localWithAssets = { ...local, use_assets: useAssets };
+        baseParamsRef.current = localWithAssets;
+        setParams(localWithAssets);
+        onToast(`✨ Mapa generado: "${local.region_name}"`);
+        return;
+      }
+
       // Always inject fresh random seeds — world TYPE comes from AI, terrain SHAPE is always unique
       const withFreshSeeds: WorldMapParams = { ...json.data.params, seeds: freshSeeds(), use_assets: useAssets };
       baseParamsRef.current = withFreshSeeds;
@@ -346,6 +611,7 @@ export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
     baseParamsRef.current = p;
     setDescription(null);
     setParams(p);
+    setSavedGenId(null);
     onToast(`🎲 Mundo aleatorio generado: ${p.region_name}`);
   };
 
@@ -493,6 +759,7 @@ export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
                   const newParams = { ...baseParamsRef.current, seeds: freshSeeds(), use_assets: useAssets };
                   baseParamsRef.current = newParams;
                   setParams(newParams);
+                  setSavedGenId(null);
                   onToast("🎲 ¡Nuevo terreno generado!");
                 }}
               >
@@ -505,8 +772,39 @@ export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
                 🌍 Mundo Aleatorio
               </button>
             </div>
+
+            {/* Save bar */}
+            <div className="wc-save-bar">
+              <button
+                className={`wc-save-btn${savedGenId ? " wc-save-btn--saved" : ""}`}
+                onClick={handleSave}
+                disabled={saving || !!savedGenId}
+              >
+                {saving ? "💾 Guardando…" : savedGenId ? "✅ Guardado" : "💾 Guardar mundo"}
+              </button>
+              {savedGenId && (
+                <button
+                  className="wc-save-btn wc-save-btn--project"
+                  onClick={() => setShowAddProj(true)}
+                >
+                  📁 Añadir a proyecto
+                </button>
+              )}
+            </div>
+
             <WorldMapPanel params={params} />
           </div>
+        )}
+
+        {/* Add-to-project modal */}
+        {showAddProj && savedGenId && (
+          <Modal open onClose={() => setShowAddProj(false)} title="📁 Añadir a proyecto" size="sm">
+            <AddToProjectPanel
+              generationId={savedGenId}
+              onClose={() => setShowAddProj(false)}
+              onToast={onToast}
+            />
+          </Modal>
         )}
       </PageContainer>
     </div>

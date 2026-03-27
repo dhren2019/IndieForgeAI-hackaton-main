@@ -188,6 +188,114 @@ const BIOME_ASSET_CONFIG: Record<string, { mainTrees: string[]; groundCovers: st
     rocks:        ["Pebble_Round_4","Pebble_Round_5","RockPath_Round_Small_2","RockPath_Round_Small_3"],
     flowers:      ["Flower_3_Group","Flower_4_Group","Petal_4","Petal_5"],
   },
+  jungle: {
+    mainTrees:    ["CommonTree_1","CommonTree_2","CommonTree_3","CommonTree_4","CommonTree_5"],
+    groundCovers: ["Fern_1","Plant_1","Plant_1_Big","Grass_Common_Tall","Bush_Common"],
+    rocks:        ["Pebble_Round_1","Rock_Medium_1"],
+    flowers:      ["Flower_4_Group","Petal_3"],
+  },
+  savanna: {
+    mainTrees:    ["DeadTree_1","DeadTree_2","CommonTree_2"],
+    groundCovers: ["Grass_Wispy_Short","Grass_Wispy_Tall"],
+    rocks:        ["Rock_Medium_1","Rock_Medium_2","Pebble_Square_1"],
+    flowers:      [],
+  },
+  glacier: {
+    mainTrees:    ["Pine_1","Pine_2"],
+    groundCovers: [],
+    rocks:        ["Rock_Medium_1","Rock_Medium_2","Rock_Medium_3","Pebble_Square_1","Pebble_Square_2","Pebble_Square_3"],
+    flowers:      [],
+  },
+  canyon: {
+    mainTrees:    ["DeadTree_1","DeadTree_2"],
+    groundCovers: ["Plant_7"],
+    rocks:        ["Rock_Medium_1","Rock_Medium_2","Rock_Medium_3","RockPath_Square_Small_1","RockPath_Square_Wide"],
+    flowers:      [],
+  },
+  mushroom: {
+    mainTrees:    ["TwistedTree_1","TwistedTree_2"],
+    groundCovers: ["Mushroom_Common","Mushroom_Laetiporus","Fern_1"],
+    rocks:        ["Pebble_Round_1"],
+    flowers:      ["Flower_4_Group","Flower_4_Single","Petal_1","Petal_2","Petal_3","Petal_4","Petal_5"],
+  },
+  wasteland: {
+    mainTrees:    ["DeadTree_3","DeadTree_4","DeadTree_5"],
+    groundCovers: [],
+    rocks:        ["Rock_Medium_1","Rock_Medium_2","Rock_Medium_3","RockPath_Round_Wide","Pebble_Square_6"],
+    flowers:      [],
+  },
+  sky: {
+    mainTrees:    ["CommonTree_1","CommonTree_2","Pine_1"],
+    groundCovers: ["Bush_Common_Flowers","Grass_Common_Short","Clover_1"],
+    rocks:        ["Pebble_Round_1","Pebble_Round_2"],
+    flowers:      ["Flower_3_Group","Flower_4_Group","Petal_1","Petal_5"],
+  },
+  infernal: {
+    mainTrees:    ["DeadTree_1","DeadTree_2","DeadTree_3","DeadTree_4","DeadTree_5"],
+    groundCovers: [],
+    rocks:        ["Rock_Medium_1","Rock_Medium_2","Rock_Medium_3","RockPath_Square_Small_1","RockPath_Square_Small_2","Pebble_Square_4","Pebble_Square_5"],
+    flowers:      [],
+  },
+  city: {
+    mainTrees:    ["CommonTree_1","CommonTree_2","CommonTree_3"],
+    groundCovers: ["Grass_Common_Short","Bush_Common","Clover_1"],
+    rocks:        ["Rock_Medium_1","Pebble_Round_1","Pebble_Round_2","RockPath_Round_Small_1"],
+    flowers:      ["Flower_3_Single","Flower_4_Single","Bush_Common_Flowers"],
+  },
+  town: {
+    mainTrees:    ["CommonTree_1","CommonTree_2","CommonTree_3","Pine_1"],
+    groundCovers: ["Grass_Common_Short","Bush_Common","Clover_1","Clover_2"],
+    rocks:        ["Pebble_Round_1","Pebble_Round_2","RockPath_Round_Small_1"],
+    flowers:      ["Flower_3_Group","Flower_4_Single","Bush_Common_Flowers","Petal_3"],
+  },
+  village_biome: {
+    mainTrees:    ["CommonTree_1","CommonTree_2","CommonTree_3","CommonTree_4"],
+    groundCovers: ["Grass_Common_Short","Grass_Common_Tall","Bush_Common","Clover_1","Clover_2","Plant_1"],
+    rocks:        ["Pebble_Round_1","Pebble_Round_2","Pebble_Round_3"],
+    flowers:      ["Flower_3_Group","Flower_4_Group","Flower_3_Single","Bush_Common_Flowers","Petal_4"],
+  },
+  farmland: {
+    mainTrees:    ["CommonTree_1","CommonTree_2"],
+    groundCovers: ["Grass_Common_Short","Grass_Common_Tall","Grass_Wispy_Short","Plant_1"],
+    rocks:        ["Pebble_Round_1","Pebble_Square_1"],
+    flowers:      ["Flower_3_Group","Flower_4_Group","Bush_Common_Flowers"],
+  },
+  coast: {
+    mainTrees:    ["CommonTree_1","CommonTree_2","CommonTree_3","Pine_1","Pine_2"],
+    groundCovers: ["Grass_Common_Short","Bush_Common_Flowers","Plant_1","Clover_1"],
+    rocks:        ["Pebble_Round_4","Pebble_Round_5","Rock_Medium_1","RockPath_Round_Small_2"],
+    flowers:      ["Flower_3_Group","Flower_4_Group","Petal_4","Petal_5"],
+  },
+  arctic: {
+    mainTrees:    ["Pine_1","Pine_2","DeadTree_1"],
+    groundCovers: [],
+    rocks:        ["Rock_Medium_1","Rock_Medium_2","Pebble_Square_1","Pebble_Square_2","Pebble_Square_3","RockPath_Square_Small_1"],
+    flowers:      [],
+  },
+  badlands: {
+    mainTrees:    ["DeadTree_1","DeadTree_2","DeadTree_3"],
+    groundCovers: ["Plant_7","Grass_Wispy_Short"],
+    rocks:        ["Rock_Medium_1","Rock_Medium_2","Rock_Medium_3","Pebble_Square_1","Pebble_Square_2","RockPath_Square_Wide","RockPath_Square_Thin"],
+    flowers:      [],
+  },
+  rainforest: {
+    mainTrees:    ["CommonTree_1","CommonTree_2","CommonTree_3","CommonTree_4","CommonTree_5"],
+    groundCovers: ["Fern_1","Plant_1","Plant_1_Big","Grass_Common_Tall","Bush_Common","Plant_7","Plant_7_Big"],
+    rocks:        ["Pebble_Round_1","Pebble_Round_2","Rock_Medium_1"],
+    flowers:      ["Flower_4_Group","Petal_2","Petal_3"],
+  },
+  steppe: {
+    mainTrees:    ["CommonTree_2","DeadTree_1","DeadTree_2"],
+    groundCovers: ["Grass_Wispy_Short","Grass_Wispy_Tall","Grass_Common_Short"],
+    rocks:        ["Rock_Medium_1","Pebble_Round_1","Pebble_Square_1","Pebble_Square_2"],
+    flowers:      [],
+  },
+  underground: {
+    mainTrees:    ["DeadTree_3","DeadTree_4","DeadTree_5"],
+    groundCovers: ["Mushroom_Laetiporus","Mushroom_Common","Plant_7"],
+    rocks:        ["Rock_Medium_1","Rock_Medium_2","Rock_Medium_3","RockPath_Square_Small_1","RockPath_Square_Small_2","RockPath_Square_Small_3","Pebble_Square_5","Pebble_Square_6"],
+    flowers:      [],
+  },
 };
 
 function terrainColor(
@@ -1454,6 +1562,11 @@ const BIOME_LABELS: Record<string, string> = {
   forest: "Bosque", desert: "Desierto", tundra: "Tundra", swamp: "Pantano",
   volcanic: "Volcánico", ocean: "Océano", plains: "Llanuras",
   mountains: "Montañas", dungeon: "Mazmorra", mystic: "Místico",
+  jungle: "Jungla", savanna: "Sabana", glacier: "Glaciar", canyon: "Cañón",
+  mushroom: "Bosque de Hongos", wasteland: "Páramo", sky: "Islas del Cielo", infernal: "Infernal",
+  city: "Ciudad", town: "Pueblo", village_biome: "Aldea", farmland: "Tierras de Cultivo",
+  coast: "Costa", arctic: "Ártico", badlands: "Badlands", rainforest: "Selva Tropical",
+  steppe: "Estepa", underground: "Mundo Subterráneo",
 };
 
 function dangerLabel(d: number) {
@@ -1540,6 +1653,7 @@ export function WorldMapPanel({ params }: WorldMapPanelProps) {
     const onCleanup: Array<() => void> = [];
 
     async function init() {
+      if (!container) return;           // narrow for TypeScript inside async closure
       // ── Optional GLTF asset preload ─────────────────────────────────
       const assetCache = new Map<string, THREE.Group>();
       if (params.use_assets) {

@@ -23757,6 +23757,7 @@ __export(exports_api, {
   apiUnfollowTag: () => apiUnfollowTag,
   apiTrending: () => apiTrending,
   apiToggleLike: () => apiToggleLike,
+  apiSaveWorld: () => apiSaveWorld,
   apiSaveGenerationImage: () => apiSaveGenerationImage,
   apiSaveGenerationGlb: () => apiSaveGenerationGlb,
   apiRemoveFromProject: () => apiRemoveFromProject,
@@ -23841,6 +23842,9 @@ async function apiGetComments(postId) {
 }
 async function apiAddComment(postId, content) {
   return postJSON(`/api/social/posts/${postId}/comentarios`, { content });
+}
+async function apiSaveWorld(payload) {
+  return postJSON("/api/worldmap/save", payload);
 }
 async function apiGetProjects() {
   return fetcher("/api/projects");
@@ -59687,11 +59691,12 @@ var AI_MODELS = [
 var DEFAULT_MODEL = "llama-3.3-70b-versatile";
 var TYPE_META = {
   npc: { icon: "\uD83E\uDDD9", label: "NPC", desc: "Personajes y personalidades", color: "#f59e0b" },
-  quest: { icon: "⚔️", label: "Misión", desc: "Misiones y objetivos", color: "#3b82f6" },
+  quest: { icon: "⚔️", label: "Misín", desc: "Misiones y objetivos", color: "#3b82f6" },
   item: { icon: "\uD83D\uDC8E", label: "Objeto", desc: "Armaduras, reliquias y objetos", color: "#10b981" },
   lore: { icon: "\uD83D\uDCDC", label: "Trasfondo", desc: "Historia del mundo y secretos", color: "#a78bfa" },
   weapon: { icon: "\uD83D\uDDE1️", label: "Arma", desc: "Espadas, bastones y armas", color: "#ef4444" },
-  enemy: { icon: "\uD83D\uDC80", label: "Enemigo", desc: "Bestias, demonios y jefes", color: "#6b7280" }
+  enemy: { icon: "\uD83D\uDC80", label: "Enemigo", desc: "Bestias, demonios y jefes", color: "#6b7280" },
+  worldmap: { icon: "\uD83C\uDF0D", label: "Mundo 3D", desc: "Mapas de terreno procedurales", color: "#22d3ee" }
 };
 var GENEROS = ["Fantasía", "Ciencia Ficción", "Cyberpunk", "Western", "Terror", "Steampunk", "Post-Apocalíptico"];
 var ROLES_NPC = ["Mercader", "Villano", "Mentor", "Guardia", "Espía", "Sanador", "Asesino", "Errante"];
@@ -59712,6 +59717,9 @@ var FIELD_LABELS = {
   dialogue: "Diálogo",
   title: "Título",
   type: "Tipo",
+  region_name: "Nombre del mundo",
+  biome: "Bioma",
+  description: "Descripción",
   objective: "Objetivo",
   reward: "Recompensa",
   location: "Ubicación",
@@ -60053,6 +60061,8 @@ function timeAgo(dateStr) {
   return `hace ${Math.floor(h / 24)}d`;
 }
 function getGenerationTitle(result, type, id) {
+  if (type === "worldmap")
+    return String(result.region_name ?? result.name ?? `Mundo #${id}`);
   return String(result.name ?? result.title ?? `${type} #${id}`);
 }
 function getPreviewText(result) {
@@ -63091,10 +63101,10 @@ function SocialPage({ onToast }) {
 }
 
 // frontend/pages/ProjectsPage.tsx
-var import_react54 = __toESM(require_react(), 1);
+var import_react55 = __toESM(require_react(), 1);
 
 // frontend/components/projects/ProjectItemCard.tsx
-var import_react53 = __toESM(require_react(), 1);
+var import_react54 = __toESM(require_react(), 1);
 init_three_module();
 
 // node_modules/three/examples/jsm/controls/OrbitControls.js
@@ -63969,648 +63979,8 @@ function interceptControlUp(event) {
   }
 }
 
-// frontend/components/projects/ProjectItemCard.tsx
-var jsx_dev_runtime35 = __toESM(require_jsx_dev_runtime(), 1);
-function GlbViewer({ url }) {
-  const ref = import_react53.useRef(null);
-  import_react53.useEffect(() => {
-    const container = ref.current;
-    if (!container)
-      return;
-    const renderer = new WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.toneMapping = ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
-    renderer.shadowMap.enabled = true;
-    container.appendChild(renderer.domElement);
-    const scene = new Scene;
-    scene.background = new Color(1052702);
-    const camera = new PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.01, 500);
-    camera.position.set(0, 1.5, 3.5);
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 1.8;
-    controls.minDistance = 0.3;
-    controls.maxDistance = 50;
-    scene.add(new AmbientLight(16777215, 0.55));
-    const dir = new DirectionalLight(16777215, 1.4);
-    dir.position.set(4, 8, 4);
-    scene.add(dir);
-    const fill = new DirectionalLight(8421631, 0.3);
-    fill.position.set(-4, 2, -4);
-    scene.add(fill);
-    const grid = new GridHelper(6, 12, 3355477, 2236996);
-    scene.add(grid);
-    let rafId = 0;
-    let disposed = false;
-    const animate = () => {
-      if (disposed)
-        return;
-      rafId = requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
-    };
-    animate();
-    Promise.resolve().then(() => (init_GLTFLoader(), exports_GLTFLoader)).then(({ GLTFLoader: GLTFLoader2 }) => {
-      if (disposed)
-        return;
-      const loader = new GLTFLoader2;
-      loader.load(url, (gltf) => {
-        if (disposed)
-          return;
-        const box = new Box3().setFromObject(gltf.scene);
-        const center = box.getCenter(new Vector3);
-        const size = box.getSize(new Vector3).length();
-        gltf.scene.position.sub(center);
-        gltf.scene.position.y += size * 0.01;
-        camera.position.set(0, size * 0.35, size * 1.5);
-        controls.target.set(0, -size * 0.05, 0);
-        controls.update();
-        scene.add(gltf.scene);
-      });
-    });
-    const onResize = () => {
-      if (!container || disposed)
-        return;
-      camera.aspect = container.clientWidth / container.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
-    };
-    window.addEventListener("resize", onResize);
-    return () => {
-      disposed = true;
-      cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", onResize);
-      controls.dispose();
-      renderer.dispose();
-      if (container.contains(renderer.domElement))
-        container.removeChild(renderer.domElement);
-    };
-  }, [url]);
-  return /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
-    ref,
-    className: "glb-viewer"
-  }, undefined, false, undefined, this);
-}
-var TYPE_BG = {
-  npc: "linear-gradient(145deg,#1a1000,#3d2800)",
-  quest: "linear-gradient(145deg,#001428,#0d3060)",
-  item: "linear-gradient(145deg,#001810,#063820)",
-  lore: "linear-gradient(145deg,#120028,#300062)",
-  weapon: "linear-gradient(145deg,#1a0000,#3a0000)",
-  enemy: "linear-gradient(145deg,#080808,#1c1c1c)"
-};
-function ProjectItemCard({ gen, isFav, onFavToggle }) {
-  const [showModel, setShowModel] = import_react53.useState(false);
-  const meta = TYPE_META[gen.type];
-  const title = getGenerationTitle(gen.result, gen.type, gen.id);
-  const previewText = getPreviewText(gen.result);
-  const bg = TYPE_BG[gen.type] ?? TYPE_BG.enemy;
-  return /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("article", {
-    className: "proj-item-card",
-    children: [
-      /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
-        className: "proj-item-card__visual",
-        style: { background: gen.image_url ? undefined : bg },
-        children: [
-          gen.image_url && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("img", {
-            src: gen.image_url,
-            alt: title,
-            className: "proj-item-card__img",
-            loading: "lazy"
-          }, undefined, false, undefined, this),
-          !gen.image_url && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
-            className: "proj-item-card__placeholder",
-            style: { background: bg },
-            children: /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
-              className: "proj-item-card__ph-icon",
-              style: { color: meta.color },
-              children: meta.icon
-            }, undefined, false, undefined, this)
-          }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
-            className: "proj-item-card__overlay"
-          }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
-            className: "proj-item-card__type-badge",
-            style: { "--badge-color": meta.color },
-            children: [
-              meta.icon,
-              " ",
-              meta.label
-            ]
-          }, undefined, true, undefined, this),
-          gen.glb_url && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
-            className: "proj-item-card__model-btn",
-            onClick: () => setShowModel(true),
-            title: "Ver modelo 3D",
-            children: "\uD83E\uDDCA 3D"
-          }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
-            className: `proj-item-card__fav${isFav ? " proj-item-card__fav--on" : ""}`,
-            onClick: () => onFavToggle(gen.id, !isFav),
-            title: isFav ? "Quitar de favoritos" : "Añadir a favoritos",
-            "aria-label": isFav ? "Quitar de favoritos" : "Añadir a favoritos",
-            children: isFav ? "★" : "☆"
-          }, undefined, false, undefined, this)
-        ]
-      }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
-        className: "proj-item-card__info",
-        children: [
-          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("p", {
-            className: "proj-item-card__title",
-            title,
-            children: title
-          }, undefined, false, undefined, this),
-          previewText && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("p", {
-            className: "proj-item-card__preview",
-            children: previewText.length > 72 ? previewText.slice(0, 72) + "…" : previewText
-          }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
-            className: "proj-item-card__date",
-            children: timeAgo(gen.created_at)
-          }, undefined, false, undefined, this)
-        ]
-      }, undefined, true, undefined, this),
-      showModel && gen.glb_url && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV(Modal, {
-        open: true,
-        onClose: () => setShowModel(false),
-        title: `\uD83E\uDDCA ${title}`,
-        size: "lg",
-        children: /* @__PURE__ */ jsx_dev_runtime35.jsxDEV(GlbViewer, {
-          url: gen.glb_url
-        }, undefined, false, undefined, this)
-      }, undefined, false, undefined, this)
-    ]
-  }, undefined, true, undefined, this);
-}
-
-// frontend/pages/ProjectsPage.tsx
-init_api();
-var jsx_dev_runtime36 = __toESM(require_jsx_dev_runtime(), 1);
-var EMOJI_OPTIONS2 = ["\uD83D\uDCC1", "⚔️", "\uD83E\uDDD9", "\uD83C\uDFF0", "\uD83D\uDDFA️", "\uD83D\uDC09", "\uD83D\uDC8E", "\uD83C\uDF3F", "\uD83D\uDD25", "⚡", "\uD83C\uDF19", "\uD83C\uDFAD"];
-function ProjectsPage({ onToast }) {
-  const { isSignedIn, isLoaded } = useAuth();
-  const { openSignIn } = useClerk();
-  const {
-    projects,
-    loading: projLoading,
-    createProject,
-    deleteProject,
-    updateProject
-  } = useProjects();
-  const { favIds, toggle: toggleFav } = useFavorites();
-  const [selected, setSelected] = import_react54.useState(null);
-  const [items, setItems] = import_react54.useState([]);
-  const [itemsLoading, setItemsLoading] = import_react54.useState(false);
-  const [creating, setCreating] = import_react54.useState(false);
-  const [newName, setNewName] = import_react54.useState("");
-  const [newEmoji, setNewEmoji] = import_react54.useState("\uD83D\uDCC1");
-  const [confirmDelete, setConfirmDelete] = import_react54.useState(null);
-  const [viewMode, setViewMode] = import_react54.useState("grid");
-  const [editingId, setEditingId] = import_react54.useState(null);
-  const [editName, setEditName] = import_react54.useState("");
-  const [editEmoji, setEditEmoji] = import_react54.useState("\uD83D\uDCC1");
-  const openProject = import_react54.useCallback(async (p) => {
-    setSelected(p);
-    setItemsLoading(true);
-    const { data, error: error2 } = await apiGetProjectItems(p.id);
-    if (error2)
-      onToast("Error al cargar el proyecto", "error");
-    setItems(data ?? []);
-    setItemsLoading(false);
-  }, [onToast]);
-  import_react54.useEffect(() => {
-    if (selected) {
-      const fresh = projects.find((p) => p.id === selected.id);
-      if (fresh)
-        setSelected(fresh);
-    }
-  }, [projects]);
-  const handleCreate = async () => {
-    if (!newName.trim())
-      return;
-    const proj = await createProject(newName.trim(), newEmoji);
-    if (proj) {
-      onToast(`Proyecto "${proj.name}" creado`);
-      setCreating(false);
-      setNewName("");
-      setNewEmoji("\uD83D\uDCC1");
-    }
-  };
-  const handleDelete = async (id) => {
-    await deleteProject(id);
-    if (selected?.id === id) {
-      setSelected(null);
-      setItems([]);
-    }
-    setConfirmDelete(null);
-    onToast("Proyecto eliminado");
-  };
-  const startEdit = (p, e) => {
-    e.stopPropagation();
-    setEditingId(p.id);
-    setEditName(p.name);
-    setEditEmoji(p.emoji);
-    setConfirmDelete(null);
-  };
-  const handleUpdate = async () => {
-    if (!editName.trim() || editingId === null)
-      return;
-    const updated = await updateProject(editingId, editName.trim(), editEmoji);
-    if (updated) {
-      onToast("Proyecto actualizado");
-      if (selected?.id === editingId)
-        setSelected((s) => s ? { ...s, name: updated.name, emoji: updated.emoji } : s);
-    }
-    setEditingId(null);
-  };
-  if (isLoaded && !isSignedIn) {
-    return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-      className: "page-bg-wrap",
-      children: [
-        /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-          className: "social-bg",
-          "aria-hidden": "true",
-          children: [
-            /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-              className: "social-bg__orb social-bg__orb--1"
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-              className: "social-bg__orb social-bg__orb--2"
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-              className: "social-bg__grid"
-            }, undefined, false, undefined, this)
-          ]
-        }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(PageContainer, {
-          children: /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-            className: "projects-page__auth-wall",
-            children: [
-              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                className: "projects-page__auth-icon",
-                children: "\uD83D\uDDC2️"
-              }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("h2", {
-                className: "projects-page__auth-title",
-                children: "Necesitas una cuenta"
-              }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
-                className: "projects-page__auth-sub",
-                children: "Inicia sesión para crear carpetas y organizar tus creaciones"
-              }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Button, {
-                variant: "primary",
-                onClick: () => openSignIn(),
-                children: "Iniciar sesión"
-              }, undefined, false, undefined, this)
-            ]
-          }, undefined, true, undefined, this)
-        }, undefined, false, undefined, this)
-      ]
-    }, undefined, true, undefined, this);
-  }
-  return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-    className: "page-bg-wrap",
-    children: [
-      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-        className: "social-bg",
-        "aria-hidden": "true",
-        children: [
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-            className: "social-bg__orb social-bg__orb--1"
-          }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-            className: "social-bg__orb social-bg__orb--2"
-          }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-            className: "social-bg__orb social-bg__orb--3"
-          }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-            className: "social-bg__grid"
-          }, undefined, false, undefined, this)
-        ]
-      }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(PageContainer, {
-        wide: true,
-        children: [
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-            className: "page-hero",
-            children: [
-              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("h1", {
-                className: "page-hero__title",
-                children: [
-                  /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
-                    className: "plain-emoji",
-                    children: "\uD83D\uDDC2️"
-                  }, undefined, false, undefined, this),
-                  " Proyectos"
-                ]
-              }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
-                className: "page-hero__sub",
-                children: "Organiza tus generaciones en carpetas"
-              }, undefined, false, undefined, this)
-            ]
-          }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-            className: "split-layout split-layout--projects",
-            children: [
-              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("aside", {
-                className: "split-layout__list projects-sidebar",
-                children: [
-                  /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                    className: "projects-sidebar__header",
-                    children: [
-                      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
-                        className: "projects-sidebar__count",
-                        children: projLoading ? "…" : `${projects.length} proyecto${projects.length !== 1 ? "s" : ""}`
-                      }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Button, {
-                        variant: "primary",
-                        size: "sm",
-                        icon: "＋",
-                        onClick: () => setCreating(true),
-                        children: "Nuevo"
-                      }, undefined, false, undefined, this)
-                    ]
-                  }, undefined, true, undefined, this),
-                  creating && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                    className: "projects-sidebar__create",
-                    children: [
-                      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                        className: "proj-panel__emoji-row",
-                        children: EMOJI_OPTIONS2.map((e) => /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
-                          className: `proj-panel__emoji-opt${newEmoji === e ? " proj-panel__emoji-opt--active" : ""}`,
-                          onClick: () => setNewEmoji(e),
-                          children: e
-                        }, e, false, undefined, this))
-                      }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("input", {
-                        className: "proj-panel__input",
-                        placeholder: "Nombre del proyecto…",
-                        value: newName,
-                        onChange: (e) => setNewName(e.target.value),
-                        onKeyDown: (e) => {
-                          if (e.key === "Enter")
-                            handleCreate();
-                          if (e.key === "Escape") {
-                            setCreating(false);
-                            setNewName("");
-                          }
-                        },
-                        autoFocus: true,
-                        maxLength: 100
-                      }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                        className: "proj-panel__create-actions",
-                        children: [
-                          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Button, {
-                            variant: "primary",
-                            size: "sm",
-                            onClick: handleCreate,
-                            disabled: !newName.trim(),
-                            children: "Crear"
-                          }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Button, {
-                            variant: "ghost",
-                            size: "sm",
-                            onClick: () => {
-                              setCreating(false);
-                              setNewName("");
-                            },
-                            children: "Cancelar"
-                          }, undefined, false, undefined, this)
-                        ]
-                      }, undefined, true, undefined, this)
-                    ]
-                  }, undefined, true, undefined, this),
-                  projLoading && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(ProjectsSkeleton, {}, undefined, false, undefined, this),
-                  !projLoading && projects.length === 0 && !creating && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                    className: "projects-sidebar__empty",
-                    children: [
-                      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
-                        className: "projects-sidebar__empty-icon",
-                        children: "\uD83D\uDCED"
-                      }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
-                        children: "Aún no tienes proyectos"
-                      }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Button, {
-                        variant: "secondary",
-                        size: "sm",
-                        onClick: () => setCreating(true),
-                        children: "Crear el primero"
-                      }, undefined, false, undefined, this)
-                    ]
-                  }, undefined, true, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                    className: "projects-sidebar__list",
-                    children: projects.map((p) => /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                      className: `projects-sidebar__item${selected?.id === p.id ? " projects-sidebar__item--active" : ""}`,
-                      children: editingId === p.id ? /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                        className: "projects-sidebar__edit",
-                        children: [
-                          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                            className: "proj-panel__emoji-row proj-panel__emoji-row--sm",
-                            children: EMOJI_OPTIONS2.map((e) => /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
-                              className: `proj-panel__emoji-opt${editEmoji === e ? " proj-panel__emoji-opt--active" : ""}`,
-                              onClick: () => setEditEmoji(e),
-                              children: e
-                            }, e, false, undefined, this))
-                          }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("input", {
-                            className: "proj-panel__input",
-                            value: editName,
-                            onChange: (e) => setEditName(e.target.value),
-                            onKeyDown: (e) => {
-                              if (e.key === "Enter")
-                                handleUpdate();
-                              if (e.key === "Escape")
-                                setEditingId(null);
-                            },
-                            autoFocus: true,
-                            maxLength: 100
-                          }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                            className: "proj-panel__create-actions",
-                            children: [
-                              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Button, {
-                                variant: "primary",
-                                size: "sm",
-                                onClick: handleUpdate,
-                                disabled: !editName.trim(),
-                                children: "Guardar"
-                              }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Button, {
-                                variant: "ghost",
-                                size: "sm",
-                                onClick: () => setEditingId(null),
-                                children: "Cancelar"
-                              }, undefined, false, undefined, this)
-                            ]
-                          }, undefined, true, undefined, this)
-                        ]
-                      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(jsx_dev_runtime36.Fragment, {
-                        children: [
-                          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
-                            className: "projects-sidebar__item-btn",
-                            onClick: () => openProject(p),
-                            children: [
-                              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
-                                className: "projects-sidebar__item-emoji",
-                                children: p.emoji
-                              }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
-                                className: "projects-sidebar__item-name",
-                                children: p.name
-                              }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
-                                className: "projects-sidebar__item-count",
-                                children: p.item_count
-                              }, undefined, false, undefined, this)
-                            ]
-                          }, undefined, true, undefined, this),
-                          confirmDelete === p.id ? /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
-                            className: "projects-sidebar__confirm",
-                            children: [
-                              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
-                                className: "projects-modal__danger-btn",
-                                onClick: () => handleDelete(p.id),
-                                title: "Confirmar eliminación",
-                                children: "✓"
-                              }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
-                                className: "projects-modal__cancel-btn",
-                                onClick: () => setConfirmDelete(null),
-                                children: "✕"
-                              }, undefined, false, undefined, this)
-                            ]
-                          }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
-                            className: "projects-sidebar__actions",
-                            children: [
-                              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
-                                className: "projects-sidebar__edit-btn",
-                                onClick: (e) => startEdit(p, e),
-                                title: "Editar nombre/icono",
-                                children: "✏️"
-                              }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
-                                className: "projects-sidebar__del",
-                                onClick: () => setConfirmDelete(p.id),
-                                title: "Eliminar proyecto",
-                                children: "\uD83D\uDDD1"
-                              }, undefined, false, undefined, this)
-                            ]
-                          }, undefined, true, undefined, this)
-                        ]
-                      }, undefined, true, undefined, this)
-                    }, p.id, false, undefined, this))
-                  }, undefined, false, undefined, this)
-                ]
-              }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("main", {
-                className: "split-layout__detail projects-detail",
-                children: !selected ? /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                  className: "empty-state",
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                      className: "empty-state__icon",
-                      children: "\uD83D\uDDC2️"
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
-                      className: "empty-state__text",
-                      children: projects.length === 0 ? "Crea tu primer proyecto y añade generaciones" : "Selecciona un proyecto para ver su contenido"
-                    }, undefined, false, undefined, this)
-                  ]
-                }, undefined, true, undefined, this) : itemsLoading ? /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(FeedSkeleton, {}, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(jsx_dev_runtime36.Fragment, {
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                      className: "projects-detail__header",
-                      children: [
-                        /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
-                          className: "projects-detail__title",
-                          children: [
-                            /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
-                              children: selected.emoji
-                            }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
-                              children: selected.name
-                            }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
-                              className: "projects-sidebar__item-count",
-                              children: items.length
-                            }, undefined, false, undefined, this)
-                          ]
-                        }, undefined, true, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
-                          className: "projects-detail__view-toggle",
-                          children: [
-                            /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
-                              className: `projects-detail__view-btn${viewMode === "grid" ? " projects-detail__view-btn--active" : ""}`,
-                              onClick: () => setViewMode("grid"),
-                              title: "Vista cuadrícula",
-                              children: "⊞"
-                            }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
-                              className: `projects-detail__view-btn${viewMode === "list" ? " projects-detail__view-btn--active" : ""}`,
-                              onClick: () => setViewMode("list"),
-                              title: "Vista lista",
-                              children: "☰"
-                            }, undefined, false, undefined, this)
-                          ]
-                        }, undefined, true, undefined, this)
-                      ]
-                    }, undefined, true, undefined, this),
-                    items.length === 0 ? /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                      className: "empty-state",
-                      children: [
-                        /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                          className: "empty-state__icon",
-                          children: selected.emoji
-                        }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
-                          className: "empty-state__text",
-                          children: [
-                            "Este proyecto está vacío. Añade generaciones con el botón ",
-                            /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("strong", {
-                              children: "＋ Proyecto"
-                            }, undefined, false, undefined, this),
-                            " en cualquier tarjeta."
-                          ]
-                        }, undefined, true, undefined, this)
-                      ]
-                    }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
-                      className: `projects-detail__grid projects-detail__grid--${viewMode}`,
-                      children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(ProjectItemCard, {
-                        gen,
-                        isFav: favIds.has(gen.id),
-                        onFavToggle: (id, add) => {
-                          toggleFav(id, add);
-                          onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
-                        }
-                      }, gen.id, false, undefined, this))
-                    }, undefined, false, undefined, this)
-                  ]
-                }, undefined, true, undefined, this)
-              }, undefined, false, undefined, this)
-            ]
-          }, undefined, true, undefined, this)
-        ]
-      }, undefined, true, undefined, this)
-    ]
-  }, undefined, true, undefined, this);
-}
-
-// frontend/pages/WorldCreatorPage.tsx
-var import_react56 = __toESM(require_react(), 1);
-
 // frontend/components/results/WorldMap3D.tsx
-var import_react55 = __toESM(require_react(), 1);
+var import_react53 = __toESM(require_react(), 1);
 init_three_module();
 
 // node_modules/simplex-noise/dist/esm/simplex-noise.js
@@ -64725,7 +64095,7 @@ function buildPermutationTable(random) {
 }
 
 // frontend/components/results/WorldMap3D.tsx
-var jsx_dev_runtime37 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime35 = __toESM(require_jsx_dev_runtime(), 1);
 var MAP_SIZE = 300;
 var SEGMENTS = 200;
 var MOVE_SPEED = 0.7;
@@ -64843,6 +64213,114 @@ var BIOME_ASSET_CONFIG = {
     groundCovers: ["Bush_Common_Flowers", "Plant_1", "Grass_Common_Short", "Clover_1"],
     rocks: ["Pebble_Round_4", "Pebble_Round_5", "RockPath_Round_Small_2", "RockPath_Round_Small_3"],
     flowers: ["Flower_3_Group", "Flower_4_Group", "Petal_4", "Petal_5"]
+  },
+  jungle: {
+    mainTrees: ["CommonTree_1", "CommonTree_2", "CommonTree_3", "CommonTree_4", "CommonTree_5"],
+    groundCovers: ["Fern_1", "Plant_1", "Plant_1_Big", "Grass_Common_Tall", "Bush_Common"],
+    rocks: ["Pebble_Round_1", "Rock_Medium_1"],
+    flowers: ["Flower_4_Group", "Petal_3"]
+  },
+  savanna: {
+    mainTrees: ["DeadTree_1", "DeadTree_2", "CommonTree_2"],
+    groundCovers: ["Grass_Wispy_Short", "Grass_Wispy_Tall"],
+    rocks: ["Rock_Medium_1", "Rock_Medium_2", "Pebble_Square_1"],
+    flowers: []
+  },
+  glacier: {
+    mainTrees: ["Pine_1", "Pine_2"],
+    groundCovers: [],
+    rocks: ["Rock_Medium_1", "Rock_Medium_2", "Rock_Medium_3", "Pebble_Square_1", "Pebble_Square_2", "Pebble_Square_3"],
+    flowers: []
+  },
+  canyon: {
+    mainTrees: ["DeadTree_1", "DeadTree_2"],
+    groundCovers: ["Plant_7"],
+    rocks: ["Rock_Medium_1", "Rock_Medium_2", "Rock_Medium_3", "RockPath_Square_Small_1", "RockPath_Square_Wide"],
+    flowers: []
+  },
+  mushroom: {
+    mainTrees: ["TwistedTree_1", "TwistedTree_2"],
+    groundCovers: ["Mushroom_Common", "Mushroom_Laetiporus", "Fern_1"],
+    rocks: ["Pebble_Round_1"],
+    flowers: ["Flower_4_Group", "Flower_4_Single", "Petal_1", "Petal_2", "Petal_3", "Petal_4", "Petal_5"]
+  },
+  wasteland: {
+    mainTrees: ["DeadTree_3", "DeadTree_4", "DeadTree_5"],
+    groundCovers: [],
+    rocks: ["Rock_Medium_1", "Rock_Medium_2", "Rock_Medium_3", "RockPath_Round_Wide", "Pebble_Square_6"],
+    flowers: []
+  },
+  sky: {
+    mainTrees: ["CommonTree_1", "CommonTree_2", "Pine_1"],
+    groundCovers: ["Bush_Common_Flowers", "Grass_Common_Short", "Clover_1"],
+    rocks: ["Pebble_Round_1", "Pebble_Round_2"],
+    flowers: ["Flower_3_Group", "Flower_4_Group", "Petal_1", "Petal_5"]
+  },
+  infernal: {
+    mainTrees: ["DeadTree_1", "DeadTree_2", "DeadTree_3", "DeadTree_4", "DeadTree_5"],
+    groundCovers: [],
+    rocks: ["Rock_Medium_1", "Rock_Medium_2", "Rock_Medium_3", "RockPath_Square_Small_1", "RockPath_Square_Small_2", "Pebble_Square_4", "Pebble_Square_5"],
+    flowers: []
+  },
+  city: {
+    mainTrees: ["CommonTree_1", "CommonTree_2", "CommonTree_3"],
+    groundCovers: ["Grass_Common_Short", "Bush_Common", "Clover_1"],
+    rocks: ["Rock_Medium_1", "Pebble_Round_1", "Pebble_Round_2", "RockPath_Round_Small_1"],
+    flowers: ["Flower_3_Single", "Flower_4_Single", "Bush_Common_Flowers"]
+  },
+  town: {
+    mainTrees: ["CommonTree_1", "CommonTree_2", "CommonTree_3", "Pine_1"],
+    groundCovers: ["Grass_Common_Short", "Bush_Common", "Clover_1", "Clover_2"],
+    rocks: ["Pebble_Round_1", "Pebble_Round_2", "RockPath_Round_Small_1"],
+    flowers: ["Flower_3_Group", "Flower_4_Single", "Bush_Common_Flowers", "Petal_3"]
+  },
+  village_biome: {
+    mainTrees: ["CommonTree_1", "CommonTree_2", "CommonTree_3", "CommonTree_4"],
+    groundCovers: ["Grass_Common_Short", "Grass_Common_Tall", "Bush_Common", "Clover_1", "Clover_2", "Plant_1"],
+    rocks: ["Pebble_Round_1", "Pebble_Round_2", "Pebble_Round_3"],
+    flowers: ["Flower_3_Group", "Flower_4_Group", "Flower_3_Single", "Bush_Common_Flowers", "Petal_4"]
+  },
+  farmland: {
+    mainTrees: ["CommonTree_1", "CommonTree_2"],
+    groundCovers: ["Grass_Common_Short", "Grass_Common_Tall", "Grass_Wispy_Short", "Plant_1"],
+    rocks: ["Pebble_Round_1", "Pebble_Square_1"],
+    flowers: ["Flower_3_Group", "Flower_4_Group", "Bush_Common_Flowers"]
+  },
+  coast: {
+    mainTrees: ["CommonTree_1", "CommonTree_2", "CommonTree_3", "Pine_1", "Pine_2"],
+    groundCovers: ["Grass_Common_Short", "Bush_Common_Flowers", "Plant_1", "Clover_1"],
+    rocks: ["Pebble_Round_4", "Pebble_Round_5", "Rock_Medium_1", "RockPath_Round_Small_2"],
+    flowers: ["Flower_3_Group", "Flower_4_Group", "Petal_4", "Petal_5"]
+  },
+  arctic: {
+    mainTrees: ["Pine_1", "Pine_2", "DeadTree_1"],
+    groundCovers: [],
+    rocks: ["Rock_Medium_1", "Rock_Medium_2", "Pebble_Square_1", "Pebble_Square_2", "Pebble_Square_3", "RockPath_Square_Small_1"],
+    flowers: []
+  },
+  badlands: {
+    mainTrees: ["DeadTree_1", "DeadTree_2", "DeadTree_3"],
+    groundCovers: ["Plant_7", "Grass_Wispy_Short"],
+    rocks: ["Rock_Medium_1", "Rock_Medium_2", "Rock_Medium_3", "Pebble_Square_1", "Pebble_Square_2", "RockPath_Square_Wide", "RockPath_Square_Thin"],
+    flowers: []
+  },
+  rainforest: {
+    mainTrees: ["CommonTree_1", "CommonTree_2", "CommonTree_3", "CommonTree_4", "CommonTree_5"],
+    groundCovers: ["Fern_1", "Plant_1", "Plant_1_Big", "Grass_Common_Tall", "Bush_Common", "Plant_7", "Plant_7_Big"],
+    rocks: ["Pebble_Round_1", "Pebble_Round_2", "Rock_Medium_1"],
+    flowers: ["Flower_4_Group", "Petal_2", "Petal_3"]
+  },
+  steppe: {
+    mainTrees: ["CommonTree_2", "DeadTree_1", "DeadTree_2"],
+    groundCovers: ["Grass_Wispy_Short", "Grass_Wispy_Tall", "Grass_Common_Short"],
+    rocks: ["Rock_Medium_1", "Pebble_Round_1", "Pebble_Square_1", "Pebble_Square_2"],
+    flowers: []
+  },
+  underground: {
+    mainTrees: ["DeadTree_3", "DeadTree_4", "DeadTree_5"],
+    groundCovers: ["Mushroom_Laetiporus", "Mushroom_Common", "Plant_7"],
+    rocks: ["Rock_Medium_1", "Rock_Medium_2", "Rock_Medium_3", "RockPath_Square_Small_1", "RockPath_Square_Small_2", "RockPath_Square_Small_3", "Pebble_Square_5", "Pebble_Square_6"],
+    flowers: []
   }
 };
 function terrainColor(nh, p, waterLine, isLava) {
@@ -65944,7 +65422,25 @@ var BIOME_LABELS = {
   plains: "Llanuras",
   mountains: "Montañas",
   dungeon: "Mazmorra",
-  mystic: "Místico"
+  mystic: "Místico",
+  jungle: "Jungla",
+  savanna: "Sabana",
+  glacier: "Glaciar",
+  canyon: "Cañón",
+  mushroom: "Bosque de Hongos",
+  wasteland: "Páramo",
+  sky: "Islas del Cielo",
+  infernal: "Infernal",
+  city: "Ciudad",
+  town: "Pueblo",
+  village_biome: "Aldea",
+  farmland: "Tierras de Cultivo",
+  coast: "Costa",
+  arctic: "Ártico",
+  badlands: "Badlands",
+  rainforest: "Selva Tropical",
+  steppe: "Estepa",
+  underground: "Mundo Subterráneo"
 };
 function dangerLabel(d) {
   if (d < 0.25)
@@ -65965,19 +65461,19 @@ function dangerColor(d) {
   return "#9f1239";
 }
 function WorldMapPanel({ params }) {
-  const containerRef = import_react55.useRef(null);
-  const rendererRef = import_react55.useRef(null);
-  const cameraRef = import_react55.useRef(null);
-  const controlsRef = import_react55.useRef(null);
-  const explorerRef = import_react55.useRef(false);
-  const fpvRef = import_react55.useRef(false);
-  const keysRef = import_react55.useRef({ w: false, a: false, s: false, d: false, shift: false });
-  const eulerRef = import_react55.useRef(new Euler(0, 0, 0, "YXZ"));
-  const [explorer, setExplorer] = import_react55.useState(false);
-  const [fpvMode, setFpvMode] = import_react55.useState(false);
-  const [fullscreen, setFullscreen] = import_react55.useState(false);
-  const terrainDataRef = import_react55.useRef(null);
-  const toggleExplorer = import_react55.useCallback(() => {
+  const containerRef = import_react53.useRef(null);
+  const rendererRef = import_react53.useRef(null);
+  const cameraRef = import_react53.useRef(null);
+  const controlsRef = import_react53.useRef(null);
+  const explorerRef = import_react53.useRef(false);
+  const fpvRef = import_react53.useRef(false);
+  const keysRef = import_react53.useRef({ w: false, a: false, s: false, d: false, shift: false });
+  const eulerRef = import_react53.useRef(new Euler(0, 0, 0, "YXZ"));
+  const [explorer, setExplorer] = import_react53.useState(false);
+  const [fpvMode, setFpvMode] = import_react53.useState(false);
+  const [fullscreen, setFullscreen] = import_react53.useState(false);
+  const terrainDataRef = import_react53.useRef(null);
+  const toggleExplorer = import_react53.useCallback(() => {
     const next = !explorerRef.current;
     explorerRef.current = next;
     fpvRef.current = false;
@@ -65988,7 +65484,7 @@ function WorldMapPanel({ params }) {
     if (document.pointerLockElement)
       document.exitPointerLock();
   }, []);
-  const toggleFPV = import_react55.useCallback(() => {
+  const toggleFPV = import_react53.useCallback(() => {
     const next = !fpvRef.current;
     fpvRef.current = next;
     explorerRef.current = next;
@@ -66003,7 +65499,7 @@ function WorldMapPanel({ params }) {
         document.exitPointerLock();
     }
   }, []);
-  const toggleFullscreen = import_react55.useCallback(() => {
+  const toggleFullscreen = import_react53.useCallback(() => {
     const el = containerRef.current?.closest(".wc-map-canvas-wrap");
     if (!el)
       return;
@@ -66012,12 +65508,12 @@ function WorldMapPanel({ params }) {
     else
       document.exitFullscreen?.();
   }, []);
-  import_react55.useEffect(() => {
+  import_react53.useEffect(() => {
     const onFsChange = () => setFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", onFsChange);
     return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
-  import_react55.useEffect(() => {
+  import_react53.useEffect(() => {
     const container = containerRef.current;
     if (!container)
       return;
@@ -66025,6 +65521,8 @@ function WorldMapPanel({ params }) {
     let disposed = false;
     const onCleanup = [];
     async function init() {
+      if (!container)
+        return;
       const assetCache = new Map;
       if (params.use_assets) {
         try {
@@ -66297,7 +65795,7 @@ function WorldMapPanel({ params }) {
       controlsRef.current = null;
     };
   }, [params]);
-  const downloadScreenshot = import_react55.useCallback(() => {
+  const downloadScreenshot = import_react53.useCallback(() => {
     const renderer = rendererRef.current;
     if (!renderer)
       return;
@@ -66312,37 +65810,37 @@ function WorldMapPanel({ params }) {
   const dColor = dangerColor(params.danger_level);
   const mystic = Math.round(params.mysticism * 100);
   const landmarkList = (params.landmarks ?? []).join(", ");
-  return /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
     className: "wc-map-canvas-wrap",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
         className: "wc-map-canvas",
         ref: containerRef
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
         className: "wc-map-hud",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
             className: "wc-map-region",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
                 className: "wc-map-region__icon",
                 children: "\uD83D\uDDFA️"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
                 className: "wc-map-region__name",
                 children: params.region_name
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
             className: "wc-map-badges",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
                 className: "wc-map-badge wc-map-badge--biome",
                 children: biome
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
                 className: "wc-map-badge",
                 style: { color: dColor, borderColor: dColor },
                 children: [
@@ -66350,7 +65848,7 @@ function WorldMapPanel({ params }) {
                   dLabel
                 ]
               }, undefined, true, undefined, this),
-              params.mysticism >= 0.22 && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+              params.mysticism >= 0.22 && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
                 className: "wc-map-badge wc-map-badge--mystic",
                 children: [
                   "✨ ",
@@ -66358,14 +65856,14 @@ function WorldMapPanel({ params }) {
                   "% místico"
                 ]
               }, undefined, true, undefined, this),
-              params.settlement_style && params.settlement_style !== "none" && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+              params.settlement_style && params.settlement_style !== "none" && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
                 className: "wc-map-badge wc-map-badge--settlement",
                 children: [
                   "\uD83C\uDFF0 ",
                   params.settlement_style
                 ]
               }, undefined, true, undefined, this),
-              landmarkList && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+              landmarkList && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
                 className: "wc-map-badge wc-map-badge--landmarks",
                 title: landmarkList,
                 children: [
@@ -66378,35 +65876,35 @@ function WorldMapPanel({ params }) {
           }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
         className: "wc-map-controls",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
             className: `wc-map-btn${explorer && !fpvMode ? " wc-map-btn--active" : ""}`,
             onClick: toggleExplorer,
             title: explorer ? "Modo órbita" : "Modo explorar (WASD)",
             children: explorer && !fpvMode ? "\uD83D\uDD04 Orbitar" : "\uD83D\uDEB6 Explorar (WASD)"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
             className: `wc-map-btn${fpvMode ? " wc-map-btn--active" : ""}`,
             onClick: toggleFPV,
             title: fpvMode ? "Salir primera persona" : "Primera persona (POV)",
             children: fpvMode ? "\uD83D\uDC41️ Salir POV" : "\uD83D\uDC41️ Primera Persona"
           }, undefined, false, undefined, this),
-          (explorer || fpvMode) && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+          (explorer || fpvMode) && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
             className: "wc-map-wasd-hint",
             children: [
               "W A S D",
               fpvMode ? " + Ratón · Shift=Sprint" : " · ↑ ↓ ← →"
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
             className: "wc-map-btn",
             onClick: downloadScreenshot,
             title: "Descargar captura del mapa (PNG)",
             children: "\uD83D\uDCF7 Descargar"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
             className: "wc-map-btn wc-map-btn--right",
             onClick: toggleFullscreen,
             title: fullscreen ? "Salir pantalla completa" : "Pantalla completa",
@@ -66418,14 +65916,797 @@ function WorldMapPanel({ params }) {
   }, undefined, true, undefined, this);
 }
 
+// frontend/components/projects/ProjectItemCard.tsx
+var jsx_dev_runtime36 = __toESM(require_jsx_dev_runtime(), 1);
+function GlbViewer({ url }) {
+  const ref = import_react54.useRef(null);
+  import_react54.useEffect(() => {
+    const container = ref.current;
+    if (!container)
+      return;
+    const renderer = new WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.toneMapping = ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+    const scene = new Scene;
+    scene.background = new Color(1052702);
+    const camera = new PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.01, 500);
+    camera.position.set(0, 1.5, 3.5);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 1.8;
+    controls.minDistance = 0.3;
+    controls.maxDistance = 50;
+    scene.add(new AmbientLight(16777215, 0.55));
+    const dir = new DirectionalLight(16777215, 1.4);
+    dir.position.set(4, 8, 4);
+    scene.add(dir);
+    const fill = new DirectionalLight(8421631, 0.3);
+    fill.position.set(-4, 2, -4);
+    scene.add(fill);
+    const grid = new GridHelper(6, 12, 3355477, 2236996);
+    scene.add(grid);
+    let rafId = 0;
+    let disposed = false;
+    const animate = () => {
+      if (disposed)
+        return;
+      rafId = requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    };
+    animate();
+    Promise.resolve().then(() => (init_GLTFLoader(), exports_GLTFLoader)).then(({ GLTFLoader: GLTFLoader2 }) => {
+      if (disposed)
+        return;
+      const loader = new GLTFLoader2;
+      loader.load(url, (gltf) => {
+        if (disposed)
+          return;
+        const box = new Box3().setFromObject(gltf.scene);
+        const center = box.getCenter(new Vector3);
+        const size = box.getSize(new Vector3).length();
+        gltf.scene.position.sub(center);
+        gltf.scene.position.y += size * 0.01;
+        camera.position.set(0, size * 0.35, size * 1.5);
+        controls.target.set(0, -size * 0.05, 0);
+        controls.update();
+        scene.add(gltf.scene);
+      });
+    });
+    const onResize = () => {
+      if (!container || disposed)
+        return;
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    };
+    window.addEventListener("resize", onResize);
+    return () => {
+      disposed = true;
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", onResize);
+      controls.dispose();
+      renderer.dispose();
+      if (container.contains(renderer.domElement))
+        container.removeChild(renderer.domElement);
+    };
+  }, [url]);
+  return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+    ref,
+    className: "glb-viewer"
+  }, undefined, false, undefined, this);
+}
+var BIOME_LABELS_CARD = {
+  forest: "Bosque",
+  desert: "Desierto",
+  tundra: "Tundra",
+  swamp: "Pantano",
+  volcanic: "Volcánico",
+  ocean: "Océano",
+  plains: "Llanuras",
+  mountains: "Montañas",
+  dungeon: "Mazmorra",
+  mystic: "Místico",
+  jungle: "Jungla",
+  savanna: "Sabana",
+  glacier: "Glaciar",
+  canyon: "Cañón",
+  mushroom: "Bosque Hongos",
+  wasteland: "Páramo",
+  sky: "Cielos",
+  infernal: "Infierno",
+  city: "Ciudad",
+  town: "Pueblo",
+  village_biome: "Aldea",
+  farmland: "Cultivos",
+  coast: "Costa",
+  arctic: "Ártico",
+  badlands: "Badlands",
+  rainforest: "Selva Tropical",
+  steppe: "Estepa",
+  underground: "Subterráneo"
+};
+function WorldMapPreview({ result }) {
+  const c1 = String(result.terrain_color_1 ?? "336633");
+  const c2 = String(result.terrain_color_2 ?? "234523");
+  const c3 = String(result.terrain_color_3 ?? "557755");
+  const sky = String(result.sky_color ?? "1a2840");
+  const water = String(result.water_color ?? "153060");
+  const biome = String(result.biome ?? "");
+  const label = BIOME_LABELS_CARD[biome] ?? biome;
+  const gradient = `linear-gradient(180deg,
+    #${sky} 0%,
+    #${sky} 25%,
+    #${c3} 38%,
+    #${c2} 52%,
+    #${c1} 65%,
+    #${water} 68%,
+    #${water} 100%)`;
+  return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+    className: "proj-item-card__world-preview",
+    style: { background: gradient },
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("svg", {
+        className: "proj-item-card__world-mountains",
+        viewBox: "0 0 100 40",
+        preserveAspectRatio: "none",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("polygon", {
+            points: "0,40 15,18 28,28 42,10 58,25 72,14 85,22 100,40",
+            fill: `#${c2}`,
+            opacity: "0.9"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("polygon", {
+            points: "0,40 10,24 22,32 35,16 50,30 64,20 78,27 90,35 100,40",
+            fill: `#${c1}`,
+            opacity: "0.8"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      label && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+        className: "proj-item-card__world-biome-tag",
+        children: label
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+function ExpandModal({ gen, title, onClose }) {
+  const isWorldMap = gen.type === "worldmap";
+  const has3D = !!gen.glb_url;
+  const previewText = getPreviewText(gen.result);
+  if (isWorldMap) {
+    const params = gen.result;
+    return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Modal, {
+      open: true,
+      onClose,
+      title: `\uD83C\uDF0D ${title}`,
+      size: "xl",
+      children: /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+        className: "proj-expand__world",
+        children: /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(WorldMapPanel, {
+          params
+        }, undefined, false, undefined, this)
+      }, undefined, false, undefined, this)
+    }, undefined, false, undefined, this);
+  }
+  return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Modal, {
+    open: true,
+    onClose,
+    title,
+    size: "lg",
+    children: /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+      className: "proj-expand__content",
+      children: [
+        gen.image_url && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("img", {
+          src: gen.image_url,
+          alt: title,
+          className: "proj-expand__img"
+        }, undefined, false, undefined, this),
+        has3D && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(GlbViewer, {
+          url: gen.glb_url
+        }, undefined, false, undefined, this),
+        previewText && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
+          className: "proj-expand__desc",
+          children: previewText
+        }, undefined, false, undefined, this),
+        !gen.image_url && !has3D && !previewText && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("pre", {
+          className: "proj-expand__json",
+          children: JSON.stringify(gen.result, null, 2)
+        }, undefined, false, undefined, this)
+      ]
+    }, undefined, true, undefined, this)
+  }, undefined, false, undefined, this);
+}
+var TYPE_BG = {
+  npc: "linear-gradient(145deg,#1a1000,#3d2800)",
+  quest: "linear-gradient(145deg,#001428,#0d3060)",
+  item: "linear-gradient(145deg,#001810,#063820)",
+  lore: "linear-gradient(145deg,#120028,#300062)",
+  weapon: "linear-gradient(145deg,#1a0000,#3a0000)",
+  enemy: "linear-gradient(145deg,#080808,#1c1c1c)",
+  worldmap: "linear-gradient(145deg,#001a20,#003040)"
+};
+function ProjectItemCard({ gen, isFav, onFavToggle }) {
+  const [showModel, setShowModel] = import_react54.useState(false);
+  const [showExpand, setShowExpand] = import_react54.useState(false);
+  const meta = TYPE_META[gen.type] ?? { icon: "\uD83C\uDF0D", label: gen.type, color: "#22d3ee" };
+  const title = getGenerationTitle(gen.result, gen.type, gen.id);
+  const previewText = getPreviewText(gen.result);
+  const bg = TYPE_BG[gen.type] ?? TYPE_BG.enemy;
+  const isWorldMap = gen.type === "worldmap";
+  return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("article", {
+    className: "proj-item-card",
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+        className: "proj-item-card__visual",
+        style: { background: gen.image_url ? undefined : bg },
+        children: [
+          gen.image_url && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("img", {
+            src: gen.image_url,
+            alt: title,
+            className: "proj-item-card__img",
+            loading: "lazy"
+          }, undefined, false, undefined, this),
+          !gen.image_url && isWorldMap && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(WorldMapPreview, {
+            result: gen.result
+          }, undefined, false, undefined, this),
+          !gen.image_url && !isWorldMap && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+            className: "proj-item-card__placeholder",
+            style: { background: bg },
+            children: /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+              className: "proj-item-card__ph-icon",
+              style: { color: meta.color },
+              children: meta.icon
+            }, undefined, false, undefined, this)
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+            className: "proj-item-card__overlay"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+            className: "proj-item-card__type-badge",
+            style: { "--badge-color": meta.color },
+            children: [
+              meta.icon,
+              " ",
+              meta.label
+            ]
+          }, undefined, true, undefined, this),
+          gen.glb_url && !isWorldMap && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
+            className: "proj-item-card__model-btn",
+            onClick: () => setShowModel(true),
+            title: "Ver modelo 3D",
+            children: "\uD83E\uDDCA 3D"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
+            className: "proj-item-card__expand",
+            onClick: () => setShowExpand(true),
+            title: isWorldMap ? "Explorar mapa" : "Ampliar",
+            "aria-label": "Ampliar",
+            children: "⛶"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
+            className: `proj-item-card__fav${isFav ? " proj-item-card__fav--on" : ""}`,
+            onClick: () => onFavToggle(gen.id, !isFav),
+            title: isFav ? "Quitar de favoritos" : "Añadir a favoritos",
+            "aria-label": isFav ? "Quitar de favoritos" : "Añadir a favoritos",
+            children: isFav ? "★" : "☆"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+        className: "proj-item-card__info",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
+            className: "proj-item-card__title",
+            title,
+            children: title
+          }, undefined, false, undefined, this),
+          previewText && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
+            className: "proj-item-card__preview",
+            children: previewText.length > 72 ? previewText.slice(0, 72) + "…" : previewText
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+            className: "proj-item-card__date",
+            children: timeAgo(gen.created_at)
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      showModel && gen.glb_url && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Modal, {
+        open: true,
+        onClose: () => setShowModel(false),
+        title: `\uD83E\uDDCA ${title}`,
+        size: "lg",
+        children: /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(GlbViewer, {
+          url: gen.glb_url
+        }, undefined, false, undefined, this)
+      }, undefined, false, undefined, this),
+      showExpand && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(ExpandModal, {
+        gen,
+        title,
+        onClose: () => setShowExpand(false)
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+
+// frontend/pages/ProjectsPage.tsx
+init_api();
+var jsx_dev_runtime37 = __toESM(require_jsx_dev_runtime(), 1);
+var EMOJI_OPTIONS2 = ["\uD83D\uDCC1", "⚔️", "\uD83E\uDDD9", "\uD83C\uDFF0", "\uD83D\uDDFA️", "\uD83D\uDC09", "\uD83D\uDC8E", "\uD83C\uDF3F", "\uD83D\uDD25", "⚡", "\uD83C\uDF19", "\uD83C\uDFAD"];
+function ProjectsPage({ onToast }) {
+  const { isSignedIn, isLoaded } = useAuth();
+  const { openSignIn } = useClerk();
+  const {
+    projects,
+    loading: projLoading,
+    createProject,
+    deleteProject,
+    updateProject
+  } = useProjects();
+  const { favIds, toggle: toggleFav } = useFavorites();
+  const [selected, setSelected] = import_react55.useState(null);
+  const [items, setItems] = import_react55.useState([]);
+  const [itemsLoading, setItemsLoading] = import_react55.useState(false);
+  const [creating, setCreating] = import_react55.useState(false);
+  const [newName, setNewName] = import_react55.useState("");
+  const [newEmoji, setNewEmoji] = import_react55.useState("\uD83D\uDCC1");
+  const [confirmDelete, setConfirmDelete] = import_react55.useState(null);
+  const [viewMode, setViewMode] = import_react55.useState("grid");
+  const [editingId, setEditingId] = import_react55.useState(null);
+  const [editName, setEditName] = import_react55.useState("");
+  const [editEmoji, setEditEmoji] = import_react55.useState("\uD83D\uDCC1");
+  const openProject = import_react55.useCallback(async (p) => {
+    setSelected(p);
+    setItemsLoading(true);
+    const { data, error: error2 } = await apiGetProjectItems(p.id);
+    if (error2)
+      onToast("Error al cargar el proyecto", "error");
+    setItems(data ?? []);
+    setItemsLoading(false);
+  }, [onToast]);
+  import_react55.useEffect(() => {
+    if (selected) {
+      const fresh = projects.find((p) => p.id === selected.id);
+      if (fresh)
+        setSelected(fresh);
+    }
+  }, [projects]);
+  const handleCreate = async () => {
+    if (!newName.trim())
+      return;
+    const proj = await createProject(newName.trim(), newEmoji);
+    if (proj) {
+      onToast(`Proyecto "${proj.name}" creado`);
+      setCreating(false);
+      setNewName("");
+      setNewEmoji("\uD83D\uDCC1");
+    }
+  };
+  const handleDelete = async (id) => {
+    await deleteProject(id);
+    if (selected?.id === id) {
+      setSelected(null);
+      setItems([]);
+    }
+    setConfirmDelete(null);
+    onToast("Proyecto eliminado");
+  };
+  const startEdit = (p, e) => {
+    e.stopPropagation();
+    setEditingId(p.id);
+    setEditName(p.name);
+    setEditEmoji(p.emoji);
+    setConfirmDelete(null);
+  };
+  const handleUpdate = async () => {
+    if (!editName.trim() || editingId === null)
+      return;
+    const updated = await updateProject(editingId, editName.trim(), editEmoji);
+    if (updated) {
+      onToast("Proyecto actualizado");
+      if (selected?.id === editingId)
+        setSelected((s) => s ? { ...s, name: updated.name, emoji: updated.emoji } : s);
+    }
+    setEditingId(null);
+  };
+  if (isLoaded && !isSignedIn) {
+    return /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+      className: "page-bg-wrap",
+      children: [
+        /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+          className: "social-bg",
+          "aria-hidden": "true",
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+              className: "social-bg__orb social-bg__orb--1"
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+              className: "social-bg__orb social-bg__orb--2"
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+              className: "social-bg__grid"
+            }, undefined, false, undefined, this)
+          ]
+        }, undefined, true, undefined, this),
+        /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(PageContainer, {
+          children: /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+            className: "projects-page__auth-wall",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                className: "projects-page__auth-icon",
+                children: "\uD83D\uDDC2️"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("h2", {
+                className: "projects-page__auth-title",
+                children: "Necesitas una cuenta"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("p", {
+                className: "projects-page__auth-sub",
+                children: "Inicia sesión para crear carpetas y organizar tus creaciones"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+                variant: "primary",
+                onClick: () => openSignIn(),
+                children: "Iniciar sesión"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this)
+        }, undefined, false, undefined, this)
+      ]
+    }, undefined, true, undefined, this);
+  }
+  return /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+    className: "page-bg-wrap",
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+        className: "social-bg",
+        "aria-hidden": "true",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--1"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--2"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+            className: "social-bg__orb social-bg__orb--3"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+            className: "social-bg__grid"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(PageContainer, {
+        wide: true,
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+            className: "page-hero",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("h1", {
+                className: "page-hero__title",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                    className: "plain-emoji",
+                    children: "\uD83D\uDDC2️"
+                  }, undefined, false, undefined, this),
+                  " Proyectos"
+                ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("p", {
+                className: "page-hero__sub",
+                children: "Organiza tus generaciones en carpetas"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+            className: "split-layout split-layout--projects",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("aside", {
+                className: "split-layout__list projects-sidebar",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                    className: "projects-sidebar__header",
+                    children: [
+                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                        className: "projects-sidebar__count",
+                        children: projLoading ? "…" : `${projects.length} proyecto${projects.length !== 1 ? "s" : ""}`
+                      }, undefined, false, undefined, this),
+                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+                        variant: "primary",
+                        size: "sm",
+                        icon: "＋",
+                        onClick: () => setCreating(true),
+                        children: "Nuevo"
+                      }, undefined, false, undefined, this)
+                    ]
+                  }, undefined, true, undefined, this),
+                  creating && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                    className: "projects-sidebar__create",
+                    children: [
+                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                        className: "proj-panel__emoji-row",
+                        children: EMOJI_OPTIONS2.map((e) => /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                          className: `proj-panel__emoji-opt${newEmoji === e ? " proj-panel__emoji-opt--active" : ""}`,
+                          onClick: () => setNewEmoji(e),
+                          children: e
+                        }, e, false, undefined, this))
+                      }, undefined, false, undefined, this),
+                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("input", {
+                        className: "proj-panel__input",
+                        placeholder: "Nombre del proyecto…",
+                        value: newName,
+                        onChange: (e) => setNewName(e.target.value),
+                        onKeyDown: (e) => {
+                          if (e.key === "Enter")
+                            handleCreate();
+                          if (e.key === "Escape") {
+                            setCreating(false);
+                            setNewName("");
+                          }
+                        },
+                        autoFocus: true,
+                        maxLength: 100
+                      }, undefined, false, undefined, this),
+                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                        className: "proj-panel__create-actions",
+                        children: [
+                          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+                            variant: "primary",
+                            size: "sm",
+                            onClick: handleCreate,
+                            disabled: !newName.trim(),
+                            children: "Crear"
+                          }, undefined, false, undefined, this),
+                          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+                            variant: "ghost",
+                            size: "sm",
+                            onClick: () => {
+                              setCreating(false);
+                              setNewName("");
+                            },
+                            children: "Cancelar"
+                          }, undefined, false, undefined, this)
+                        ]
+                      }, undefined, true, undefined, this)
+                    ]
+                  }, undefined, true, undefined, this),
+                  projLoading && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(ProjectsSkeleton, {}, undefined, false, undefined, this),
+                  !projLoading && projects.length === 0 && !creating && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                    className: "projects-sidebar__empty",
+                    children: [
+                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                        className: "projects-sidebar__empty-icon",
+                        children: "\uD83D\uDCED"
+                      }, undefined, false, undefined, this),
+                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("p", {
+                        children: "Aún no tienes proyectos"
+                      }, undefined, false, undefined, this),
+                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+                        variant: "secondary",
+                        size: "sm",
+                        onClick: () => setCreating(true),
+                        children: "Crear el primero"
+                      }, undefined, false, undefined, this)
+                    ]
+                  }, undefined, true, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                    className: "projects-sidebar__list",
+                    children: projects.map((p) => /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                      className: `projects-sidebar__item${selected?.id === p.id ? " projects-sidebar__item--active" : ""}`,
+                      children: editingId === p.id ? /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                        className: "projects-sidebar__edit",
+                        children: [
+                          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                            className: "proj-panel__emoji-row proj-panel__emoji-row--sm",
+                            children: EMOJI_OPTIONS2.map((e) => /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                              className: `proj-panel__emoji-opt${editEmoji === e ? " proj-panel__emoji-opt--active" : ""}`,
+                              onClick: () => setEditEmoji(e),
+                              children: e
+                            }, e, false, undefined, this))
+                          }, undefined, false, undefined, this),
+                          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("input", {
+                            className: "proj-panel__input",
+                            value: editName,
+                            onChange: (e) => setEditName(e.target.value),
+                            onKeyDown: (e) => {
+                              if (e.key === "Enter")
+                                handleUpdate();
+                              if (e.key === "Escape")
+                                setEditingId(null);
+                            },
+                            autoFocus: true,
+                            maxLength: 100
+                          }, undefined, false, undefined, this),
+                          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                            className: "proj-panel__create-actions",
+                            children: [
+                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+                                variant: "primary",
+                                size: "sm",
+                                onClick: handleUpdate,
+                                disabled: !editName.trim(),
+                                children: "Guardar"
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+                                variant: "ghost",
+                                size: "sm",
+                                onClick: () => setEditingId(null),
+                                children: "Cancelar"
+                              }, undefined, false, undefined, this)
+                            ]
+                          }, undefined, true, undefined, this)
+                        ]
+                      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(jsx_dev_runtime37.Fragment, {
+                        children: [
+                          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                            className: "projects-sidebar__item-btn",
+                            onClick: () => openProject(p),
+                            children: [
+                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                                className: "projects-sidebar__item-emoji",
+                                children: p.emoji
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                                className: "projects-sidebar__item-name",
+                                children: p.name
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                                className: "projects-sidebar__item-count",
+                                children: p.item_count
+                              }, undefined, false, undefined, this)
+                            ]
+                          }, undefined, true, undefined, this),
+                          confirmDelete === p.id ? /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                            className: "projects-sidebar__confirm",
+                            children: [
+                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                                className: "projects-modal__danger-btn",
+                                onClick: () => handleDelete(p.id),
+                                title: "Confirmar eliminación",
+                                children: "✓"
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                                className: "projects-modal__cancel-btn",
+                                onClick: () => setConfirmDelete(null),
+                                children: "✕"
+                              }, undefined, false, undefined, this)
+                            ]
+                          }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                            className: "projects-sidebar__actions",
+                            children: [
+                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                                className: "projects-sidebar__edit-btn",
+                                onClick: (e) => startEdit(p, e),
+                                title: "Editar nombre/icono",
+                                children: "✏️"
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                                className: "projects-sidebar__del",
+                                onClick: () => setConfirmDelete(p.id),
+                                title: "Eliminar proyecto",
+                                children: "\uD83D\uDDD1"
+                              }, undefined, false, undefined, this)
+                            ]
+                          }, undefined, true, undefined, this)
+                        ]
+                      }, undefined, true, undefined, this)
+                    }, p.id, false, undefined, this))
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("main", {
+                className: "split-layout__detail projects-detail",
+                children: !selected ? /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                  className: "empty-state",
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                      className: "empty-state__icon",
+                      children: "\uD83D\uDDC2️"
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("p", {
+                      className: "empty-state__text",
+                      children: projects.length === 0 ? "Crea tu primer proyecto y añade generaciones" : "Selecciona un proyecto para ver su contenido"
+                    }, undefined, false, undefined, this)
+                  ]
+                }, undefined, true, undefined, this) : itemsLoading ? /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(FeedSkeleton, {}, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(jsx_dev_runtime37.Fragment, {
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                      className: "projects-detail__header",
+                      children: [
+                        /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                          className: "projects-detail__title",
+                          children: [
+                            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                              children: selected.emoji
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                              children: selected.name
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                              className: "projects-sidebar__item-count",
+                              children: items.length
+                            }, undefined, false, undefined, this)
+                          ]
+                        }, undefined, true, undefined, this),
+                        /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                          className: "projects-detail__view-toggle",
+                          children: [
+                            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                              className: `projects-detail__view-btn${viewMode === "grid" ? " projects-detail__view-btn--active" : ""}`,
+                              onClick: () => setViewMode("grid"),
+                              title: "Vista cuadrícula",
+                              children: "⊞"
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                              className: `projects-detail__view-btn${viewMode === "list" ? " projects-detail__view-btn--active" : ""}`,
+                              onClick: () => setViewMode("list"),
+                              title: "Vista lista",
+                              children: "☰"
+                            }, undefined, false, undefined, this)
+                          ]
+                        }, undefined, true, undefined, this)
+                      ]
+                    }, undefined, true, undefined, this),
+                    items.length === 0 ? /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                      className: "empty-state",
+                      children: [
+                        /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                          className: "empty-state__icon",
+                          children: selected.emoji
+                        }, undefined, false, undefined, this),
+                        /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("p", {
+                          className: "empty-state__text",
+                          children: [
+                            "Este proyecto está vacío. Añade generaciones con el botón ",
+                            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("strong", {
+                              children: "＋ Proyecto"
+                            }, undefined, false, undefined, this),
+                            " en cualquier tarjeta."
+                          ]
+                        }, undefined, true, undefined, this)
+                      ]
+                    }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                      className: `projects-detail__grid projects-detail__grid--${viewMode}`,
+                      children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(ProjectItemCard, {
+                        gen,
+                        isFav: favIds.has(gen.id),
+                        onFavToggle: (id, add) => {
+                          toggleFav(id, add);
+                          onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
+                        }
+                      }, gen.id, false, undefined, this))
+                    }, undefined, false, undefined, this)
+                  ]
+                }, undefined, true, undefined, this)
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+
 // frontend/pages/WorldCreatorPage.tsx
+var import_react56 = __toESM(require_react(), 1);
 var jsx_dev_runtime38 = __toESM(require_jsx_dev_runtime(), 1);
 var EXAMPLES = [
   "Un reino de volcanes activos donde dragones de obsidiana custodian templos subterráneos llenos de lava y ruinas antiguas",
   "Bosques mágicos eternos donde los árboles brillan de noche y los elfos construyeron ciudades en las copas. La niebla cubre el suelo y esconde criaturas ancestrales",
   "Tundra helada con torres de hielo negro que emergen de la nieve. Los muertos caminan bajo las auroras boreales",
   "Pantanos traicioneros de color verde putrefacto, llenos de ruinas hundidas de una civilización ahogada. Cocodrilos gigantes patrullan las aguas oscuras",
-  "Desierto de dunas doradas con pirámides enterradas hasta la mitad. Bajo la arena duerme un dios olvidado"
+  "Desierto de dunas doradas con pirámides enterradas hasta la mitad. Bajo la arena duerme un dios olvidado",
+  "Una gran ciudad imperial amurallada con mercados bulliciosos, torres de vigilancia y callejones oscuros donde operan los gremios de ladrones",
+  "Aldea campesina tranquila rodeada de campos de trigo dorado y molinos de viento. El río serpentea entre granjas y huertos",
+  "Selva tropical densa donde la lluvia no cesa. Templos mayas olvidados entre las raíces de árboles de 50 metros con coloridas aves exóticas",
+  "Costa salvaje con acantilados batidos por olas gigantes. Faros abandonados y barcos naufragados en la arena bajo tormentas perpetuas",
+  "Badlands de roca roja erosionada por el viento con agujas de piedra y cañones profundos. Forajidos y criaturas del desierto acechan entre las sombras",
+  "Mundo subterráneo con cavernas iluminadas por hongos bioluminiscentes y cristales flotantes. Una civilización enana construyó sus ciudades en estas profundidades"
 ];
 function freshSeeds() {
   return [
@@ -66434,7 +66715,36 @@ function freshSeeds() {
     Math.floor(Math.random() * 99999) + 1
   ];
 }
-var BIOME_POOL = ["forest", "desert", "tundra", "swamp", "volcanic", "ocean", "plains", "mountains", "dungeon", "mystic"];
+var BIOME_POOL = [
+  "forest",
+  "desert",
+  "tundra",
+  "swamp",
+  "volcanic",
+  "ocean",
+  "plains",
+  "mountains",
+  "dungeon",
+  "mystic",
+  "jungle",
+  "savanna",
+  "glacier",
+  "canyon",
+  "mushroom",
+  "wasteland",
+  "sky",
+  "infernal",
+  "city",
+  "town",
+  "village_biome",
+  "farmland",
+  "coast",
+  "arctic",
+  "badlands",
+  "rainforest",
+  "steppe",
+  "underground"
+];
 var BIOME_DATA = {
   forest: {
     terrain_color_1: "3d6b35",
@@ -66655,6 +66965,402 @@ var BIOME_DATA = {
     terrain_roughness: [0.4, 0.75],
     danger_level: [0.45, 0.8],
     mysticism: [0.65, 1]
+  },
+  jungle: {
+    terrain_color_1: "1e4d0a",
+    terrain_color_2: "0e2d05",
+    terrain_color_3: "2a6a10",
+    water_color: "1a4a2a",
+    sky_color: "0a1a0a",
+    settlement_style: "ruins",
+    tree_density: 0.9,
+    terrain_style: "rolling",
+    has_lava: false,
+    ambient_particles: "spores",
+    lava_color: "ff4500",
+    accent_color: "44ff44",
+    landmarks: ["giant_tree", "ancient_ruins", "pillars", "temple"],
+    names: ["Jungla Primordial", "Selva Eterna", "El Bosque Infinito", "Selva de las Sombras", "Jungla del Tiempo Perdido", "Las Lianas Eternas"],
+    fog_density: 0.35,
+    water_level: [0.25, 0.4],
+    mountain_height: [0.25, 0.5],
+    terrain_roughness: [0.3, 0.6],
+    danger_level: [0.4, 0.8],
+    mysticism: [0.3, 0.7]
+  },
+  savanna: {
+    terrain_color_1: "c8a050",
+    terrain_color_2: "a07830",
+    terrain_color_3: "d0b860",
+    water_color: "1060a0",
+    sky_color: "3a2808",
+    settlement_style: "village",
+    tree_density: 0.12,
+    terrain_style: "flat",
+    has_lava: false,
+    ambient_particles: "ash",
+    lava_color: "ff4500",
+    accent_color: "ffd700",
+    landmarks: ["watchtower", "ancient_ruins"],
+    names: ["Gran Sabana", "Pradera Dorada", "Las Llanuras Secas", "Savanna del Horizonte", "Las Estepas Doradas", "Tierra de los Leones"],
+    fog_density: 0.06,
+    water_level: [0.05, 0.15],
+    mountain_height: [0.15, 0.4],
+    terrain_roughness: [0.2, 0.45],
+    danger_level: [0.3, 0.65],
+    mysticism: [0.1, 0.35]
+  },
+  glacier: {
+    terrain_color_1: "e8f0f8",
+    terrain_color_2: "c0d8f0",
+    terrain_color_3: "a0c0e0",
+    water_color: "0a2040",
+    sky_color: "0a1828",
+    settlement_style: "none",
+    tree_density: 0.03,
+    terrain_style: "jagged",
+    has_lava: false,
+    ambient_particles: "snow",
+    lava_color: "ff4500",
+    accent_color: "88ccff",
+    landmarks: ["ice_spikes", "ancient_ruins", "crystal"],
+    names: ["Glaciar Eterno", "Las Murallas de Hielo", "El Manto Glacial", "Tundra Cristalina", "El Gran Casquete", "Hielos del Fin del Mundo"],
+    fog_density: 0.32,
+    water_level: [0.1, 0.22],
+    mountain_height: [0.65, 1],
+    terrain_roughness: [0.65, 0.92],
+    danger_level: [0.35, 0.7],
+    mysticism: [0.15, 0.45]
+  },
+  canyon: {
+    terrain_color_1: "a02818",
+    terrain_color_2: "c04028",
+    terrain_color_3: "8a2010",
+    water_color: "503818",
+    sky_color: "200808",
+    settlement_style: "ruins",
+    tree_density: 0.06,
+    terrain_style: "canyon",
+    has_lava: false,
+    ambient_particles: "ash",
+    lava_color: "ff4500",
+    accent_color: "ff8800",
+    landmarks: ["ancient_ruins", "pillars", "watchtower"],
+    names: ["Gran Cañón", "Las Gargantas Rojas", "Desfiladero del Diablo", "Cañones Perdidos", "El Abismo Rojo", "Rocas del Tiempo"],
+    fog_density: 0.1,
+    water_level: [0.05, 0.15],
+    mountain_height: [0.5, 0.85],
+    terrain_roughness: [0.55, 0.85],
+    danger_level: [0.3, 0.65],
+    mysticism: [0.15, 0.4]
+  },
+  mushroom: {
+    terrain_color_1: "3a1a4a",
+    terrain_color_2: "501a3a",
+    terrain_color_3: "4a2a5a",
+    water_color: "2a1050",
+    sky_color: "050010",
+    settlement_style: "none",
+    tree_density: 0.6,
+    terrain_style: "rolling",
+    has_lava: false,
+    ambient_particles: "spores",
+    lava_color: "ff00cc",
+    accent_color: "ff44cc",
+    landmarks: ["giant_tree", "pillars", "crystal", "ancient_ruins"],
+    names: ["Bosque de Hongos", "Valle de las Setas", "El Bosque Etéreo", "Setas Gigantes", "Colonia Fúngica", "El Reino de los Hongos"],
+    fog_density: 0.3,
+    water_level: [0.15, 0.3],
+    mountain_height: [0.2, 0.5],
+    terrain_roughness: [0.25, 0.55],
+    danger_level: [0.3, 0.65],
+    mysticism: [0.55, 0.9]
+  },
+  wasteland: {
+    terrain_color_1: "3a2a1a",
+    terrain_color_2: "2a1a0a",
+    terrain_color_3: "4a3a2a",
+    water_color: "1a1010",
+    sky_color: "1a1608",
+    settlement_style: "ruins",
+    tree_density: 0.04,
+    terrain_style: "flat",
+    has_lava: false,
+    ambient_particles: "ash",
+    lava_color: "ff4500",
+    accent_color: "aa5500",
+    landmarks: ["ancient_ruins", "pillars", "watchtower"],
+    names: ["El Páramo", "Las Tierras Yermas", "Ruinas del Mundo", "Terra Desolata", "El Desierto Gris", "Llanuras Olvidadas"],
+    fog_density: 0.2,
+    water_level: [0.02, 0.1],
+    mountain_height: [0.2, 0.5],
+    terrain_roughness: [0.3, 0.6],
+    danger_level: [0.5, 0.85],
+    mysticism: [0.15, 0.4]
+  },
+  sky: {
+    terrain_color_1: "a0c8f0",
+    terrain_color_2: "c0d8ff",
+    terrain_color_3: "80a8d0",
+    water_color: "406090",
+    sky_color: "0820c0",
+    settlement_style: "towers",
+    tree_density: 0.3,
+    terrain_style: "archipelago",
+    has_lava: false,
+    ambient_particles: "magic",
+    lava_color: "ff4500",
+    accent_color: "ffffff",
+    landmarks: ["floating_rocks", "crystal", "watchtower", "temple"],
+    names: ["Islas del Cielo", "Archipiélago Etéreo", "Los Reinos del Viento", "Islas Flotantes", "El Paraíso Nublado", "Altiplano Celestial"],
+    fog_density: 0.15,
+    water_level: [0.2, 0.35],
+    mountain_height: [0.4, 0.75],
+    terrain_roughness: [0.35, 0.65],
+    danger_level: [0.3, 0.7],
+    mysticism: [0.5, 0.85]
+  },
+  infernal: {
+    terrain_color_1: "3a0000",
+    terrain_color_2: "500000",
+    terrain_color_3: "200000",
+    water_color: "cc0000",
+    sky_color: "180000",
+    settlement_style: "towers",
+    tree_density: 0.01,
+    terrain_style: "crater",
+    has_lava: true,
+    ambient_particles: "embers",
+    lava_color: "ff0000",
+    accent_color: "ff4400",
+    landmarks: ["volcano", "lava_river", "altar", "pillars", "obelisk"],
+    names: ["Las Llamas Eternas", "Plano Infernal", "Infierno Rojo", "El Averno", "Las Catacumbas del Fuego", "Tierra de los Condenados"],
+    fog_density: 0.35,
+    water_level: [0.05, 0.12],
+    mountain_height: [0.55, 0.95],
+    terrain_roughness: [0.65, 0.95],
+    danger_level: [0.75, 1],
+    mysticism: [0.4, 0.75]
+  },
+  city: {
+    terrain_color_1: "8a7a6a",
+    terrain_color_2: "6a5a4a",
+    terrain_color_3: "aaa090",
+    water_color: "2a6a9a",
+    sky_color: "2a3a5a",
+    settlement_style: "fortress",
+    tree_density: 0.08,
+    terrain_style: "flat",
+    has_lava: false,
+    ambient_particles: "none",
+    lava_color: "ff4500",
+    accent_color: "ffd700",
+    landmarks: ["watchtower", "pillars", "ancient_ruins"],
+    names: ["Ciudad Imperial", "Metrópolis Antigua", "La Gran Ciudad", "Ciudad Amurallada", "Urbs Magna", "Capital del Reino", "Ciudad Eterna"],
+    fog_density: 0.12,
+    water_level: [0.12, 0.25],
+    mountain_height: [0.1, 0.3],
+    terrain_roughness: [0.1, 0.3],
+    danger_level: [0.2, 0.55],
+    mysticism: [0.1, 0.4]
+  },
+  town: {
+    terrain_color_1: "7a8a5a",
+    terrain_color_2: "5a7a3a",
+    terrain_color_3: "9a9a6a",
+    water_color: "3a7aaa",
+    sky_color: "3a4a6a",
+    settlement_style: "village",
+    tree_density: 0.2,
+    terrain_style: "rolling",
+    has_lava: false,
+    ambient_particles: "none",
+    lava_color: "ff4500",
+    accent_color: "ffcc44",
+    landmarks: ["watchtower", "ancient_ruins"],
+    names: ["Pueblo de Piedra", "Villa del Río", "Aldea del Cruce", "Poblado del Valle", "El Burgo", "Villa Mercader", "Pueblo Frontera"],
+    fog_density: 0.1,
+    water_level: [0.15, 0.28],
+    mountain_height: [0.1, 0.35],
+    terrain_roughness: [0.15, 0.4],
+    danger_level: [0.1, 0.4],
+    mysticism: [0.05, 0.3]
+  },
+  village_biome: {
+    terrain_color_1: "5a8a40",
+    terrain_color_2: "3a6a28",
+    terrain_color_3: "7a9a55",
+    water_color: "2a6090",
+    sky_color: "2a3a5a",
+    settlement_style: "village",
+    tree_density: 0.35,
+    terrain_style: "rolling",
+    has_lava: false,
+    ambient_particles: "fireflies",
+    lava_color: "ff4500",
+    accent_color: "ffdd55",
+    landmarks: ["ancient_ruins", "watchtower"],
+    names: ["Aldea de los Robles", "El Villorrio", "Pueblo Campesino", "Aldea Serena", "Villar del Bosque", "La Aldea", "Pueblo del Lago"],
+    fog_density: 0.1,
+    water_level: [0.18, 0.3],
+    mountain_height: [0.1, 0.3],
+    terrain_roughness: [0.1, 0.3],
+    danger_level: [0.05, 0.25],
+    mysticism: [0.05, 0.25]
+  },
+  farmland: {
+    terrain_color_1: "8aaa50",
+    terrain_color_2: "6a8838",
+    terrain_color_3: "c0c060",
+    water_color: "2a80b0",
+    sky_color: "3a5080",
+    settlement_style: "village",
+    tree_density: 0.1,
+    terrain_style: "flat",
+    has_lava: false,
+    ambient_particles: "none",
+    lava_color: "ff4500",
+    accent_color: "ffee66",
+    landmarks: ["watchtower"],
+    names: ["Tierras de Cultivo", "Los Campos Eternos", "Llanura Fértil", "Las Granjas del Norte", "El Granero", "Campos del Valle", "Tierras Sembradas"],
+    fog_density: 0.07,
+    water_level: [0.15, 0.25],
+    mountain_height: [0.05, 0.2],
+    terrain_roughness: [0.05, 0.2],
+    danger_level: [0.05, 0.2],
+    mysticism: [0, 0.15]
+  },
+  coast: {
+    terrain_color_1: "9ab870",
+    terrain_color_2: "7a9840",
+    terrain_color_3: "c8d890",
+    water_color: "1050a0",
+    sky_color: "1840a0",
+    settlement_style: "village",
+    tree_density: 0.22,
+    terrain_style: "rolling",
+    has_lava: false,
+    ambient_particles: "none",
+    lava_color: "ff4500",
+    accent_color: "00ddff",
+    landmarks: ["watchtower", "ancient_ruins"],
+    names: ["Costa Dorada", "Orilla del Mar", "Bahía Perdida", "Costa de los Vientos", "El Litoral", "Playa Esmeralda", "Costa Eterna"],
+    fog_density: 0.15,
+    water_level: [0.38, 0.52],
+    mountain_height: [0.15, 0.45],
+    terrain_roughness: [0.2, 0.5],
+    danger_level: [0.2, 0.55],
+    mysticism: [0.1, 0.4]
+  },
+  arctic: {
+    terrain_color_1: "d0e8ff",
+    terrain_color_2: "b0c8e8",
+    terrain_color_3: "e8f4ff",
+    water_color: "0a1838",
+    sky_color: "051228",
+    settlement_style: "none",
+    tree_density: 0.02,
+    terrain_style: "flat",
+    has_lava: false,
+    ambient_particles: "snow",
+    lava_color: "ff4500",
+    accent_color: "88eeff",
+    landmarks: ["ice_spikes", "ancient_ruins"],
+    names: ["El Ártico Perdido", "Polo Eterno", "Gran Tundra", "Las Nieves Perpetuas", "Campo de Hielo", "Blancura Infinita"],
+    fog_density: 0.25,
+    water_level: [0.05, 0.15],
+    mountain_height: [0.2, 0.5],
+    terrain_roughness: [0.2, 0.5],
+    danger_level: [0.3, 0.65],
+    mysticism: [0.1, 0.35]
+  },
+  badlands: {
+    terrain_color_1: "9a4a28",
+    terrain_color_2: "7a3818",
+    terrain_color_3: "c06040",
+    water_color: "4a3010",
+    sky_color: "281408",
+    settlement_style: "ruins",
+    tree_density: 0.03,
+    terrain_style: "canyon",
+    has_lava: false,
+    ambient_particles: "ash",
+    lava_color: "ff4500",
+    accent_color: "ff8844",
+    landmarks: ["ancient_ruins", "pillars", "obelisk"],
+    names: ["Las Badlands", "Tierras Malvadas", "El Desierto Rojo", "Cañones Oxidados", "Las Tierras Áridas", "Roca Pelada"],
+    fog_density: 0.08,
+    water_level: [0.03, 0.1],
+    mountain_height: [0.35, 0.7],
+    terrain_roughness: [0.5, 0.85],
+    danger_level: [0.4, 0.75],
+    mysticism: [0.1, 0.35]
+  },
+  rainforest: {
+    terrain_color_1: "1a5a0a",
+    terrain_color_2: "0a3a04",
+    terrain_color_3: "2a7010",
+    water_color: "0a4a2a",
+    sky_color: "041208",
+    settlement_style: "ruins",
+    tree_density: 0.95,
+    terrain_style: "rolling",
+    has_lava: false,
+    ambient_particles: "spores",
+    lava_color: "ff4500",
+    accent_color: "44ff88",
+    landmarks: ["giant_tree", "ancient_ruins", "temple"],
+    names: ["Selva Tropical", "La Gran Lluvia", "Bosque Pluvial", "Jungla Densa", "Selva de las Lluvias", "El Edén Verde"],
+    fog_density: 0.42,
+    water_level: [0.3, 0.45],
+    mountain_height: [0.2, 0.45],
+    terrain_roughness: [0.3, 0.6],
+    danger_level: [0.45, 0.85],
+    mysticism: [0.35, 0.75]
+  },
+  steppe: {
+    terrain_color_1: "b09050",
+    terrain_color_2: "907838",
+    terrain_color_3: "c8a860",
+    water_color: "2a6080",
+    sky_color: "304868",
+    settlement_style: "village",
+    tree_density: 0.06,
+    terrain_style: "rolling",
+    has_lava: false,
+    ambient_particles: "none",
+    lava_color: "ff4500",
+    accent_color: "ffc844",
+    landmarks: ["watchtower", "ancient_ruins"],
+    names: ["Gran Estepa", "Pradera del Viento", "Llanuras Kazaras", "El Mar de Hierba", "Estepa Infinita", "Tierras de los Nómadas"],
+    fog_density: 0.06,
+    water_level: [0.08, 0.2],
+    mountain_height: [0.15, 0.4],
+    terrain_roughness: [0.15, 0.35],
+    danger_level: [0.2, 0.55],
+    mysticism: [0.05, 0.3]
+  },
+  underground: {
+    terrain_color_1: "1a1a2a",
+    terrain_color_2: "0a0a18",
+    terrain_color_3: "2a2a3a",
+    water_color: "0a1a4a",
+    sky_color: "000005",
+    settlement_style: "towers",
+    tree_density: 0,
+    terrain_style: "canyon",
+    has_lava: false,
+    ambient_particles: "magic",
+    lava_color: "8800ff",
+    accent_color: "aa44ff",
+    landmarks: ["pillars", "altar", "crystal", "ancient_ruins", "cave_entrance"],
+    names: ["Las Profundidades", "Mundo Subterráneo", "Las Catacumbas", "Abismo Sin Fondo", "El Mundo Interior", "Reino de las Sombras"],
+    fog_density: 0.38,
+    water_level: [0.1, 0.25],
+    mountain_height: [0.5, 0.85],
+    terrain_roughness: [0.55, 0.9],
+    danger_level: [0.5, 0.9],
+    mysticism: [0.45, 0.85]
   }
 };
 function rndBetween(a, b) {
@@ -66700,19 +67406,55 @@ function parsePromptLocally(prompt) {
   let biomeKey = "plains";
   if (/volcan|lava|magma|obsidian|ceniza|ignea/.test(p))
     biomeKey = "volcanic";
-  else if (/hielo|nieve|tundra|helad|glaciar|ártico|artico|permafrost/.test(p))
+  else if (/infiern|infernal|averno|demoni|gehenna|hell\b/.test(p))
+    biomeKey = "infernal";
+  else if (/glaci[ae]r|iceberg|ventisquero|ice.*cliff/.test(p))
+    biomeKey = "glacier";
+  else if (/\bártico\b|\bartico\b|tundra.*polar|polo.*norte/.test(p))
+    biomeKey = "arctic";
+  else if (/hielo|nieve|tundra|helad|permafrost/.test(p))
     biomeKey = "tundra";
   else if (/pantano|ciénaga|cienaga|marisma|fango|turba|swamp/.test(p))
     biomeKey = "swamp";
-  else if (/bosque|selva|árbol|arbol|forest|jungla|jungle/.test(p))
+  else if (/selva.*lluvia|bosque.*pluvial|rain.*forest|lluvias.*tropic/.test(p))
+    biomeKey = "rainforest";
+  else if (/selva|jungla|jungle|tropical|lianas/.test(p))
+    biomeKey = "jungle";
+  else if (/bosque|árbol|arbol|forest/.test(p))
     biomeKey = "forest";
+  else if (/sabana|savanna|pradera.*seca|africano/.test(p))
+    biomeKey = "savanna";
+  else if (/cañon|cañón|desfiladero|barranco|canyon|roca.*roja/.test(p))
+    biomeKey = "canyon";
+  else if (/\bbadlands?\b|tierras.*malvadas|desierto.*rojo/.test(p))
+    biomeKey = "badlands";
+  else if (/hongo|seta\b|mushroom/.test(p))
+    biomeKey = "mushroom";
+  else if (/páramo|baldio|baldío|wasteland|post-apocalip|yermo|desolad/.test(p))
+    biomeKey = "wasteland";
+  else if (/cielo.*flotan|isla.*flotan|flotando|sky.*island|isla.*celest/.test(p))
+    biomeKey = "sky";
   else if (/desierto|arena|dunas|desert|árido|arid/.test(p))
     biomeKey = "desert";
-  else if (/océano|ocean|mar\b|sea\b|isla\b|archipiélago|archipelago/.test(p))
+  else if (/estepa|pradera.*nómad|pastizal.*seco/.test(p))
+    biomeKey = "steppe";
+  else if (/\bcosta\b|litoral|\bplaya\b|orilla.*mar|bahía/.test(p))
+    biomeKey = "coast";
+  else if (/océano|ocean|\bmar\b|\bsea\b|archipiélago|archipelago/.test(p))
     biomeKey = "ocean";
+  else if (/ciudad.*gran|gran.*ciudad|metrópoli|metropolis|capital|ciudad.*imperial/.test(p))
+    biomeKey = "city";
+  else if (/\bpueblo\b|\bpoblado\b|pequeña.*ciudad|villa.*comercial/.test(p))
+    biomeKey = "town";
+  else if (/\baldea\b|villorrio|caserío|hamlet/.test(p))
+    biomeKey = "village_biome";
+  else if (/granja|campo.*cultiv|tierras.*cultiv|farmland|cosecha|siembra/.test(p))
+    biomeKey = "farmland";
+  else if (/subterr|cueva.*profund|\bprofundidades\b|underground/.test(p))
+    biomeKey = "underground";
   else if (/montaña|montañas|sierra|pico|cumbre|mountain|colina/.test(p))
     biomeKey = "mountains";
-  else if (/mazmorra|cripta|dungeon|catacumba|catacomba|cueva|subterr/.test(p))
+  else if (/mazmorra|cripta|dungeon|catacumba|catacomba|\bcueva\b/.test(p))
     biomeKey = "dungeon";
   else if (/místico|arcano|éter|astral|mágico|mystic|arcane|planar/.test(p))
     biomeKey = "mystic";
@@ -66750,17 +67492,44 @@ function parsePromptLocally(prompt) {
     lset.add("volcano");
     lset.add("lava_river");
   }
+  if (biomeKey === "infernal") {
+    lset.add("volcano");
+    lset.add("lava_river");
+    lset.add("altar");
+  }
   if (biomeKey === "tundra")
+    lset.add("ice_spikes");
+  if (biomeKey === "glacier")
+    lset.add("ice_spikes");
+  if (biomeKey === "arctic")
     lset.add("ice_spikes");
   if (biomeKey === "mystic") {
     lset.add("crystal");
     lset.add("obelisk");
+  }
+  if (biomeKey === "mushroom")
+    lset.add("giant_tree");
+  if (biomeKey === "sky") {
+    lset.add("floating_rocks");
+    lset.add("crystal");
   }
   if (biomeKey === "desert")
     lset.add("pyramid");
   if (biomeKey === "dungeon") {
     lset.add("pillars");
     lset.add("altar");
+  }
+  if (biomeKey === "canyon")
+    lset.add("pillars");
+  if (biomeKey === "badlands")
+    lset.add("ancient_ruins");
+  if (biomeKey === "underground") {
+    lset.add("pillars");
+    lset.add("cave_entrance");
+  }
+  if (biomeKey === "city") {
+    lset.add("watchtower");
+    lset.add("pillars");
   }
   const landmarks = Array.from(lset);
   const highDanger = /dragón|dragon|letal|demon|bestia|beast|peligro|mortal|muerte|maldic/.test(p);
@@ -66814,8 +67583,39 @@ function WorldCreatorPage({ onToast }) {
   const [description, setDescription] = import_react56.useState(null);
   const [params, setParams] = import_react56.useState(null);
   const [useAssets, setUseAssets] = import_react56.useState(false);
+  const [savedGenId, setSavedGenId] = import_react56.useState(null);
+  const [saving, setSaving] = import_react56.useState(false);
+  const [showAddProj, setShowAddProj] = import_react56.useState(false);
   const baseParamsRef = import_react56.useRef(null);
   const textareaRef = import_react56.useRef(null);
+  const handleSave = async () => {
+    if (!params)
+      return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/worldmap/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          prompt,
+          description: description ?? "",
+          params: { ...params, use_assets: undefined }
+        })
+      });
+      const json = await res.json();
+      if (json.data?.id) {
+        setSavedGenId(json.data.id);
+        onToast("\uD83C\uDF0D Mundo guardado en tu historial");
+      } else {
+        onToast("Error al guardar el mundo", "error");
+      }
+    } catch {
+      onToast("Error al guardar el mundo", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
   const handleCreate = async () => {
     const trimmed = prompt.trim();
     if (!trimmed) {
@@ -66825,6 +67625,7 @@ function WorldCreatorPage({ onToast }) {
     setLoading(true);
     setDescription(null);
     setParams(null);
+    setSavedGenId(null);
     try {
       const res = await fetch("/api/worldmap", {
         method: "POST",
@@ -66847,6 +67648,14 @@ function WorldCreatorPage({ onToast }) {
         return;
       }
       const json = await res.json();
+      if (json.data?.fallback) {
+        const local = parsePromptLocally(trimmed);
+        const localWithAssets = { ...local, use_assets: useAssets };
+        baseParamsRef.current = localWithAssets;
+        setParams(localWithAssets);
+        onToast(`✨ Mapa generado: "${local.region_name}"`);
+        return;
+      }
       const withFreshSeeds = { ...json.data.params, seeds: freshSeeds(), use_assets: useAssets };
       baseParamsRef.current = withFreshSeeds;
       setDescription(json.data.description);
@@ -66868,6 +67677,7 @@ function WorldCreatorPage({ onToast }) {
     baseParamsRef.current = p;
     setDescription(null);
     setParams(p);
+    setSavedGenId(null);
     onToast(`\uD83C\uDFB2 Mundo aleatorio generado: ${p.region_name}`);
   };
   const handleExample = (ex) => {
@@ -67103,6 +67913,7 @@ function WorldCreatorPage({ onToast }) {
                       const newParams = { ...baseParamsRef.current, seeds: freshSeeds(), use_assets: useAssets };
                       baseParamsRef.current = newParams;
                       setParams(newParams);
+                      setSavedGenId(null);
                       onToast("\uD83C\uDFB2 ¡Nuevo terreno generado!");
                     },
                     children: "\uD83C\uDFB2 Nueva Forma"
@@ -67114,11 +67925,38 @@ function WorldCreatorPage({ onToast }) {
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+                className: "wc-save-bar",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("button", {
+                    className: `wc-save-btn${savedGenId ? " wc-save-btn--saved" : ""}`,
+                    onClick: handleSave,
+                    disabled: saving || !!savedGenId,
+                    children: saving ? "\uD83D\uDCBE Guardando…" : savedGenId ? "✅ Guardado" : "\uD83D\uDCBE Guardar mundo"
+                  }, undefined, false, undefined, this),
+                  savedGenId && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("button", {
+                    className: "wc-save-btn wc-save-btn--project",
+                    onClick: () => setShowAddProj(true),
+                    children: "\uD83D\uDCC1 Añadir a proyecto"
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(WorldMapPanel, {
                 params
               }, undefined, false, undefined, this)
             ]
-          }, undefined, true, undefined, this)
+          }, undefined, true, undefined, this),
+          showAddProj && savedGenId && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(Modal, {
+            open: true,
+            onClose: () => setShowAddProj(false),
+            title: "\uD83D\uDCC1 Añadir a proyecto",
+            size: "sm",
+            children: /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(AddToProjectPanel, {
+              generationId: savedGenId,
+              onClose: () => setShowAddProj(false),
+              onToast
+            }, undefined, false, undefined, this)
+          }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this)
     ]

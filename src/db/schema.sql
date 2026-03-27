@@ -129,3 +129,8 @@ CREATE INDEX IF NOT EXISTS idx_project_items_gen      ON project_items(generatio
 
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS display_name TEXT NOT NULL DEFAULT '';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS merged_cookie TEXT;
+
+-- Add worldmap as a valid generation type (idempotent)
+ALTER TABLE generations DROP CONSTRAINT IF EXISTS generations_type_check;
+ALTER TABLE generations ADD CONSTRAINT generations_type_check
+  CHECK (type IN ('npc', 'quest', 'item', 'lore', 'weapon', 'enemy', 'worldmap'));

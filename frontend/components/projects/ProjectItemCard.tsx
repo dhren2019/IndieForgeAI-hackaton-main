@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE          from "three";
 import { OrbitControls }   from "three/examples/jsm/controls/OrbitControls.js";
 import { Modal }           from "../ui/Modal";
+import { WorldMapPanel }   from "../results/WorldMap3D";
+import type { WorldMapParams } from "../results/WorldMap3D";
 import { TYPE_META }       from "../../types/generate";
 import { getGenerationTitle, getPreviewText, timeAgo } from "../../lib/formatters";
 import type { Generation } from "../../types/generate";
@@ -96,15 +98,103 @@ function GlbViewer({ url }: { url: string }) {
   return <div ref={ref} className="glb-viewer" />;
 }
 
+// ── WorldMap biome color preview ──────────────────────────────────────────────
+
+const BIOME_LABELS_CARD: Record<string, string> = {
+  forest: "Bosque", desert: "Desierto", tundra: "Tundra", swamp: "Pantano",
+  volcanic: "Volcánico", ocean: "Océano", plains: "Llanuras", mountains: "Montañas",
+  dungeon: "Mazmorra", mystic: "Místico", jungle: "Jungla", savanna: "Sabana",
+  glacier: "Glaciar", canyon: "Cañón", mushroom: "Bosque Hongos", wasteland: "Páramo",
+  sky: "Cielos", infernal: "Infierno", city: "Ciudad", town: "Pueblo",
+  village_biome: "Aldea", farmland: "Cultivos", coast: "Costa", arctic: "Ártico",
+  badlands: "Badlands", rainforest: "Selva Tropical", steppe: "Estepa",
+  underground: "Subterráneo",
+};
+
+function WorldMapPreview({ result }: { result: Record<string, unknown> }) {
+  const c1    = String(result.terrain_color_1 ?? "336633");
+  const c2    = String(result.terrain_color_2 ?? "234523");
+  const c3    = String(result.terrain_color_3 ?? "557755");
+  const sky   = String(result.sky_color       ?? "1a2840");
+  const water = String(result.water_color     ?? "153060");
+  const biome = String(result.biome           ?? "");
+  const label = BIOME_LABELS_CARD[biome] ?? biome;
+
+  const gradient = `linear-gradient(180deg,
+    #${sky} 0%,
+    #${sky} 25%,
+    #${c3} 38%,
+    #${c2} 52%,
+    #${c1} 65%,
+    #${water} 68%,
+    #${water} 100%)`;
+
+  return (
+    <div className="proj-item-card__world-preview" style={{ background: gradient }}>
+      {/* Stylized mountain silhouette */}
+      <svg className="proj-item-card__world-mountains" viewBox="0 0 100 40" preserveAspectRatio="none">
+        <polygon points="0,40 15,18 28,28 42,10 58,25 72,14 85,22 100,40" fill={`#${c2}`} opacity="0.9" />
+        <polygon points="0,40 10,24 22,32 35,16 50,30 64,20 78,27 90,35 100,40" fill={`#${c1}`} opacity="0.8" />
+      </svg>
+      {label && <span className="proj-item-card__world-biome-tag">{label}</span>}
+    </div>
+  );
+}
+
+// ── Expand detail modal content ───────────────────────────────────────────────
+
+function ExpandModal({ gen, title, onClose }: {
+  gen:     Generation;
+  title:   string;
+  onClose: () => void;
+}) {
+  const isWorldMap = gen.type === "worldmap";
+  const has3D      = !!gen.glb_url;
+  const previewText = getPreviewText(gen.result);
+
+  if (isWorldMap) {
+    const params = gen.result as unknown as WorldMapParams;
+    return (
+      <Modal open onClose={onClose} title={`🌍 ${title}`} size="xl">
+        <div className="proj-expand__world">
+          <WorldMapPanel params={params} />
+        </div>
+      </Modal>
+    );
+  }
+
+  return (
+    <Modal open onClose={onClose} title={title} size="lg">
+      <div className="proj-expand__content">
+        {gen.image_url && (
+          <img src={gen.image_url} alt={title} className="proj-expand__img" />
+        )}
+        {has3D && (
+          <GlbViewer url={gen.glb_url!} />
+        )}
+        {previewText && (
+          <p className="proj-expand__desc">{previewText}</p>
+        )}
+        {!gen.image_url && !has3D && !previewText && (
+          <pre className="proj-expand__json">
+            {JSON.stringify(gen.result, null, 2)}
+          </pre>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
 // ── Card component ────────────────────────────────────────────────────────────
 
 const TYPE_BG: Record<string, string> = {
-  npc:    "linear-gradient(145deg,#1a1000,#3d2800)",
-  quest:  "linear-gradient(145deg,#001428,#0d3060)",
-  item:   "linear-gradient(145deg,#001810,#063820)",
-  lore:   "linear-gradient(145deg,#120028,#300062)",
-  weapon: "linear-gradient(145deg,#1a0000,#3a0000)",
-  enemy:  "linear-gradient(145deg,#080808,#1c1c1c)",
+  npc:      "linear-gradient(145deg,#1a1000,#3d2800)",
+  quest:    "linear-gradient(145deg,#001428,#0d3060)",
+  item:     "linear-gradient(145deg,#001810,#063820)",
+  lore:     "linear-gradient(145deg,#120028,#300062)",
+  weapon:   "linear-gradient(145deg,#1a0000,#3a0000)",
+  enemy:    "linear-gradient(145deg,#080808,#1c1c1c)",
+  worldmap: "linear-gradient(145deg,#001a20,#003040)",
 };
 
 interface ProjectItemCardProps {
@@ -114,12 +204,14 @@ interface ProjectItemCardProps {
 }
 
 export function ProjectItemCard({ gen, isFav, onFavToggle }: ProjectItemCardProps) {
-  const [showModel, setShowModel] = useState(false);
+  const [showModel,  setShowModel]  = useState(false);
+  const [showExpand, setShowExpand] = useState(false);
 
-  const meta        = TYPE_META[gen.type];
+  const meta        = TYPE_META[gen.type as keyof typeof TYPE_META] ?? { icon: "🌍", label: gen.type, color: "#22d3ee" };
   const title       = getGenerationTitle(gen.result, gen.type, gen.id);
   const previewText = getPreviewText(gen.result);
   const bg          = TYPE_BG[gen.type] ?? TYPE_BG.enemy;
+  const isWorldMap  = gen.type === "worldmap";
 
   return (
     <article className="proj-item-card">
@@ -129,7 +221,11 @@ export function ProjectItemCard({ gen, isFav, onFavToggle }: ProjectItemCardProp
           <img src={gen.image_url} alt={title} className="proj-item-card__img" loading="lazy" />
         )}
 
-        {!gen.image_url && (
+        {!gen.image_url && isWorldMap && (
+          <WorldMapPreview result={gen.result} />
+        )}
+
+        {!gen.image_url && !isWorldMap && (
           <div className="proj-item-card__placeholder" style={{ background: bg }}>
             <span className="proj-item-card__ph-icon" style={{ color: meta.color }}>{meta.icon}</span>
           </div>
@@ -146,8 +242,8 @@ export function ProjectItemCard({ gen, isFav, onFavToggle }: ProjectItemCardProp
           {meta.icon} {meta.label}
         </span>
 
-        {/* 3D model button */}
-        {gen.glb_url && (
+        {/* 3D model button (only when no expand would show 3D anyway) */}
+        {gen.glb_url && !isWorldMap && (
           <button
             className="proj-item-card__model-btn"
             onClick={() => setShowModel(true)}
@@ -156,6 +252,16 @@ export function ProjectItemCard({ gen, isFav, onFavToggle }: ProjectItemCardProp
             🧊 3D
           </button>
         )}
+
+        {/* Expand / open button — top-left */}
+        <button
+          className="proj-item-card__expand"
+          onClick={() => setShowExpand(true)}
+          title={isWorldMap ? "Explorar mapa" : "Ampliar"}
+          aria-label="Ampliar"
+        >
+          ⛶
+        </button>
 
         {/* Fav toggle */}
         <button
@@ -179,11 +285,16 @@ export function ProjectItemCard({ gen, isFav, onFavToggle }: ProjectItemCardProp
         <span className="proj-item-card__date">{timeAgo(gen.created_at)}</span>
       </div>
 
-      {/* 3D model modal */}
+      {/* 3D model modal (standalone) */}
       {showModel && gen.glb_url && (
         <Modal open onClose={() => setShowModel(false)} title={`🧊 ${title}`} size="lg">
           <GlbViewer url={gen.glb_url} />
         </Modal>
+      )}
+
+      {/* Expand modal */}
+      {showExpand && (
+        <ExpandModal gen={gen} title={title} onClose={() => setShowExpand(false)} />
       )}
     </article>
   );

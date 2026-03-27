@@ -23,6 +23,7 @@ export function getGenerationTitle(
   type: GenerationType,
   id: number
 ): string {
+  if (type === "worldmap") return String(result.region_name ?? result.name ?? `Mundo #${id}`);
   return String(result.name ?? result.title ?? `${type} #${id}`);
 }
 

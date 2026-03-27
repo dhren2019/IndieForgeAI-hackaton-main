@@ -24,7 +24,7 @@ import { instantMeshRoute }           from "./routes/instant-mesh";
 import { shapERoute }                 from "./routes/shap-e";
 import { healthRoute }                from "./routes/health";
 import { projectsRoute }              from "./routes/projects";
-import { worldMapRoute }             from "./routes/worldmap";
+import { worldMapRoute, saveWorldRoute } from "./routes/worldmap";
 import { sql }                          from "bun";
 import { logger }                     from "./utils/logger";
 import { readFileSync }               from "fs";
@@ -117,8 +117,9 @@ async function router(req: Request, sessionId: string, cookieSessionId?: string 
   if (genGlbMatch && method === "PATCH")
     return saveGenerationGlbRoute(req, sessionId, Number(genGlbMatch[1]));
 
-  // World Map generation
-  if (pathname === "/api/worldmap" && method === "POST") return worldMapRoute(req, sessionId);
+  // World Map generation / save
+  if (pathname === "/api/worldmap" && method === "POST")       return worldMapRoute(req, sessionId);
+  if (pathname === "/api/worldmap/save" && method === "POST") return saveWorldRoute(req, sessionId);
 
   // 3D generation
   if (pathname === "/api/trellis"       && method === "POST") return trellisRoute(req, sessionId);

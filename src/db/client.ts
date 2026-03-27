@@ -5,7 +5,7 @@ import { logger } from "../utils/logger";
 // Helpers
 // ---------------------------------------------------------------------------
 
-export type GenerationType = "npc" | "quest" | "item" | "lore" | "weapon" | "enemy";
+export type GenerationType = "npc" | "quest" | "item" | "lore" | "weapon" | "enemy" | "worldmap";
 
 export interface Generation {
   id: number;

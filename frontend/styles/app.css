@@ -811,6 +811,105 @@ input, textarea, select {
   overflow: hidden;
 }
 
+/* ── WorldMap biome preview thumbnail ──────────────────────────────────────── */
+.proj-item-card__world-preview {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.proj-item-card__world-mountains {
+  position: absolute;
+  bottom: 28%;
+  left: 0;
+  width: 100%;
+  height: 45%;
+  pointer-events: none;
+}
+.proj-item-card__world-biome-tag {
+  position: absolute;
+  bottom: var(--sp-3);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.9);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  white-space: nowrap;
+}
+
+/* ── Expand button — top-left ───────────────────────────────────────────────── */
+.proj-item-card__expand {
+  position: absolute;
+  top: var(--sp-2);
+  left: var(--sp-2);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.18s ease, background 0.15s, border-color 0.15s;
+}
+.proj-item-card:hover .proj-item-card__expand {
+  opacity: 1;
+}
+.proj-item-card__expand:hover {
+  color: #fff;
+  background: rgba(139,92,246,0.45);
+  border-color: rgba(139,92,246,0.7);
+}
+
+/* ── Expand modal content ───────────────────────────────────────────────────── */
+.proj-expand__world {
+  width: 100%;
+  height: calc(90vh - 80px);
+  min-height: 500px;
+}
+.proj-expand__world .wc-map-canvas-wrap,
+.proj-expand__world > div {
+  height: 100%;
+}
+.proj-expand__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.proj-expand__img {
+  width: 100%;
+  max-height: 480px;
+  object-fit: contain;
+  border-radius: var(--r-xl);
+}
+.proj-expand__desc {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  margin: 0;
+}
+.proj-expand__json {
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--sp-3);
+  overflow: auto;
+  max-height: 400px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .projects-page__auth-wall {
   display: flex;
   flex-direction: column;
