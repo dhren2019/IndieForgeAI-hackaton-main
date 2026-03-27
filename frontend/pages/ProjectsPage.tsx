@@ -1,9 +1,9 @@
 ﻿import React, { useState, useEffect, useCallback } from "react";
 import { useAuth, useClerk }  from "@clerk/clerk-react";
 import { PageContainer }      from "../components/layout/PageContainer";
-import { ResultCard }         from "../components/results/ResultCard";
-import { Loader }             from "../components/ui/Loader";
 import { Button }             from "../components/ui/Button";
+import { ProjectsSkeleton, FeedSkeleton } from "../components/ui/Skeletons";
+import { ProjectItemCard }    from "../components/projects/ProjectItemCard";
 import { useProjects }        from "../hooks/useProjects";
 import { useFavorites }       from "../hooks/useFavorites";
 import { apiGetProjectItems } from "../lib/api";
@@ -128,7 +128,7 @@ export function ProjectsPage({ onToast }: ProjectsPageProps) {
 
       <PageContainer wide>
         <div className="page-hero">
-          <h1 className="page-hero__title">🗂️ Proyectos</h1>
+          <h1 className="page-hero__title"><span className="plain-emoji">🗂️</span> Proyectos</h1>
           <p className="page-hero__sub">Organiza tus generaciones en carpetas</p>
         </div>
 
@@ -181,7 +181,7 @@ export function ProjectsPage({ onToast }: ProjectsPageProps) {
               </div>
             )}
 
-            {projLoading && <Loader label="Cargando proyectos…" />}
+            {projLoading && <ProjectsSkeleton />}
 
             {!projLoading && projects.length === 0 && !creating && (
               <div className="projects-sidebar__empty">
@@ -289,7 +289,7 @@ export function ProjectsPage({ onToast }: ProjectsPageProps) {
                 </p>
               </div>
             ) : itemsLoading ? (
-              <Loader label="Cargando contenido…" />
+              <FeedSkeleton />
             ) : (
               <>
                 {/* Detail header: project title + view-mode toggle */}
@@ -324,7 +324,7 @@ export function ProjectsPage({ onToast }: ProjectsPageProps) {
                 ) : (
                   <div className={`projects-detail__grid projects-detail__grid--${viewMode}`}>
                     {items.map((gen) => (
-                      <ResultCard
+                      <ProjectItemCard
                         key={gen.id}
                         gen={gen}
                         isFav={favIds.has(gen.id)}
@@ -332,7 +332,6 @@ export function ProjectsPage({ onToast }: ProjectsPageProps) {
                           toggleFav(id, add);
                           onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
                         }}
-                        showActions={true}
                       />
                     ))}
                   </div>

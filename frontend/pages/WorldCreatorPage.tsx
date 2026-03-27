@@ -183,11 +183,110 @@ function generateRandomWorldParams(): WorldMapParams {
   };
 }
 
+// ── Smart client-side parser: convierte el prompt del usuario a WorldMapParams ─
+function parsePromptLocally(prompt: string): WorldMapParams {
+  const p = prompt.toLowerCase();
+
+  // ── Detección de bioma (primera coincidencia gana) ─────────────────────────
+  let biomeKey: BiomeKey = "plains";
+  if      (/volcan|lava|magma|obsidian|ceniza|ignea/.test(p))                 biomeKey = "volcanic";
+  else if (/hielo|nieve|tundra|helad|glaciar|ártico|artico|permafrost/.test(p)) biomeKey = "tundra";
+  else if (/pantano|ciénaga|cienaga|marisma|fango|turba|swamp/.test(p))       biomeKey = "swamp";
+  else if (/bosque|selva|árbol|arbol|forest|jungla|jungle/.test(p))           biomeKey = "forest";
+  else if (/desierto|arena|dunas|desert|árido|arid/.test(p))                  biomeKey = "desert";
+  else if (/océano|ocean|mar\b|sea\b|isla\b|archipiélago|archipelago/.test(p)) biomeKey = "ocean";
+  else if (/montaña|montañas|sierra|pico|cumbre|mountain|colina/.test(p))     biomeKey = "mountains";
+  else if (/mazmorra|cripta|dungeon|catacumba|catacomba|cueva|subterr/.test(p)) biomeKey = "dungeon";
+  else if (/místico|arcano|éter|astral|mágico|mystic|arcane|planar/.test(p))  biomeKey = "mystic";
+
+  const d = BIOME_DATA[biomeKey];
+
+  // ── Detección de landmarks ─────────────────────────────────────────────────
+  const lset = new Set<string>(d.landmarks.slice(0, 1));
+  if (/volcan|volcán/.test(p))                                           lset.add("volcano");
+  if (/\blava\b|magma/.test(p))                                          lset.add("lava_river");
+  if (/templo|temple|santuario|shrine/.test(p))                          lset.add("temple");
+  if (/pirámide|piramide|pyramid/.test(p))                               lset.add("pyramid");
+  if (/ruina|ruinas|antigua|ancient|abandonad/.test(p))                  lset.add("ancient_ruins");
+  if (/cristal|crystal|gema|\bgem\b/.test(p))                            lset.add("crystal");
+  if (/atalaya|watchtower|torre.*vigía|vigilante/.test(p))               lset.add("watchtower");
+  if (/árbol.*gigan|gigan.*árbol|árbol.*inmen|giant.*tree/.test(p))      lset.add("giant_tree");
+  if (/\baltar\b|sacrific/.test(p))                                      lset.add("altar");
+  if (/obelisco|obelisk|monolito/.test(p))                               lset.add("obelisk");
+  if (/pilar|pilares|columna|columnas|pillar/.test(p))                   lset.add("pillars");
+  if (/roca.*flota|piedra.*flota|float.*rock/.test(p))                   lset.add("floating_rocks");
+  if (/pico.*hielo|hielo.*pico|ice.*spike/.test(p))                      lset.add("ice_spikes");
+  if (/subterr/.test(p))                                                 lset.add("pillars");
+  // Garantías por bioma
+  if (biomeKey === "volcanic") { lset.add("volcano"); lset.add("lava_river"); }
+  if (biomeKey === "tundra")   lset.add("ice_spikes");
+  if (biomeKey === "mystic")   { lset.add("crystal"); lset.add("obelisk"); }
+  if (biomeKey === "desert")   lset.add("pyramid");
+  if (biomeKey === "dungeon")  { lset.add("pillars"); lset.add("altar"); }
+  const landmarks = Array.from(lset);
+
+  // ── Nivel de peligro ───────────────────────────────────────────────────────
+  const highDanger = /dragón|dragon|letal|demon|bestia|beast|peligro|mortal|muerte|maldic/.test(p);
+  const lowDanger  = /pacífico|peaceful|seguro|safe|tranquil/.test(p);
+  const danger     = highDanger ? rndBetween(0.65, 0.98)
+                   : lowDanger  ? rndBetween(0.0, 0.28)
+                   : rndBetween(...d.danger_level);
+
+  // ── Misticismo ─────────────────────────────────────────────────────────────
+  const highMystic = /mágico|magia|magic|arcano|arcane|místico|mystic|encantado|hechizo/.test(p);
+  const mysticism  = highMystic ? rndBetween(0.6, 1.0) : rndBetween(...d.mysticism);
+
+  // ── Estilo de asentamiento ─────────────────────────────────────────────────
+  let settlement = d.settlement_style;
+  if      (/ruina|ruinas|abandonad/.test(p))                     settlement = "ruins";
+  else if (/ciudad|city|village|aldea|pueblo|villa/.test(p))     settlement = "village";
+  else if (/fortaleza|fortress|castillo|castle/.test(p))         settlement = "fortress";
+  else if (/\btorre\b|\btorres\b|\btower\b/.test(p))             settlement = "towers";
+
+  // ── Altura de montañas ─────────────────────────────────────────────────────
+  const highMtn = /cumbres|pico.*alto|alto.*pico|montaña.*gigan|imponente/.test(p);
+  const mtnH    = highMtn ? rndBetween(0.75, 1.0) : rndBetween(...d.mountain_height);
+
+  // ── Rugosidad ──────────────────────────────────────────────────────────────
+  const highRough = /escarpado|rugoso|accidentado|rough|jagged/.test(p);
+  const roughness = highRough ? rndBetween(0.65, 0.95) : rndBetween(...d.terrain_roughness);
+
+  // ── Nombre de región — extraer del prompt o usar default del bioma ─────────
+  const nameMatch = /(?:llamad[ao]s?|conocid[ao]s?|den[oa]minad[ao]s?|llaman?)\s*["«]?([A-ZÁÉÍÓÚÑ][a-záéíóúñ ]{2,28})["»]?/i.exec(prompt);
+  const regionName = nameMatch ? nameMatch[1].trim() : pickRandom(d.names);
+
+  return {
+    biome:             biomeKey,
+    terrain_roughness: roughness,
+    water_level:       rndBetween(...d.water_level),
+    mountain_height:   mtnH,
+    danger_level:      danger,
+    mysticism,
+    terrain_color_1:   d.terrain_color_1,
+    terrain_color_2:   d.terrain_color_2,
+    terrain_color_3:   d.terrain_color_3,
+    water_color:       d.water_color,
+    sky_color:         d.sky_color,
+    fog_density:       d.fog_density,
+    region_name:       regionName,
+    seeds:             freshSeeds(),
+    settlement_style:  settlement,
+    tree_density:      d.tree_density,
+    terrain_style:     d.terrain_style,
+    has_lava:          d.has_lava || biomeKey === "volcanic",
+    ambient_particles: d.ambient_particles,
+    lava_color:        d.lava_color,
+    accent_color:      d.accent_color,
+    landmarks,
+  };
+}
+
 export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
   const [prompt,      setPrompt]      = useState("");
   const [loading,     setLoading]     = useState(false);
   const [description, setDescription] = useState<string | null>(null);
   const [params,      setParams]      = useState<WorldMapParams | null>(null);
+  const [useAssets,   setUseAssets]   = useState(false);
   // Base params without seeds — lets us regenerate terrain shape without re-calling the AI
   const baseParamsRef = useRef<WorldMapParams | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -214,34 +313,36 @@ export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
           if (errJson.error) errDetail = errJson.error;
         } catch { /* ignore */ }
         console.warn("[WorldCreator] AI failed:", errDetail || res.status);
-        const fallback = generateRandomWorldParams();
-        baseParamsRef.current = fallback;
-        setParams(fallback);
-        onToast("⚠️ La IA no está disponible — generando mapa aleatorio", "error");
+        const fallback = parsePromptLocally(trimmed);
+        const fallbackWithAssets = { ...fallback, use_assets: useAssets };
+        baseParamsRef.current = fallbackWithAssets;
+        setParams(fallbackWithAssets);
+        onToast(`✨ Mapa generado: "${fallback.region_name}"`);
         return;
       }
 
       const json = await res.json() as { data: { description: string; params: WorldMapParams } };
       // Always inject fresh random seeds — world TYPE comes from AI, terrain SHAPE is always unique
-      const withFreshSeeds: WorldMapParams = { ...json.data.params, seeds: freshSeeds() };
+      const withFreshSeeds: WorldMapParams = { ...json.data.params, seeds: freshSeeds(), use_assets: useAssets };
       baseParamsRef.current = withFreshSeeds;
       setDescription(json.data.description);
       setParams(withFreshSeeds);
       onToast("¡Mundo generado! 🌍");
     } catch (e) {
-      // Network error — also fall back to random
+      // Network error — fall back to local prompt parser
       console.warn("[WorldCreator] Network error:", e);
-      const fallback = generateRandomWorldParams();
-      baseParamsRef.current = fallback;
-      setParams(fallback);
-      onToast("⚠️ Error de red — generando mapa aleatorio", "error");
+      const fallback = parsePromptLocally(trimmed);
+      const fallbackWithAssets = { ...fallback, use_assets: useAssets };
+      baseParamsRef.current = fallbackWithAssets;
+      setParams(fallbackWithAssets);
+      onToast(`✨ Mapa generado: "${fallback.region_name}"`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleRandom = () => {
-    const p = generateRandomWorldParams();
+    const p = { ...generateRandomWorldParams(), use_assets: useAssets };
     baseParamsRef.current = p;
     setDescription(null);
     setParams(p);
@@ -269,7 +370,7 @@ export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
 
       <PageContainer>
         <div className="page-hero">
-          <h1 className="page-hero__title">🌍 World Creator</h1>
+          <h1 className="page-hero__title"><span className="plain-emoji">🌍</span> World Creator</h1>
           <p className="page-hero__sub">
             Describe tu mundo en palabras. La IA lo imaginará y construirá un mapa 3D interactivo en tiempo real.
           </p>
@@ -355,6 +456,29 @@ export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
           </div>
         )}
 
+        {/* Map options bar */}
+        <div className="wc-options-bar">
+          <label className="wc-assets-toggle" title="Usa modelos 3D reales (.gltf) del pack de naturaleza en lugar de geometría procedural">
+            <input
+              type="checkbox"
+              checked={useAssets}
+              onChange={e => {
+                setUseAssets(e.target.checked);
+                // Re-apply to current map immediately
+                if (baseParamsRef.current) {
+                  const updated = { ...baseParamsRef.current, use_assets: e.target.checked };
+                  baseParamsRef.current = updated;
+                  setParams(updated);
+                }
+              }}
+              disabled={loading}
+            />
+            <span className="wc-assets-toggle__icon">🌲</span>
+            <span className="wc-assets-toggle__label">Usar assets glTF reales</span>
+            <span className="wc-assets-toggle__hint">{useAssets ? "Cargando modelos 3D…" : "Geometría procedural"}</span>
+          </label>
+        </div>
+
         {/* 3D Map Panel */}
         {params && !loading && (
           <div className="wc-map-section">
@@ -366,7 +490,7 @@ export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
                 className="wc-map-regen-btn"
                 onClick={() => {
                   if (!baseParamsRef.current) return;
-                  const newParams = { ...baseParamsRef.current, seeds: freshSeeds() };
+                  const newParams = { ...baseParamsRef.current, seeds: freshSeeds(), use_assets: useAssets };
                   baseParamsRef.current = newParams;
                   setParams(newParams);
                   onToast("🎲 ¡Nuevo terreno generado!");

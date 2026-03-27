@@ -244,6 +244,38 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Projects sidebar skeleton */
+.projects-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-1) 0;
+}
+.projects-skeleton__item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: 8px;
+  opacity: .85;
+  animation: card-rise .45s ease both;
+}
+.projects-skeleton__emoji {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--border) 25%, var(--card-hover) 50%, var(--border) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.6s infinite linear;
+  flex-shrink: 0;
+}
+.projects-skeleton__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .feed-skeleton {
   position: relative;
   display:  flex;
@@ -1203,7 +1235,7 @@
 .history-item__body  { flex: 1; min-width: 0; }
 .history-item__title { font-size: var(--text-sm); font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .history-item__meta  { display: flex; align-items: center; gap: var(--sp-2); margin-top: 3px; flex-wrap: wrap; }
-.history-item__time  { font-size: var(--text-xs); color: var(--muted); }
+.history-item__time  { font-size: var(--text-xs); color: var(--muted); display: block; margin-top: var(--sp-1); }
 .history-item__preview {
   font-size:   var(--text-xs);
   color:       var(--muted);
@@ -1958,6 +1990,45 @@
   transform: translateY(-1px);
 }
 .wc-map-regen-btn:active { transform: translateY(0); }
+
+/* Asset toggle + options bar */
+.wc-options-bar {
+  display:       flex;
+  align-items:   center;
+  gap:           var(--sp-4);
+  margin-bottom: var(--sp-3);
+  padding:       var(--sp-3) var(--sp-4);
+  background:    rgba(15,10,35,0.6);
+  border:        1px solid rgba(124,58,237,0.22);
+  border-radius: var(--r-lg);
+  flex-wrap:     wrap;
+}
+
+.wc-assets-toggle {
+  display:     flex;
+  align-items: center;
+  gap:         var(--sp-2);
+  cursor:      pointer;
+  user-select: none;
+}
+.wc-assets-toggle input[type="checkbox"] {
+  width:  1.1rem;
+  height: 1.1rem;
+  cursor: pointer;
+  accent-color: #7c3aed;
+  flex-shrink: 0;
+}
+.wc-assets-toggle__icon { font-size: 1.1rem; }
+.wc-assets-toggle__label {
+  font-size:   0.88rem;
+  font-weight: 600;
+  color:       var(--text-1);
+}
+.wc-assets-toggle__hint {
+  font-size: 0.75rem;
+  color:     var(--text-2);
+  margin-left: var(--sp-1);
+}
 
 /* Map canvas wrapper — the panel */
 .wc-map-canvas-wrap {

@@ -1,5 +1,21 @@
 import React from "react";
 
+export function ProjectsSkeleton() {
+  return (
+    <div className="projects-skeleton">
+      {[0, 1, 2, 3].map((i) => (
+        <div key={i} className="projects-skeleton__item" style={{ animationDelay: `${i * 0.1}s` }}>
+          <div className="projects-skeleton__emoji" />
+          <div className="projects-skeleton__info">
+            <div className="feed-skeleton__line feed-skeleton__line--name" />
+            <div className="feed-skeleton__line feed-skeleton__line--date" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function FeedSkeleton() {
   return (
     <div className="feed-skeleton">

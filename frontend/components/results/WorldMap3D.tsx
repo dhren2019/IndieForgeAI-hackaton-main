@@ -47,6 +47,7 @@ export interface WorldMapParams {
   ambient_particles?: string;
   lava_color?:       string;
   accent_color?:     string;
+  use_assets?:       boolean;   // use glTF models from public/glTF/ when true
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -85,6 +86,109 @@ function lerpRgb(
   const s = Math.max(0, Math.min(1, t));
   return [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s, a[2] + (b[2] - a[2]) * s];
 }
+
+// ── Placement grid — prevents overlapping objects ─────────────────────────────
+// Uses a spatial hash to efficiently track occupied areas.
+
+class PlacementGrid {
+  private used = new Set<string>();
+  private cs: number;
+  constructor(cellSize = 5) { this.cs = cellSize; }
+
+  private cells(x: number, z: number, r: number): string[] {
+    const out: string[] = [];
+    const n  = Math.ceil(r / this.cs) + 1;
+    const bx = Math.round(x / this.cs);
+    const bz = Math.round(z / this.cs);
+    for (let i = -n; i <= n; i++) for (let j = -n; j <= n; j++) {
+      if (Math.hypot(i, j) * this.cs <= r + this.cs) out.push(`${bx + i},${bz + j}`);
+    }
+    return out;
+  }
+
+  /** Returns true if space is free and marks it occupied. */
+  tryPlace(x: number, z: number, r: number): boolean {
+    const cs = this.cells(x, z, r);
+    if (cs.some(k => this.used.has(k))) return false;
+    cs.forEach(k => this.used.add(k));
+    return true;
+  }
+
+  /** Mark area as forbidden without checking (terrain features, buildings). */
+  forbid(x: number, z: number, r: number): void {
+    this.cells(x, z, r).forEach(k => this.used.add(k));
+  }
+}
+
+// ── GLTF asset configuration per biome ────────────────────────────────────────
+
+const GLTF_TREE_SCALE  = 3.8;
+const GLTF_COVER_SCALE = 1.6;
+const GLTF_ROCK_SCALE  = 2.2;
+const GLTF_FLOWER_SCALE = 1.2;
+
+const BIOME_ASSET_CONFIG: Record<string, { mainTrees: string[]; groundCovers: string[]; rocks: string[]; flowers: string[] }> = {
+  forest:    {
+    mainTrees:    ["CommonTree_1","CommonTree_2","CommonTree_3","CommonTree_4","CommonTree_5"],
+    groundCovers: ["Bush_Common","Fern_1","Mushroom_Common","Clover_1","Clover_2","Plant_1","Grass_Common_Short","Grass_Common_Tall","Grass_Wispy_Short"],
+    rocks:        ["Rock_Medium_1","Pebble_Round_1","Pebble_Round_2","Pebble_Round_3","RockPath_Round_Small_1"],
+    flowers:      ["Flower_3_Group","Flower_3_Single","Flower_4_Group","Flower_4_Single","Bush_Common_Flowers","Petal_1","Petal_2"],
+  },
+  tundra:    {
+    mainTrees:    ["Pine_1","Pine_2","Pine_3","DeadTree_1","DeadTree_2"],
+    groundCovers: ["Grass_Wispy_Short","Grass_Wispy_Tall","Plant_7"],
+    rocks:        ["Rock_Medium_1","Rock_Medium_2","Pebble_Square_1","Pebble_Square_2","Pebble_Round_1","RockPath_Square_Small_1"],
+    flowers:      [],
+  },
+  plains:    {
+    mainTrees:    ["CommonTree_1","CommonTree_2","CommonTree_3"],
+    groundCovers: ["Grass_Common_Short","Grass_Common_Tall","Grass_Wispy_Short","Grass_Wispy_Tall","Bush_Common","Clover_1","Clover_2","Plant_1"],
+    rocks:        ["Pebble_Round_1","Pebble_Round_2","Pebble_Square_1","RockPath_Round_Small_1"],
+    flowers:      ["Flower_3_Group","Flower_4_Group","Bush_Common_Flowers","Flower_3_Single","Flower_4_Single","Petal_3","Petal_4"],
+  },
+  swamp:     {
+    mainTrees:    ["TwistedTree_1","TwistedTree_2","TwistedTree_3","TwistedTree_4"],
+    groundCovers: ["Mushroom_Laetiporus","Mushroom_Common","Plant_1","Plant_1_Big","Plant_7","Plant_7_Big","Grass_Wispy_Tall","Fern_1"],
+    rocks:        ["Pebble_Round_3","Pebble_Round_4","RockPath_Round_Thin"],
+    flowers:      ["Petal_5"],
+  },
+  volcanic:  {
+    mainTrees:    ["DeadTree_1","DeadTree_2","DeadTree_3","DeadTree_4","DeadTree_5"],
+    groundCovers: [],
+    rocks:        ["Rock_Medium_1","Rock_Medium_2","Rock_Medium_3","RockPath_Square_Small_1","RockPath_Square_Small_2","Pebble_Square_3","Pebble_Square_4"],
+    flowers:      [],
+  },
+  desert:    {
+    mainTrees:    ["DeadTree_4","DeadTree_5","DeadTree_1"],
+    groundCovers: ["Plant_7","Grass_Wispy_Short"],
+    rocks:        ["Rock_Medium_1","Rock_Medium_2","Rock_Medium_3","Pebble_Square_1","Pebble_Square_2","Pebble_Square_5","RockPath_Square_Wide"],
+    flowers:      [],
+  },
+  mountains: {
+    mainTrees:    ["Pine_1","Pine_2","Pine_3","Pine_4","Pine_5"],
+    groundCovers: ["Grass_Wispy_Short","Plant_7"],
+    rocks:        ["Rock_Medium_1","Rock_Medium_2","Rock_Medium_3","Pebble_Square_1","Pebble_Square_2","RockPath_Square_Thin","RockPath_Round_Wide"],
+    flowers:      [],
+  },
+  mystic:    {
+    mainTrees:    ["TwistedTree_1","TwistedTree_2","TwistedTree_4","TwistedTree_5"],
+    groundCovers: ["Mushroom_Common","Mushroom_Laetiporus","Plant_1_Big","Plant_7_Big","Fern_1"],
+    rocks:        ["Rock_Medium_1","Pebble_Round_5","Pebble_Square_6"],
+    flowers:      ["Flower_4_Group","Flower_4_Single","Petal_1","Petal_2","Petal_3"],
+  },
+  dungeon:   {
+    mainTrees:    ["DeadTree_3","DeadTree_4","DeadTree_5"],
+    groundCovers: ["Mushroom_Laetiporus","Plant_7"],
+    rocks:        ["Rock_Medium_1","Rock_Medium_2","Rock_Medium_3","RockPath_Square_Small_1","RockPath_Square_Small_2","RockPath_Square_Small_3","Pebble_Square_4","Pebble_Square_5"],
+    flowers:      [],
+  },
+  ocean:     {
+    mainTrees:    ["CommonTree_1","CommonTree_3","Pine_1","Pine_2"],
+    groundCovers: ["Bush_Common_Flowers","Plant_1","Grass_Common_Short","Clover_1"],
+    rocks:        ["Pebble_Round_4","Pebble_Round_5","RockPath_Round_Small_2","RockPath_Round_Small_3"],
+    flowers:      ["Flower_3_Group","Flower_4_Group","Petal_4","Petal_5"],
+  },
+};
 
 function terrainColor(
   nh: number,
@@ -355,7 +459,7 @@ function buildTerrain(
   geo.computeVertexNormals();
   geo.setAttribute("color", new THREE.BufferAttribute(colorArr, 3));
 
-  const mat  = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.82, metalness: 0.02 });
+  const mat  = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.76, metalness: 0.05 });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
   mesh.castShadow    = true;
@@ -428,9 +532,9 @@ function buildWater(scene: THREE.Scene, p: WorldMapParams, waterH: number): THRE
   const mat  = new THREE.MeshStandardMaterial({
     color:       new THREE.Color(parseInt(p.water_color, 16)),
     transparent: true,
-    opacity:     0.72,
-    roughness:   0.04,
-    metalness:   0.35,
+    opacity:     0.86,
+    roughness:   0.0,
+    metalness:   0.70,
   });
 
   const mesh       = new THREE.Mesh(geo, mat);
@@ -458,6 +562,7 @@ function buildTrees(
   waterH: number,
   features: TerrainFeatures,
   rng: () => number,
+  grid: PlacementGrid,
 ): void {
   const cfg = TREE_BIOME_CONFIG[p.biome];
   if (!cfg) return;
@@ -511,6 +616,9 @@ function buildTrees(
       const cn = (scatter(wx * 0.04, wz * 0.04) + 1) * 0.5;
       if (cn < (1 - density) * 0.6) continue;
 
+      // Collision check — skip if another object already occupies this cell
+      if (!grid.tryPlace(wx, wz, 2.5)) continue;
+
       const scale   = 0.7 + rng() * 0.8;
       const trunkH  = h + 1.0 * scale * cfg.tallFactor;
       const canopyH = h + 2.0 * scale * cfg.tallFactor + 1.4 * scale;
@@ -563,6 +671,7 @@ function buildSettlements(
   waterH: number,
   features: TerrainFeatures,
   rng: () => number,
+  grid: PlacementGrid,
 ): void {
   const style  = (p.settlement_style ?? "none") as BuildingStyle;
   const config = BUILDING_CONFIGS[style];
@@ -611,6 +720,9 @@ function buildSettlements(
         w = 3.5 + rng() * 3; d = 3.5 + rng() * 3; h = 2.5 + rng() * 2;
       }
 
+      // Reserve footprint so trees/landmarks don't overlap with this building
+      if (!grid.tryPlace(bx, bz, Math.max(w, d) / 2 + 2.5)) continue;
+
       const bodyGeo  = new THREE.BoxGeometry(w, h, d);
       const bodyMesh = new THREE.Mesh(bodyGeo, wallMat);
       bodyMesh.position.set(bx, bh + h / 2, bz);
@@ -653,6 +765,7 @@ function buildLandmarks(
   waterH: number,
   features: TerrainFeatures,
   rng: () => number,
+  grid: PlacementGrid,
 ): void {
   const landmarks = p.landmarks ?? [];
   const accentColor = parseInt(p.accent_color ?? "ffaa00", 16);
@@ -674,6 +787,7 @@ function buildLandmarks(
         if (th / maxH > (waterH / maxH) + 0.1 && th / maxH < 0.65) { found = true; break; }
       }
       if (!found) continue;
+      grid.forbid(tx, tz, 9);  // temple footprint
       for (let tier = 0; tier < 3; tier++) {
         const size = 12 - tier * 3, height = 2.5;
         const tierGeo = new THREE.BoxGeometry(size, height, size);
@@ -708,6 +822,7 @@ function buildLandmarks(
       const pz = (rng() - 0.5) * MAP_SIZE * 0.5;
       const ph = computeH(px, pz, noise2D, warpNoise, p, maxH, waterH, features);
       const pyrSize = 14 + rng() * 10, pyrHeight = 12 + rng() * 8;
+      grid.forbid(px, pz, pyrSize / 2 + 3);  // pyramid footprint
       const pyrGeo = new THREE.ConeGeometry(pyrSize / 2, pyrHeight, 4);
       const pyrMesh = new THREE.Mesh(pyrGeo, sandStoneMat);
       pyrMesh.position.set(px, ph + pyrHeight / 2, pz);
@@ -854,6 +969,7 @@ function buildLandmarks(
       const az = (rng() - 0.5) * MAP_SIZE * 0.4;
       const ah = computeH(ax, az, noise2D, warpNoise, p, maxH, waterH, features);
       if (ah / maxH < (waterH / maxH) + 0.06) continue;
+      grid.forbid(ax, az, 7);  // altar footprint
       const baseGeo = new THREE.CylinderGeometry(4, 4.5, 1.5, 8);
       const baseMsh = new THREE.Mesh(baseGeo, altarMat);
       baseMsh.position.set(ax, ah + 0.75, az);
@@ -887,6 +1003,7 @@ function buildLandmarks(
     const ruinMat = new THREE.MeshStandardMaterial({ color: 0x6b5d4d, roughness: 0.9 });
     const ancX = (rng() - 0.5) * MAP_SIZE * 0.4;
     const ancZ = (rng() - 0.5) * MAP_SIZE * 0.4;
+    grid.forbid(ancX, ancZ, 26);  // ruin complex footprint
     for (let i = 0; i < count; i++) {
       const rx = ancX + (rng() - 0.5) * 40;
       const rz = ancZ + (rng() - 0.5) * 40;
@@ -924,6 +1041,7 @@ function buildLandmarks(
       const tz = (rng() - 0.5) * MAP_SIZE * 0.5;
       const th = computeH(tx, tz, noise2D, warpNoise, p, maxH, waterH, features);
       if (th / maxH < (waterH / maxH) + 0.08) continue;
+      grid.forbid(tx, tz, 4);  // watchtower footprint
       const height = 12 + rng() * 8;
       const bodyGeo = new THREE.CylinderGeometry(1.5, 2.0, height, 8);
       const bodyMsh = new THREE.Mesh(bodyGeo, towerMat);
@@ -954,6 +1072,7 @@ function buildLandmarks(
       const gz = (rng() - 0.5) * MAP_SIZE * 0.4;
       const gh = computeH(gx, gz, noise2D, warpNoise, p, maxH, waterH, features);
       if (gh / maxH < (waterH / maxH) + 0.06) continue;
+      grid.forbid(gx, gz, 12);  // giant tree footprint
       const trunkH = 18 + rng() * 12, trunkR = 2 + rng() * 2;
       const tGeo = new THREE.CylinderGeometry(trunkR * 0.6, trunkR, trunkH, 10);
       const tMsh = new THREE.Mesh(tGeo, trunkMat);
@@ -1044,6 +1163,291 @@ function buildParticles(scene: THREE.Scene, p: WorldMapParams): THREE.Points | n
   return pts;
 }
 
+// ── Sky dome with gradient ────────────────────────────────────────────────────
+
+function buildSky(scene: THREE.Scene, p: WorldMapParams): void {
+  const skyRGB = hexToRgb01(p.sky_color);
+  const skyGeo = new THREE.SphereGeometry(550, 32, 20);
+  const pos    = skyGeo.attributes.position as THREE.BufferAttribute;
+  const cols   = new Float32Array(pos.count * 3);
+
+  // Horizon color: brightened version of sky
+  const hR = Math.min(1, skyRGB[0] * 1.55 + 0.07);
+  const hG = Math.min(1, skyRGB[1] * 1.35 + 0.05);
+  const hB = Math.min(1, skyRGB[2] * 1.20 + 0.05);
+
+  for (let i = 0; i < pos.count; i++) {
+    const t = Math.max(-1, Math.min(1, pos.getY(i) / 550)); // -1 bottom → +1 top
+    let r, g, b;
+    if (t >= 0) {
+      // Horizon → zenith
+      r = hR + (skyRGB[0] - hR) * t;
+      g = hG + (skyRGB[1] - hG) * t;
+      b = hB + (skyRGB[2] - hB) * t;
+    } else {
+      // Below horizon → dark ground color
+      const s = 1 + t;
+      r = hR * s * 0.35;
+      g = hG * s * 0.35;
+      b = hB * s * 0.35;
+    }
+    cols[i * 3]     = Math.max(0, Math.min(1, r));
+    cols[i * 3 + 1] = Math.max(0, Math.min(1, g));
+    cols[i * 3 + 2] = Math.max(0, Math.min(1, b));
+  }
+
+  skyGeo.setAttribute("color", new THREE.BufferAttribute(cols, 3));
+  const skyMesh = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({
+    vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false,
+  }));
+  skyMesh.renderOrder = -2;
+  scene.add(skyMesh);
+}
+
+// ── Stars (shown for dark/mystic/night biomes) ────────────────────────────────
+
+function buildStars(scene: THREE.Scene, p: WorldMapParams): THREE.Points | null {
+  const showStars = ["dungeon", "volcanic", "mystic", "tundra"].includes(p.biome)
+    || p.danger_level > 0.65 || p.mysticism > 0.55;
+  if (!showStars) return null;
+
+  const count = 1400;
+  const pos   = new Float32Array(count * 3);
+  const cols  = new Float32Array(count * 3);
+  const R     = 500;
+
+  for (let i = 0; i < count; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi   = Math.acos(1 - Math.random() * 0.88); // upper sphere
+    pos[i * 3]     = R * Math.sin(phi) * Math.cos(theta);
+    pos[i * 3 + 1] = Math.abs(R * Math.cos(phi)) + 15;
+    pos[i * 3 + 2] = R * Math.sin(phi) * Math.sin(theta);
+
+    const b    = 0.65 + Math.random() * 0.35;
+    const tint = Math.random();
+    cols[i * 3]     = b;
+    cols[i * 3 + 1] = b * (tint > 0.75 ? 0.90 : 1.0);
+    cols[i * 3 + 2] = b * (tint > 0.75 ? 1.0  : tint > 0.35 ? 0.94 : 0.82);
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(pos,  3));
+  geo.setAttribute("color",    new THREE.BufferAttribute(cols, 3));
+
+  const stars = new THREE.Points(geo, new THREE.PointsMaterial({
+    vertexColors: true, size: 1.4, sizeAttenuation: false,
+    transparent: true, opacity: 0.88, fog: false,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  stars.renderOrder = -1;
+  scene.add(stars);
+  return stars;
+}
+
+// ── Celestial body (sun or moon) ──────────────────────────────────────────────
+
+function buildCelestialBody(scene: THREE.Scene, p: WorldMapParams): void {
+  const isNight = ["dungeon", "mystic", "volcanic"].includes(p.biome) || p.danger_level > 0.72;
+  const dist = 440;
+  const elev = (isNight ? 0.62 : 0.52) * Math.PI * 0.5;
+  const az   = Math.PI * 0.28;
+  const cx   = Math.cos(az) * Math.cos(elev) * dist;
+  const cy   = Math.sin(elev) * dist;
+  const cz   = Math.sin(az)  * Math.cos(elev) * dist;
+
+  let bodyHex: number, glowHex: number, radius: number;
+  if (isNight) {
+    bodyHex = p.biome === "mystic" ? 0xd4aaff : 0xd0dcff;
+    glowHex = p.biome === "mystic" ? 0x9333ea : 0x7777bb;
+    radius  = 7;
+  } else {
+    bodyHex = p.biome === "desert" ? 0xfffbd8 : p.biome === "tundra" ? 0xddeeff : 0xfffce8;
+    glowHex = p.biome === "desert" ? 0xffcc44 : 0xffeeaa;
+    radius  = 10;
+  }
+
+  const bodyMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(radius, 16, 16),
+    new THREE.MeshBasicMaterial({ color: bodyHex, fog: false }),
+  );
+  bodyMesh.position.set(cx, cy, cz);
+  bodyMesh.renderOrder = -1;
+  scene.add(bodyMesh);
+
+  const haloMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(radius * 2.6, 16, 16),
+    new THREE.MeshBasicMaterial({
+      color: glowHex, transparent: true, opacity: 0.13,
+      fog: false, blending: THREE.AdditiveBlending, depthWrite: false,
+    }),
+  );
+  haloMesh.position.set(cx, cy, cz);
+  haloMesh.renderOrder = -1;
+  scene.add(haloMesh);
+}
+
+// ── Animated clouds ───────────────────────────────────────────────────────────
+
+function buildClouds(scene: THREE.Scene, p: WorldMapParams, rng: () => number): THREE.Group | null {
+  if (p.biome === "dungeon") return null;
+
+  const cloudY = 50 + p.mountain_height * 22;
+  const count  = 10 + Math.floor(rng() * 8);
+
+  const cloudMat = new THREE.MeshStandardMaterial({
+    color:       p.biome === "volcanic" ? 0x2a1a1a : p.biome === "tundra" ? 0xe8f0ff : 0xf0f0f0,
+    transparent: true,
+    opacity:     p.biome === "volcanic" ? 0.45 : 0.68,
+    roughness:   1.0,
+    fog:         false,
+    depthWrite:  false,
+  });
+
+  const group  = new THREE.Group();
+  const puffs  = [7, 5, 6, 4.5, 3.5];
+
+  for (let i = 0; i < count; i++) {
+    const cx = (rng() - 0.5) * MAP_SIZE * 1.3;
+    const cz = (rng() - 0.5) * MAP_SIZE * 1.3;
+    const cy = cloudY + rng() * 20 - 8;
+    const sc = 0.9 + rng() * 1.3;
+
+    for (let j = 0; j < puffs.length; j++) {
+      const angle  = (j / puffs.length) * Math.PI * 2;
+      const spread = puffs[0] * sc * 0.65;
+      const ox     = j === 0 ? 0 : Math.cos(angle) * spread;
+      const oz     = j === 0 ? 0 : Math.sin(angle) * spread * 0.5;
+      const oy     = (rng() - 0.5) * 2 * sc;
+      const pMsh   = new THREE.Mesh(new THREE.SphereGeometry(puffs[j] * sc, 7, 6), cloudMat);
+      pMsh.position.set(cx + ox, cy + oy, cz + oz);
+      group.add(pMsh);
+    }
+  }
+
+  scene.add(group);
+  return group;
+}
+
+// ── GLTF vegetation builder ───────────────────────────────────────────────────
+// Used when params.use_assets=true. Loads real .gltf tree/rock/cover models
+// from public/glTF/ and places them coherently using the PlacementGrid.
+
+function buildGltfVegetation(
+  scene: THREE.Scene,
+  p: WorldMapParams,
+  noise2D: (x: number, y: number) => number,
+  warpNoise: (x: number, y: number) => number,
+  maxH: number,
+  waterH: number,
+  features: TerrainFeatures,
+  rng: () => number,
+  grid: PlacementGrid,
+  assetCache: Map<string, THREE.Group>,
+): void {
+  const cfg = BIOME_ASSET_CONFIG[p.biome];
+  if (!cfg) return;
+
+  const waterRatio  = waterH / maxH;
+  const half        = MAP_SIZE * 0.47;
+  const treeDensity = p.tree_density ?? 0.5;
+
+  const placeModel = (name: string, wx: number, wz: number, scale: number) => {
+    const template = assetCache.get(name);
+    if (!template) return;
+    const clone = template.clone(true);
+    const h     = computeH(wx, wz, noise2D, warpNoise, p, maxH, waterH, features);
+    clone.position.set(wx, h, wz);
+    clone.scale.setScalar(scale);
+    clone.rotation.y = rng() * Math.PI * 2;
+    clone.traverse(obj => {
+      const m = obj as THREE.Mesh;
+      m.userData.isGltf = true;
+      if ((m as THREE.Mesh).isMesh) { m.castShadow = true; m.receiveShadow = true; }
+    });
+    scene.add(clone);
+  };
+
+  // ── Trees ──────────────────────────────────────────────────────────────────
+  const treeNames = cfg.mainTrees.filter(n => assetCache.has(n));
+  if (treeNames.length > 0 && treeDensity > 0.01) {
+    const treeCount = Math.floor(treeDensity * 460);
+    const cols      = Math.ceil(Math.sqrt(treeCount * 1.5));
+    const step      = (MAP_SIZE * 0.94) / cols;
+    const scatter   = createNoise2D(() => rng());
+    let placed = 0;
+
+    outer:
+    for (let row = 0; row < cols; row++) {
+      for (let col = 0; col < cols; col++) {
+        if (placed >= treeCount) break outer;
+        const wx = -half + col * step + (rng() - 0.5) * step * 0.9;
+        const wz = -half + row * step + (rng() - 0.5) * step * 0.9;
+        const h  = computeH(wx, wz, noise2D, warpNoise, p, maxH, waterH, features);
+        const nh = h / maxH;
+        if (nh <= waterRatio + 0.06 || nh > 0.75) continue;
+        let nearVolcano = false;
+        for (const v of features.volcanoes) {
+          if (Math.sqrt((wx - v.cx) ** 2 + (wz - v.cz) ** 2) < v.radius * 1.3) { nearVolcano = true; break; }
+        }
+        if (nearVolcano) continue;
+        const cn = (scatter(wx * 0.04, wz * 0.04) + 1) * 0.5;
+        if (cn < (1 - treeDensity) * 0.5) continue;
+        if (!grid.tryPlace(wx, wz, 3.0)) continue;
+        const name  = treeNames[Math.floor(rng() * treeNames.length)];
+        placeModel(name, wx, wz, GLTF_TREE_SCALE * (0.72 + rng() * 0.58));
+        placed++;
+      }
+    }
+  }
+
+  // ── Ground covers (bushes, grass, mushrooms) ───────────────────────────────
+  const coverNames = cfg.groundCovers.filter(n => assetCache.has(n));
+  if (coverNames.length > 0) {
+    const coverCount = Math.floor(treeDensity * 320);
+    for (let i = 0; i < coverCount; i++) {
+      const wx = (rng() - 0.5) * MAP_SIZE * 0.9;
+      const wz = (rng() - 0.5) * MAP_SIZE * 0.9;
+      const h  = computeH(wx, wz, noise2D, warpNoise, p, maxH, waterH, features);
+      const nh = h / maxH;
+      if (nh <= waterRatio + 0.04 || nh > 0.72) continue;
+      if (!grid.tryPlace(wx, wz, 1.2)) continue;
+      const name = coverNames[Math.floor(rng() * coverNames.length)];
+      placeModel(name, wx, wz, GLTF_COVER_SCALE * (0.8 + rng() * 0.5));
+    }
+  }
+
+  // ── Rocks ─────────────────────────────────────────────────────────────────
+  const rockNames = cfg.rocks.filter(n => assetCache.has(n));
+  if (rockNames.length > 0) {
+    const rockCount = Math.floor(55 + p.terrain_roughness * 90);
+    for (let i = 0; i < rockCount; i++) {
+      const wx = (rng() - 0.5) * MAP_SIZE * 0.85;
+      const wz = (rng() - 0.5) * MAP_SIZE * 0.85;
+      const h  = computeH(wx, wz, noise2D, warpNoise, p, maxH, waterH, features);
+      if (h / maxH <= waterRatio + 0.03) continue;
+      if (!grid.tryPlace(wx, wz, 1.8)) continue;
+      const name = rockNames[Math.floor(rng() * rockNames.length)];
+      placeModel(name, wx, wz, GLTF_ROCK_SCALE * (0.55 + rng() * 0.9));
+    }
+  }
+
+  // ── Flowers / decoratives ─────────────────────────────────────────────────
+  const flowerNames = (cfg.flowers ?? []).filter(n => assetCache.has(n));
+  if (flowerNames.length > 0 && treeDensity > 0.1) {
+    const flowerCount = Math.floor(treeDensity * 220);
+    for (let i = 0; i < flowerCount; i++) {
+      const wx = (rng() - 0.5) * MAP_SIZE * 0.88;
+      const wz = (rng() - 0.5) * MAP_SIZE * 0.88;
+      const h  = computeH(wx, wz, noise2D, warpNoise, p, maxH, waterH, features);
+      const nh = h / maxH;
+      if (nh <= waterRatio + 0.035 || nh > 0.68) continue;
+      if (!grid.tryPlace(wx, wz, 0.8)) continue;
+      const name = flowerNames[Math.floor(rng() * flowerNames.length)];
+      placeModel(name, wx, wz, GLTF_FLOWER_SCALE * (0.7 + rng() * 0.6));
+    }
+  }
+}
+
 // ── Label helpers ─────────────────────────────────────────────────────────────
 
 const BIOME_LABELS: Record<string, string> = {
@@ -1130,254 +1534,323 @@ export function WorldMapPanel({ params }: WorldMapPanelProps) {
     const container = containerRef.current;
     if (!container) return;
 
-    // ── Renderer ──────────────────────────────────────────────────────
-    const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.shadowMap.enabled   = true;
-    renderer.shadowMap.type      = THREE.PCFSoftShadowMap;
-    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.95;
-    container.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
+    let rafId    = 0;
+    let disposed = false;
+    // Will be populated inside init(); cleanup() runs them all.
+    const onCleanup: Array<() => void> = [];
 
-    // ── Scene ─────────────────────────────────────────────────────────
-    const scene    = new THREE.Scene();
-    const skyColor = new THREE.Color(parseInt(params.sky_color, 16));
-    scene.background = skyColor;
-    scene.fog        = new THREE.FogExp2(skyColor, params.fog_density * 0.014 + 0.002);
+    async function init() {
+      // ── Optional GLTF asset preload ─────────────────────────────────
+      const assetCache = new Map<string, THREE.Group>();
+      if (params.use_assets) {
+        try {
+          const { GLTFLoader } = await import("three/examples/jsm/loaders/GLTFLoader.js");
+          const loader = new GLTFLoader();
+          const cfg    = BIOME_ASSET_CONFIG[params.biome] ?? { mainTrees: [], groundCovers: [], rocks: [], flowers: [] };
+          const names  = [...new Set([...cfg.mainTrees, ...cfg.groundCovers, ...cfg.rocks, ...cfg.flowers])];
+          const results = await Promise.allSettled(
+            names.map(n => loader.loadAsync(`/glTF/${n}.gltf`).then(g => [n, g.scene] as const))
+          );
+          for (const r of results) if (r.status === "fulfilled") assetCache.set(r.value[0], r.value[1]);
+        } catch { /* GLTF load failed — fall back to procedural trees */ }
+      }
+      if (disposed) return;
 
-    // ── Camera ────────────────────────────────────────────────────────
-    const camera = new THREE.PerspectiveCamera(
-      62, container.clientWidth / container.clientHeight, 0.2, 1200,
-    );
-    camera.position.set(0, 55, 110);
-    camera.lookAt(0, 8, 0);
-    cameraRef.current = camera;
+      // ── Renderer ──────────────────────────────────────────────────────
+      const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.shadowMap.enabled   = true;
+      renderer.shadowMap.type      = THREE.PCFSoftShadowMap;
+      renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 0.95;
+      container.appendChild(renderer.domElement);
+      rendererRef.current = renderer;
 
-    // ── Controls ──────────────────────────────────────────────────────
-    const controls         = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 8, 0);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.06;
-    controls.maxPolarAngle = Math.PI * 0.48;
-    controls.minPolarAngle = 0.05;
-    controls.minDistance   = 8;
-    controls.maxDistance   = 280;
-    controls.update();
-    controlsRef.current = controls;
+      // ── Scene ─────────────────────────────────────────────────────────
+      const scene    = new THREE.Scene();
+      const skyColor = new THREE.Color(parseInt(params.sky_color, 16));
+      scene.background = skyColor;
+      scene.fog        = new THREE.FogExp2(skyColor, params.fog_density * 0.014 + 0.002);
 
-    // ── Lighting ──────────────────────────────────────────────────────
-    const ambLum = params.danger_level > 0.7 ? 0.18 : 0.38;
-    scene.add(new THREE.AmbientLight(0xffffff, ambLum));
+      // ── Camera ────────────────────────────────────────────────────────
+      const camera = new THREE.PerspectiveCamera(
+        62, container.clientWidth / container.clientHeight, 0.2, 1200,
+      );
+      camera.position.set(0, 55, 110);
+      camera.lookAt(0, 8, 0);
+      cameraRef.current = camera;
 
-    const sunR = Math.min(1.0, 1.0 + params.danger_level * 0.35);
-    const sunG = Math.max(0.35, 0.95 - params.danger_level * 0.45);
-    const sunB = Math.max(0.08, 0.85 - params.danger_level * 0.72);
-    const sun  = new THREE.DirectionalLight(new THREE.Color(sunR, sunG, sunB), 1.6);
-    sun.position.set(90, 130, 70);
-    sun.castShadow            = true;
-    sun.shadow.mapSize.width  = 2048;
-    sun.shadow.mapSize.height = 2048;
-    sun.shadow.camera.near    = 1;
-    sun.shadow.camera.far     = 700;
-    const shadowExtent = 180;
-    sun.shadow.camera.left    = -shadowExtent;
-    sun.shadow.camera.right   = shadowExtent;
-    sun.shadow.camera.top     = shadowExtent;
-    sun.shadow.camera.bottom  = -shadowExtent;
-    sun.shadow.bias           = -0.0003;
-    scene.add(sun);
-    scene.add(new THREE.HemisphereLight(skyColor, new THREE.Color(0x1a120a), 0.3));
+      // ── Controls ──────────────────────────────────────────────────────
+      const controls         = new OrbitControls(camera, renderer.domElement);
+      controls.target.set(0, 8, 0);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.06;
+      controls.maxPolarAngle = Math.PI * 0.48;
+      controls.minPolarAngle = 0.05;
+      controls.minDistance   = 8;
+      controls.maxDistance   = 280;
+      controls.update();
+      controlsRef.current = controls;
 
-    if (params.biome === "volcanic" || params.has_lava) {
-      scene.add(new THREE.AmbientLight(parseInt(params.lava_color ?? "ff4500", 16), 0.15));
+      // ── Lighting ──────────────────────────────────────────────────────
+      const ambLum = params.danger_level > 0.7 ? 0.18 : 0.38;
+      scene.add(new THREE.AmbientLight(0xffffff, ambLum));
+
+      const sunR = Math.min(1.0, 1.0 + params.danger_level * 0.35);
+      const sunG = Math.max(0.35, 0.95 - params.danger_level * 0.45);
+      const sunB = Math.max(0.08, 0.85 - params.danger_level * 0.72);
+      const sun  = new THREE.DirectionalLight(new THREE.Color(sunR, sunG, sunB), 1.6);
+      sun.position.set(90, 130, 70);
+      sun.castShadow            = true;
+      sun.shadow.mapSize.width  = 4096;
+      sun.shadow.mapSize.height = 4096;
+      sun.shadow.camera.near    = 1;
+      sun.shadow.camera.far     = 700;
+      const shadowExtent = 180;
+      sun.shadow.camera.left    = -shadowExtent;
+      sun.shadow.camera.right   = shadowExtent;
+      sun.shadow.camera.top     = shadowExtent;
+      sun.shadow.camera.bottom  = -shadowExtent;
+      sun.shadow.bias           = -0.0003;
+      scene.add(sun);
+      scene.add(new THREE.HemisphereLight(skyColor, new THREE.Color(0x1a120a), 0.3));
+
+      if (params.biome === "volcanic" || params.has_lava) {
+        scene.add(new THREE.AmbientLight(parseInt(params.lava_color ?? "ff4500", 16), 0.15));
+      }
+
+      // ── Terrain ───────────────────────────────────────────────────────
+      const rng       = mulberry32(
+        ((params.seeds[0] ?? 42) * 73856093) ^
+        ((params.seeds[1] ?? 137) * 19349663) ^
+        ((params.seeds[2] ?? 555) * 83492791)
+      );
+      const noise2D   = createNoise2D(() => rng());
+      const warpNoise = createNoise2D(() => rng());
+      const features  = generateFeatures(params, rng);
+
+      const { maxH, waterH } = buildTerrain(scene, params, noise2D, warpNoise, features);
+      const waterMesh        = buildWater(scene, params, waterH);
+      const lavaMeshes       = buildLava(scene, params, features, noise2D, warpNoise, maxH, waterH);
+
+      terrainDataRef.current = { noise2D, warpNoise, maxH, waterH, features };
+
+      // ── Collision grid: prevents overlapping objects ───────────────────
+      const grid = new PlacementGrid(4);
+      // Pre-forbid volcano zones (highest priority exclusion)
+      for (const v of features.volcanoes) grid.forbid(v.cx, v.cz, v.radius * 1.5);
+
+      // ── Vegetation + Settlements + Landmarks ───────────────────────────
+      // Settlements and landmarks register their footprints first so trees
+      // never spawn on top of buildings or special structures.
+      buildSettlements(scene, params, noise2D, warpNoise, maxH, waterH, features, rng, grid);
+      buildLandmarks(scene, params, noise2D, warpNoise, maxH, waterH, features, rng, grid);
+
+      if (params.use_assets && assetCache.size > 0) {
+        buildGltfVegetation(scene, params, noise2D, warpNoise, maxH, waterH, features, rng, grid, assetCache);
+      } else {
+        buildTrees(scene, params, noise2D, warpNoise, maxH, waterH, features, rng, grid);
+      }
+
+      // ── Particles ─────────────────────────────────────────────────────
+      const particles = buildParticles(scene, params);
+
+      // ── Sky, stars, celestial body, clouds ────────────────────────────
+      buildSky(scene, params);
+      buildCelestialBody(scene, params);
+      const stars      = buildStars(scene, params);
+      const cloudGroup = buildClouds(scene, params, rng);
+
+      // ── Keyboard ──────────────────────────────────────────────────────
+      const onKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "w" || e.key === "W" || e.key === "ArrowUp")    keysRef.current.w = true;
+        if (e.key === "s" || e.key === "S" || e.key === "ArrowDown")  keysRef.current.s = true;
+        if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft")  keysRef.current.a = true;
+        if (e.key === "d" || e.key === "D" || e.key === "ArrowRight") keysRef.current.d = true;
+        if (e.key === "Shift") keysRef.current.shift = true;
+      };
+      const onKeyUp = (e: KeyboardEvent) => {
+        if (e.key === "w" || e.key === "W" || e.key === "ArrowUp")    keysRef.current.w = false;
+        if (e.key === "s" || e.key === "S" || e.key === "ArrowDown")  keysRef.current.s = false;
+        if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft")  keysRef.current.a = false;
+        if (e.key === "d" || e.key === "D" || e.key === "ArrowRight") keysRef.current.d = false;
+        if (e.key === "Shift") keysRef.current.shift = false;
+      };
+      window.addEventListener("keydown", onKeyDown);
+      window.addEventListener("keyup",   onKeyUp);
+      onCleanup.push(() => window.removeEventListener("keydown", onKeyDown));
+      onCleanup.push(() => window.removeEventListener("keyup",   onKeyUp));
+
+      // ── Mouse look (FPV) ──────────────────────────────────────────────
+      const onMouseMove = (e: MouseEvent) => {
+        if (!fpvRef.current || !document.pointerLockElement) return;
+        eulerRef.current.y -= e.movementX * MOUSE_SENS;
+        eulerRef.current.x -= e.movementY * MOUSE_SENS;
+        eulerRef.current.x  = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, eulerRef.current.x));
+        camera.quaternion.setFromEuler(eulerRef.current);
+      };
+      document.addEventListener("mousemove", onMouseMove);
+      onCleanup.push(() => document.removeEventListener("mousemove", onMouseMove));
+
+      const onPointerLockChange = () => {
+        if (!document.pointerLockElement && fpvRef.current) {
+          fpvRef.current = false;
+          setFpvMode(false);
+          explorerRef.current = false;
+          setExplorer(false);
+          controls.enabled = true;
+        }
+      };
+      document.addEventListener("pointerlockchange", onPointerLockChange);
+      onCleanup.push(() => document.removeEventListener("pointerlockchange", onPointerLockChange));
+
+      // ── Resize ────────────────────────────────────────────────────────
+      const onResize = () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      };
+      window.addEventListener("resize", onResize);
+      onCleanup.push(() => window.removeEventListener("resize", onResize));
+
+      // ── Animate ───────────────────────────────────────────────────────
+      const clock  = new THREE.Clock();
+      const fwdDir = new THREE.Vector3();
+      const rgtDir = new THREE.Vector3();
+
+      const animate = () => {
+        if (disposed) return;
+        rafId = requestAnimationFrame(animate);
+        const t = clock.getElapsedTime();
+
+        // Movement
+        const isWalking = explorerRef.current || fpvRef.current;
+        if (isWalking) {
+          const speed = MOVE_SPEED * (keysRef.current.shift ? SPRINT_MULT : 1.0);
+          camera.getWorldDirection(fwdDir);
+          fwdDir.y = 0; fwdDir.normalize();
+          rgtDir.crossVectors(fwdDir, camera.up).normalize();
+
+          const move = new THREE.Vector3(0, 0, 0);
+          if (keysRef.current.w) move.addScaledVector(fwdDir,  speed);
+          if (keysRef.current.s) move.addScaledVector(fwdDir, -speed);
+          if (keysRef.current.a) move.addScaledVector(rgtDir, -speed);
+          if (keysRef.current.d) move.addScaledVector(rgtDir,  speed);
+
+          camera.position.add(move);
+
+          // FPV: snap to terrain height
+          if (fpvRef.current && terrainDataRef.current) {
+            const td = terrainDataRef.current;
+            const terrH = computeH(
+              camera.position.x, camera.position.z,
+              td.noise2D, td.warpNoise, params, td.maxH, td.waterH, td.features,
+            );
+            const targetY = Math.max(terrH, td.waterH) + PLAYER_HEIGHT;
+            camera.position.y += (targetY - camera.position.y) * 0.15;
+          }
+
+          if (explorerRef.current && !fpvRef.current) {
+            controls.target.add(move);
+          }
+        }
+
+        // Animate water
+        if (waterMesh) {
+          const wPos = waterMesh.geometry.attributes.position as THREE.BufferAttribute;
+          for (let i = 0; i < wPos.count; i++) {
+            const wx = wPos.getX(i);
+            const wz = wPos.getZ(i);
+            wPos.setY(i, Math.sin(t * 0.5 + wx * 0.065) * 0.35 + Math.cos(t * 0.35 + wz * 0.055) * 0.25);
+          }
+          wPos.needsUpdate = true;
+        }
+
+        // Animate lava
+        for (const lm of lavaMeshes) {
+          const mat = lm.material as THREE.MeshStandardMaterial;
+          mat.emissiveIntensity = 1.4 + Math.sin(t * 2.0) * 0.6;
+        }
+
+        // Animate particles
+        if (particles) {
+          const cfg  = (particles as any).__particleCfg as ParticleConfig;
+          const pPos = particles.geometry.attributes.position as THREE.BufferAttribute;
+          for (let i = 0; i < pPos.count; i++) {
+            let y = pPos.getY(i), x = pPos.getX(i), z = pPos.getZ(i);
+            if (cfg.direction === "up") {
+              y += cfg.speed;
+              if (y > cfg.maxY) y = cfg.minY;
+            } else if (cfg.direction === "down") {
+              y -= cfg.speed;
+              if (y < cfg.minY) y = cfg.maxY;
+              x += Math.sin(t + i) * 0.01;
+              z += Math.cos(t * 0.7 + i) * 0.01;
+            } else {
+              y += Math.sin(t * 0.5 + i * 0.1) * cfg.speed * 0.5;
+              x += Math.cos(t * 0.3 + i * 0.05) * cfg.speed;
+              z += Math.sin(t * 0.4 + i * 0.07) * cfg.speed;
+              if (y > cfg.maxY) y = cfg.minY;
+              if (y < cfg.minY) y = cfg.maxY;
+            }
+            pPos.setX(i, x); pPos.setY(i, y); pPos.setZ(i, z);
+          }
+          pPos.needsUpdate    = true;
+          particles.rotation.y += 0.0002;
+        }
+
+        // Drift clouds slowly across the map
+        if (cloudGroup) {
+          cloudGroup.position.x += 0.014;
+          if (cloudGroup.position.x > MAP_SIZE * 0.6) cloudGroup.position.x -= MAP_SIZE * 1.2;
+        }
+
+        // Subtle star twinkle
+        if (stars) {
+          (stars.material as THREE.PointsMaterial).opacity = 0.76 + Math.sin(t * 0.8) * 0.12;
+        }
+
+        if (!fpvRef.current) controls.update();
+        renderer.render(scene, camera);
+      };
+      animate();
+
+      // ── Register Three.js cleanup ─────────────────────────────────────
+      onCleanup.push(() => {
+        if (document.pointerLockElement) document.exitPointerLock();
+        controls.dispose();
+        renderer.dispose();
+        scene.traverse((obj) => {
+          const m = obj as THREE.Mesh;
+          // Skip GLTF-originated meshes (shared geometry/material refs)
+          if (m.userData.isGltf) return;
+          if (m.geometry) m.geometry.dispose();
+          if (m.material) {
+            Array.isArray(m.material)
+              ? m.material.forEach((mt) => mt.dispose())
+              : m.material.dispose();
+          }
+        });
+        renderer.domElement.remove();
+        rendererRef.current = null;
+        cameraRef.current   = null;
+        controlsRef.current = null;
+      });
     }
 
-    // ── Terrain ───────────────────────────────────────────────────────
-    // Combine all 3 seeds with prime multipliers for better entropy
-    const rng       = mulberry32(
-      ((params.seeds[0] ?? 42) * 73856093) ^
-      ((params.seeds[1] ?? 137) * 19349663) ^
-      ((params.seeds[2] ?? 555) * 83492791)
-    );
-    const noise2D   = createNoise2D(() => rng());
-    const warpNoise = createNoise2D(() => rng());
-    const features  = generateFeatures(params, rng);
-
-    const { maxH, waterH } = buildTerrain(scene, params, noise2D, warpNoise, features);
-    const waterMesh        = buildWater(scene, params, waterH);
-    const lavaMeshes       = buildLava(scene, params, features, noise2D, warpNoise, maxH, waterH);
-
-    terrainDataRef.current = { noise2D, warpNoise, maxH, waterH, features };
-
-    // ── Vegetation + Settlements + Landmarks ──────────────────────────
-    buildTrees(scene, params, noise2D, warpNoise, maxH, waterH, features, rng);
-    buildSettlements(scene, params, noise2D, warpNoise, maxH, waterH, features, rng);
-    buildLandmarks(scene, params, noise2D, warpNoise, maxH, waterH, features, rng);
-
-    // ── Particles ─────────────────────────────────────────────────────
-    const particles = buildParticles(scene, params);
-
-    // ── Keyboard ──────────────────────────────────────────────────────
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "w" || e.key === "W" || e.key === "ArrowUp")    keysRef.current.w = true;
-      if (e.key === "s" || e.key === "S" || e.key === "ArrowDown")  keysRef.current.s = true;
-      if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft")  keysRef.current.a = true;
-      if (e.key === "d" || e.key === "D" || e.key === "ArrowRight") keysRef.current.d = true;
-      if (e.key === "Shift") keysRef.current.shift = true;
-    };
-    const onKeyUp = (e: KeyboardEvent) => {
-      if (e.key === "w" || e.key === "W" || e.key === "ArrowUp")    keysRef.current.w = false;
-      if (e.key === "s" || e.key === "S" || e.key === "ArrowDown")  keysRef.current.s = false;
-      if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft")  keysRef.current.a = false;
-      if (e.key === "d" || e.key === "D" || e.key === "ArrowRight") keysRef.current.d = false;
-      if (e.key === "Shift") keysRef.current.shift = false;
-    };
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup",   onKeyUp);
-
-    // ── Mouse look (FPV) ──────────────────────────────────────────────
-    const onMouseMove = (e: MouseEvent) => {
-      if (!fpvRef.current || !document.pointerLockElement) return;
-      eulerRef.current.y -= e.movementX * MOUSE_SENS;
-      eulerRef.current.x -= e.movementY * MOUSE_SENS;
-      eulerRef.current.x  = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, eulerRef.current.x));
-      camera.quaternion.setFromEuler(eulerRef.current);
-    };
-    document.addEventListener("mousemove", onMouseMove);
-
-    const onPointerLockChange = () => {
-      if (!document.pointerLockElement && fpvRef.current) {
-        fpvRef.current = false;
-        setFpvMode(false);
-        explorerRef.current = false;
-        setExplorer(false);
-        controls.enabled = true;
-      }
-    };
-    document.addEventListener("pointerlockchange", onPointerLockChange);
-
-    // ── Resize ────────────────────────────────────────────────────────
-    const onResize = () => {
-      camera.aspect = container.clientWidth / container.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
-    };
-    window.addEventListener("resize", onResize);
-
-    // ── Animate ───────────────────────────────────────────────────────
-    const clock  = new THREE.Clock();
-    const fwdDir = new THREE.Vector3();
-    const rgtDir = new THREE.Vector3();
-    let rafId    = 0;
-
-    const animate = () => {
-      rafId = requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
-
-      // Movement
-      const isWalking = explorerRef.current || fpvRef.current;
-      if (isWalking) {
-        const speed = MOVE_SPEED * (keysRef.current.shift ? SPRINT_MULT : 1.0);
-        camera.getWorldDirection(fwdDir);
-        fwdDir.y = 0; fwdDir.normalize();
-        rgtDir.crossVectors(fwdDir, camera.up).normalize();
-
-        const move = new THREE.Vector3(0, 0, 0);
-        if (keysRef.current.w) move.addScaledVector(fwdDir,  speed);
-        if (keysRef.current.s) move.addScaledVector(fwdDir, -speed);
-        if (keysRef.current.a) move.addScaledVector(rgtDir, -speed);
-        if (keysRef.current.d) move.addScaledVector(rgtDir,  speed);
-
-        camera.position.add(move);
-
-        // FPV: snap to terrain height
-        if (fpvRef.current && terrainDataRef.current) {
-          const td = terrainDataRef.current;
-          const terrH = computeH(
-            camera.position.x, camera.position.z,
-            td.noise2D, td.warpNoise, params, td.maxH, td.waterH, td.features,
-          );
-          const targetY = Math.max(terrH, td.waterH) + PLAYER_HEIGHT;
-          camera.position.y += (targetY - camera.position.y) * 0.15;
-        }
-
-        if (explorerRef.current && !fpvRef.current) {
-          controls.target.add(move);
-        }
-      }
-
-      // Animate water
-      if (waterMesh) {
-        const wPos = waterMesh.geometry.attributes.position as THREE.BufferAttribute;
-        for (let i = 0; i < wPos.count; i++) {
-          const wx = wPos.getX(i);
-          const wz = wPos.getZ(i);
-          wPos.setY(i, Math.sin(t * 0.5 + wx * 0.065) * 0.35 + Math.cos(t * 0.35 + wz * 0.055) * 0.25);
-        }
-        wPos.needsUpdate = true;
-      }
-
-      // Animate lava
-      for (const lm of lavaMeshes) {
-        const mat = lm.material as THREE.MeshStandardMaterial;
-        mat.emissiveIntensity = 1.4 + Math.sin(t * 2.0) * 0.6;
-      }
-
-      // Animate particles
-      if (particles) {
-        const cfg  = (particles as any).__particleCfg as ParticleConfig;
-        const pPos = particles.geometry.attributes.position as THREE.BufferAttribute;
-        for (let i = 0; i < pPos.count; i++) {
-          let y = pPos.getY(i), x = pPos.getX(i), z = pPos.getZ(i);
-          if (cfg.direction === "up") {
-            y += cfg.speed;
-            if (y > cfg.maxY) y = cfg.minY;
-          } else if (cfg.direction === "down") {
-            y -= cfg.speed;
-            if (y < cfg.minY) y = cfg.maxY;
-            x += Math.sin(t + i) * 0.01;
-            z += Math.cos(t * 0.7 + i) * 0.01;
-          } else {
-            y += Math.sin(t * 0.5 + i * 0.1) * cfg.speed * 0.5;
-            x += Math.cos(t * 0.3 + i * 0.05) * cfg.speed;
-            z += Math.sin(t * 0.4 + i * 0.07) * cfg.speed;
-            if (y > cfg.maxY) y = cfg.minY;
-            if (y < cfg.minY) y = cfg.maxY;
-          }
-          pPos.setX(i, x); pPos.setY(i, y); pPos.setZ(i, z);
-        }
-        pPos.needsUpdate    = true;
-        particles.rotation.y += 0.0002;
-      }
-
-      if (!fpvRef.current) controls.update();
-      renderer.render(scene, camera);
-    };
-    animate();
+    init();
 
     return () => {
+      disposed = true;
       cancelAnimationFrame(rafId);
-      window.removeEventListener("resize",   onResize);
-      window.removeEventListener("keydown",  onKeyDown);
-      window.removeEventListener("keyup",    onKeyUp);
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("pointerlockchange", onPointerLockChange);
-      if (document.pointerLockElement) document.exitPointerLock();
-      controls.dispose();
-      renderer.dispose();
-      scene.traverse((obj) => {
-        const m = obj as THREE.Mesh;
-        if (m.geometry) m.geometry.dispose();
-        if (m.material) {
-          Array.isArray(m.material)
-            ? m.material.forEach((mt) => mt.dispose())
-            : m.material.dispose();
-        }
-      });
-      renderer.domElement.remove();
-      rendererRef.current = null;
+      for (const fn of onCleanup) fn();
+      // Safety fallback: cleanup renderer if init() didn't fully complete
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+        rendererRef.current.domElement.remove();
+        rendererRef.current = null;
+      }
       cameraRef.current   = null;
       controlsRef.current = null;
     };

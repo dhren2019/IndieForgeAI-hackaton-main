@@ -1,24 +1,20 @@
 /**
  * Thin fetch wrapper with typed responses.
- * Automatically attaches Authorization: Bearer <token> when the user is
- * signed in with Clerk (token getter set by ClerkTokenSync in app.tsx).
+ * Auth is handled via Clerk's browser cookies (__session) which are sent
+ * automatically. We no longer attach an Authorization header because the
+ * duplicate JWT pushed Cookie + Authorization over Bun's 16 KB header limit
+ * causing HTTP 431 errors.
  */
-import { getAuthToken } from "./auth-token";
 
 export async function fetcher<T>(
   url: string,
   options?: RequestInit
 ): Promise<{ data: T | null; error: string | null }> {
   try {
-    const token = await getAuthToken();
-    const authHeader: Record<string, string> = token
-      ? { Authorization: `Bearer ${token}` }
-      : {};
-
     const mergedOptions: RequestInit = {
       ...options,
+      credentials: "include",
       headers: {
-        ...authHeader,
         ...(options?.headers as Record<string, string> ?? {}),
       },
     };

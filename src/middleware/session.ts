@@ -62,28 +62,31 @@ export async function resolveSession(req: Request): Promise<SessionContext> {
     ? `${SESSION_COOKIE.name}=${newCookieId}; Path=${SESSION_COOKIE.path}; HttpOnly; SameSite=${SESSION_COOKIE.sameSite}; Max-Age=${SESSION_COOKIE.maxAge}`
     : null;
 
-  // 1. Try Clerk JWT from Authorization: Bearer <token>
+  // Helper: upsert + migrate for a verified Clerk ID
+  async function resolveClerk(clerkId: string) {
+    const { mergedCookie } = await upsertUser(clerkId);
+    if (cookieId && cookieId !== clerkId && mergedCookie !== cookieId) {
+      await migrateAnonymousSession(clerkId, cookieId);
+    }
+    return { sessionId: clerkId, cookieSessionId: cookieId, setCookie: null };
+  }
+
+  // 1a. Try Clerk JWT from Authorization: Bearer <token> (non-browser clients)
   const authHeader = req.headers.get("authorization") ?? "";
   if (authHeader.startsWith("Bearer ")) {
     const token = authHeader.slice(7).trim();
     if (token) {
       const clerkId = await verifyClerkToken(token);
-      if (clerkId) {
-        // Upsert user in DB so data is always associated to this Clerk ID
-        const { mergedCookie } = await upsertUser(clerkId);
-
-        // Migrate anonymous cookie data → Clerk ID (once per device cookie)
-        if (cookieId && cookieId !== clerkId && mergedCookie !== cookieId) {
-          await migrateAnonymousSession(clerkId, cookieId);
-        }
-
-        return {
-          sessionId:       clerkId,
-          cookieSessionId: cookieId,
-          setCookie:       null,
-        };
-      }
+      if (clerkId) return resolveClerk(clerkId);
     }
+  }
+
+  // 1b. Try Clerk JWT from __session cookie (browser clients — avoids large
+  //     Authorization header that can trigger HTTP 431 with Bun)
+  const clerkCookieMatch = cookie.match(/(?:^|;)\s*__session=([^;]+)/);
+  if (clerkCookieMatch?.[1]) {
+    const clerkId = await verifyClerkToken(decodeURIComponent(clerkCookieMatch[1]));
+    if (clerkId) return resolveClerk(clerkId);
   }
 
   // 2. Fall back to cookie-based anonymous session

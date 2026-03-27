@@ -41,20 +41,48 @@ const BIOMES = [
   "ocean", "plains", "mountains", "dungeon", "mystic",
 ] as const;
 
+// ── Biome keyword extractor (used for prompt hints and fallback) ───────────
+
+function extractBiomeFromPrompt(prompt: string): string | undefined {
+  const p = prompt.toLowerCase();
+  if (/volcan|lava|magma|obsidian|ceniza|ignea|pyroclast/.test(p))               return "volcanic";
+  if (/hielo|nieve|tundra|helad|glaciar|ártico|artico|permafrost/.test(p))       return "tundra";
+  if (/pantano|ciénaga|cienaga|marisma|fango|turba|swamp/.test(p))               return "swamp";
+  if (/bosque|selva|árbol|arbol|forest|jungla|jungle/.test(p))                   return "forest";
+  if (/desierto|arena|dunas|desert|árido|arid/.test(p))                          return "desert";
+  if (/océano|ocean|\bmar\b|\bsea\b|\bisla\b|archipiélago|archipelago/.test(p)) return "ocean";
+  if (/montaña|montañas|sierra|pico|cumbre|mountain|colina/.test(p))             return "mountains";
+  if (/mazmorra|cripta|dungeon|catacumba|cueva|subterr/.test(p))                 return "dungeon";
+  if (/místico|arcano|éter|astral|mágico|mystic|arcane|planar/.test(p))         return "mystic";
+  return undefined;
+}
+
 // ── Prompts ────────────────────────────────────────────────────────────────
 
 function buildFreePrompt(userPrompt: string): string {
+  const detectedBiome = extractBiomeFromPrompt(userPrompt);
+  const biomeHint = detectedBiome
+    ? `\nBIOME OBLIGATORIO: El prompt menciona claramente características de "${detectedBiome}". DEBES usar biome="${detectedBiome}". No elijas otro bioma salvo que el prompt lo contradiga explícitamente.\n`
+    : "";
   return `Eres el arquitecto de mundos de fantasía más imaginativo del universo RPG.
-Generas mundos 3D procedurales ÚNICOS y DETALLADOS que reflejan EXACTAMENTE lo que el usuario describe.
-
-El usuario ha descrito el siguiente mundo:
+Tu output se convierte DIRECTAMENTE en un mapa 3D procedural — cada parámetro tiene impacto visual real.
+FIDELIDAD TOTAL: el mapa DEBE reflejar lo que el usuario describe. Si dice volcanes → biome=volcanic, has_lava=true. Si dice dragones → danger_level alto. Si dice magia → mysticism alto.
+${biomeHint}
+PROMPT DEL USUARIO:
 "${userPrompt}"
 
 Tu misión (doble):
-1. Escribir una descripción vívida y evocadora del mundo (2-3 párrafos cortos, máx 320 palabras, en el MISMO idioma que el prompt del usuario). Habla del clima, la historia, los peligros, la magia. Haz que el lector sienta que está ahí.
-2. Extraer los parámetros técnicos para generar el terreno 3D procedural. ANALIZA el prompt cuidadosamente y genera landmarks que CORRESPONDAN a lo descrito.
+1. Escribir una descripción vívida (2-3 párrafos, máx 300 palabras, en el idioma del prompt). Clima, historia, peligros, magia. Que el lector sienta que está ahí.
+2. Extraer parámetros técnicos. CADA palabra del prompt importa. Extrae TODO lo que puedas.
 
-REGLA CRÍTICA: Los seeds DEBEN ser aleatorios y DIFERENTES cada vez. Nunca repitas seeds. Genera 3 números aleatorios entre 1 y 9999.
+REGLAS CRÍTICAS:
+- Seeds DEBEN ser 3 enteros completamente ALEATORIOS entre 1 y 9999 — nunca iguales entre sí.
+- landmarks DEBE ser un array con TODOS los elementos que menciona el prompt.
+- Si el prompt menciona lava, fuego, volcanes → has_lava=true SIEMPRE.
+- Los colores deben REFLEJAR el mood del prompt: volcánico=negros/rojos, místico=púrpuras, etc.
+- danger_level: dragones/demonios/monstruos=0.8-1.0. Tranquilo/seguro=0.0-0.3.
+- mysticism: magia/hechizos/dimensiones=0.7-1.0. Sin magia=0.0-0.3.
+- terrain_roughness: montañas escarpadas/volcanes=0.7-1.0. Llanuras/pantanos=0.1-0.4.
 
 Responde SOLO con este JSON (sin markdown, sin texto extra):
 {
@@ -208,42 +236,96 @@ function sanitize(raw: Record<string, unknown>): WorldMapParams {
   };
 }
 
+// ── Fallback world generator (used when AI is unavailable) ───────────────────
+
+const BIOME_DEFAULTS: Record<string, Partial<Record<string, unknown>>> = {
+  forest:    { terrain_color_1: "4a6741", terrain_color_2: "2d5a27", terrain_color_3: "8b7355", water_color: "1d6fa0", sky_color: "2a3d5c", settlement_style: "village", tree_density: 0.75, ambient_particles: "none" },
+  desert:    { terrain_color_1: "c9a76c", terrain_color_2: "d4885a", terrain_color_3: "b8860b", water_color: "1e90ff", sky_color: "6a8cc7", settlement_style: "ruins",   tree_density: 0.05, landmarks: ["pyramid", "ancient_ruins"], terrain_style: "flat" },
+  tundra:    { terrain_color_1: "b0c4d8", terrain_color_2: "ffffff", terrain_color_3: "8fafc0", water_color: "6aaed6", sky_color: "8ab4d8", settlement_style: "none",    tree_density: 0.05, landmarks: ["ice_spikes"], ambient_particles: "snow" },
+  swamp:     { terrain_color_1: "3a4a2a", terrain_color_2: "2a3a1a", terrain_color_3: "5a6a3a", water_color: "2a4a2a", sky_color: "2a3a2a", settlement_style: "ruins",   tree_density: 0.35, terrain_style: "flat" },
+  volcanic:  { terrain_color_1: "2a1a1a", terrain_color_2: "1a0a0a", terrain_color_3: "3a1a1a", water_color: "ff4500", sky_color: "2a0a0a", settlement_style: "none",    tree_density: 0.0,  has_lava: true, lava_color: "ff4500", landmarks: ["volcano", "lava_river"], ambient_particles: "embers", terrain_style: "crater" },
+  plains:    { terrain_color_1: "6aaa50", terrain_color_2: "4a8840", terrain_color_3: "8ab060", water_color: "1d6fa0", sky_color: "3a5a8a", settlement_style: "village", tree_density: 0.25, terrain_style: "rolling" },
+  mountains: { terrain_color_1: "787878", terrain_color_2: "585858", terrain_color_3: "a0a0a0", water_color: "4a8aaa", sky_color: "2a3a4a", settlement_style: "fortress", tree_density: 0.18, terrain_style: "jagged", mountain_height: 0.9 },
+  mystic:    { terrain_color_1: "5a3a7a", terrain_color_2: "3a1a5a", terrain_color_3: "8a5aaa", water_color: "7a3abb", sky_color: "1a0a2a", settlement_style: "towers",  tree_density: 0.4,  landmarks: ["crystal", "floating_rocks", "obelisk"], ambient_particles: "magic", accent_color: "c084fc" },
+  ocean:     { terrain_color_1: "0a2a4a", terrain_color_2: "0a1a3a", terrain_color_3: "1a3a5a", water_color: "1d6fa0", sky_color: "2a4a6a", settlement_style: "none",    tree_density: 0.05, terrain_style: "archipelago", water_level: 0.55 },
+  dungeon:   { terrain_color_1: "2a2a2a", terrain_color_2: "1a1a1a", terrain_color_3: "3a3a3a", water_color: "1a1a2a", sky_color: "0a0a0a", settlement_style: "towers",  tree_density: 0.0,  landmarks: ["pillars", "altar"], terrain_style: "canyon" },
+};
+
+function generateFallbackParams(biomeHint?: string): { description: string; params: WorldMapParams } {
+  const validBiomes = Object.keys(BIOME_DEFAULTS);
+  const biome = validBiomes.includes(biomeHint ?? "") ? (biomeHint as string) : validBiomes[Math.floor(Math.random() * validBiomes.length)];
+  const baseDefaults = BIOME_DEFAULTS[biome] ?? {};
+  const description = `Un mundo ${biome} generado proceduralmente. La IA no estaba disponible, pero el terreno fue creado con los parámetros por defecto del bioma ${biome}.`;
+  const params = sanitize({
+    biome,
+    terrain_roughness: biome === "mountains" ? 0.82 : biome === "volcanic" ? 0.75 : biome === "plains" ? 0.25 : 0.5,
+    water_level:       biome === "ocean" ? 0.55 : biome === "desert" || biome === "volcanic" ? 0.05 : 0.25,
+    mountain_height:   biome === "mountains" ? 0.9 : biome === "volcanic" ? 0.7 : 0.45,
+    danger_level:      biome === "volcanic" ? 0.85 : biome === "dungeon" ? 0.9 : biome === "mystic" ? 0.55 : 0.3,
+    mysticism:         biome === "mystic" ? 0.88 : biome === "dungeon" ? 0.45 : 0.15,
+    fog_density:       biome === "swamp" ? 0.22 : biome === "dungeon" ? 0.18 : 0.1,
+    region_name:       `Tierras ${biome.charAt(0).toUpperCase() + biome.slice(1)}`,
+    seeds:             [Math.floor(Math.random() * 9999) + 1, Math.floor(Math.random() * 9999) + 1, Math.floor(Math.random() * 9999) + 1],
+    ...baseDefaults,
+  });
+  return { description, params };
+}
+
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function worldMapRoute(req: Request, _sessionId: string): Promise<Response> {
-  let body: Record<string, unknown>;
   try {
-    body = (await req.json()) as Record<string, unknown>;
-  } catch {
-    return err("Invalid JSON body");
+    let body: Record<string, unknown>;
+    try {
+      body = (await req.json()) as Record<string, unknown>;
+    } catch {
+      return err("Invalid JSON body");
+    }
+
+    const hasFreePrompt = typeof body.prompt === "string" && body.prompt.trim().length > 0;
+    const prompt        = hasFreePrompt
+      ? buildFreePrompt(String(body.prompt).slice(0, 800))
+      : buildRpgPrompt(
+          typeof body.type === "string" ? body.type : "lore",
+          typeof body.result === "object" && body.result !== null
+            ? body.result as Record<string, unknown>
+            : {}
+        );
+
+    const model   = ENV.GROQ_MODEL ?? "llama-3.3-70b-versatile";
+    const groqRes = await callGroq(prompt, model);
+
+    if (!groqRes.ok) {
+      console.warn("[worldmap] Groq unavailable:", groqRes.error);
+      const biomeHint =
+        typeof body.type   === "string" ? body.type :
+        typeof body.prompt === "string" ? extractBiomeFromPrompt(body.prompt) :
+        undefined;
+      const { description, params } = generateFallbackParams(biomeHint);
+      return ok({ description: `⚠️ IA no disponible — mundo de respaldo generado.\n\n${description}`, params, fallback: true });
+    }
+
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(groqRes.raw) as Record<string, unknown>;
+    } catch {
+      console.warn("[worldmap] JSON parse failed, using fallback. Raw:", groqRes.raw.slice(0, 120));
+      const biomeHint =
+        typeof body.type   === "string" ? body.type :
+        typeof body.prompt === "string" ? extractBiomeFromPrompt(body.prompt) :
+        undefined;
+      const { description, params } = generateFallbackParams(biomeHint);
+      return ok({ description: `⚠️ Error de formato IA — mundo de respaldo generado.\n\n${description}`, params, fallback: true });
+    }
+
+    const description = typeof parsed.description === "string" ? parsed.description : "";
+    const params      = sanitize(parsed);
+    return ok({ description, params });
+
+  } catch (e) {
+    console.error("[worldmap] Unhandled error:", e);
+    const { description, params } = generateFallbackParams();
+    return ok({ description: `🔧 Error interno — mundo de respaldo generado.\n\n${description}`, params, fallback: true });
   }
-
-  const hasFreePrompt = typeof body.prompt === "string" && body.prompt.trim().length > 0;
-  const prompt        = hasFreePrompt
-    ? buildFreePrompt(String(body.prompt).slice(0, 800))
-    : buildRpgPrompt(
-        typeof body.type === "string" ? body.type : "lore",
-        typeof body.result === "object" && body.result !== null
-          ? body.result as Record<string, unknown>
-          : {}
-      );
-
-  const model   = ENV.GROQ_MODEL ?? "llama-3.3-70b-versatile";
-  const groqRes = await callGroq(prompt, model);
-
-  if (!groqRes.ok) {
-    return err(groqRes.error ?? "La IA no pudo generar los parámetros del mundo. Intenta de nuevo.", 503);
-  }
-
-  let parsed: Record<string, unknown>;
-  try {
-    parsed = JSON.parse(groqRes.raw) as Record<string, unknown>;
-  } catch {
-    return err("Failed to parse terrain parameters");
-  }
-
-  const description = typeof parsed.description === "string" ? parsed.description : "";
-  const params      = sanitize(parsed);
-  return ok({ description, params });
 }
 
