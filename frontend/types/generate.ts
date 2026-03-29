@@ -1,4 +1,4 @@
-export type GenerationType = "npc" | "quest" | "item" | "lore" | "weapon" | "enemy" | "worldmap";
+export type GenerationType = "npc" | "quest" | "item" | "lore" | "weapon" | "enemy";
 export type GenerationSource = "model" | "fallback";
 
 export const AI_MODELS = [
@@ -36,13 +36,12 @@ export interface Generation {
 }
 
 export const TYPE_META = {
-  npc:      { icon: "🧙", label: "NPC",        desc: "Personajes y personalidades",       color: "#f59e0b" },
-  quest:    { icon: "⚔️", label: "Misín",     desc: "Misiones y objetivos",              color: "#3b82f6" },
-  item:     { icon: "💎", label: "Objeto",    desc: "Armaduras, reliquias y objetos",    color: "#10b981" },
-  lore:     { icon: "📜", label: "Trasfondo", desc: "Historia del mundo y secretos",     color: "#a78bfa" },
-  weapon:   { icon: "🗡️", label: "Arma",      desc: "Espadas, bastones y armas",         color: "#ef4444" },
-  enemy:    { icon: "💀", label: "Enemigo",   desc: "Bestias, demonios y jefes",         color: "#6b7280" },
-  worldmap: { icon: "🌍", label: "Mundo 3D",   desc: "Mapas de terreno procedurales",     color: "#22d3ee" },
+  npc:      { icon: "🧙", label: "NPC",       desc: "Personajes y personalidades",       color: "#f59e0b" },
+  quest:    { icon: "⚔️", label: "MISIONES",  desc: "Misiones y objetivos",              color: "#3b82f6" },
+  item:     { icon: "💎", label: "OBJETO",    desc: "Armaduras, reliquias y objetos",    color: "#10b981" },
+  lore:     { icon: "📜", label: "HISTORIA",  desc: "Historia del mundo y secretos",     color: "#a78bfa" },
+  weapon:   { icon: "🗡️", label: "ARMAS",     desc: "Espadas, bastones y armas",         color: "#ef4444" },
+  enemy:    { icon: "💀", label: "ENEMIGOS",  desc: "Bestias, demonios y jefes",         color: "#6b7280" },
 } as const;
 
 export const GENEROS         = ["Fantasía", "Ciencia Ficción", "Cyberpunk", "Western", "Terror", "Steampunk", "Post-Apocalíptico"];
@@ -61,7 +60,7 @@ export const FIELD_LABELS: Record<string, string> = {
   secret: "Secreto", dialogue: "Diálogo", title: "Título", type: "Tipo",
   region_name: "Nombre del mundo", biome: "Bioma", description: "Descripción",
   objective: "Objetivo", reward: "Recompensa", location: "Ubicación", twist: "Giro",
-  rarity: "Rareza", description: "Descripción", effect: "Efecto", value: "Valor",
+  rarity: "Rareza", effect: "Efecto", value: "Valor",
   era: "Era", summary: "Resumen", factions: "Facciones", element: "Elemento",
   style: "Estilo", damage: "Daño", special_ability: "Habilidad especial", lore: "Trasfondo",
   difficulty: "Dificultad", hp: "HP", attack_style: "Estilo de ataque",
@@ -71,4 +70,12 @@ export const FIELD_LABELS: Record<string, string> = {
   speed: "Velocidad", range: "Alcance", passive: "Pasivo", crafting_material: "Materiales",
   steps: "Pasos", enemies: "Enemigos", region: "Región", factions_desc: "Facciones",
   key_figures: "Figuras clave", impact: "Impacto",
+  // New rich fields
+  history: "Historia", overview: "Visión general", synopsis: "Sinopsis",
+  important_events: "Eventos importantes", geography: "Geografía",
+  magic_or_power: "Magia y poder", myths_and_prophecies: "Mitos y profecías",
+  moral_dilemma: "Dilema moral", failure_consequences: "Consecuencias del fracaso",
+  npcs_involved: "NPCs involucrados", relationships: "Relaciones",
+  curse: "Maldición", requirements: "Requisitos",
+  encounter_tips: "Consejos de encuentro",
 };

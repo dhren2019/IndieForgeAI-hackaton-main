@@ -193,12 +193,37 @@ bun run build
 | **simplex-noise** | Generación procedural de terreno (fBm) |
 | **Groq API** | Extracción de parámetros + descripción del mundo |
 
+### Assets glTF reales de videojuegos
+
+Al activar el modo **"Usar glTF reales"**, World Creator carga modelos y assets 3D extraídos directamente de videojuegos en formato `.glTF`/`.glb`:
+
+- Los modelos se instancian sobre el terreno procedural: personajes, enemigos, objetos de escenario y props de ambiente se colocan según el bioma y los parámetros generados.
+- Los assets se cargan mediante **`THREE.GLTFLoader`**, por lo que cualquier modelo `.glb` compatible con el estándar Khronos puede ser usado.
+- **Skeleton / esqueleto**: durante la carga de cada modelo se muestra un esqueleto animado (skeleton placeholder) que indica visualmente el progreso, exactamente igual al skeleton loading de la UI general. Una vez cargado el asset, el placeholder desaparece y aparece el modelo real.
+- Los modelos incluyen sus propias animaciones (idle, walk, attack) si las `.glb` las traen embebidas, activadas automáticamente con `AnimationMixer`.
+
+### Modo primera persona
+
+Pulsa el botón **"🎮 Primera persona"** para entrar en modo FPS dentro del propio mundo generado:
+
+- El cursor queda capturado en el canvas (Pointer Lock API).
+- Movimiento con `W / A / S / D` o flechas, vista con el ratón.
+- Los modelos glTF coexisten en la escena con el terreno procedural, pudiendo explorar junto a ellos.
+- Pulsa `Esc` para salir del modo FPS y volver a OrbitControls.
+
+### Guardar en Mis Proyectos
+
+Una vez generado un mundo (con o sin glTF reales), pulsa **"Añadir a proyecto"** para guardarlo:
+
+- Se abre el panel `AddToProjectPanel` donde puedes asociar el mundo a un proyecto existente o crear uno nuevo.
+- Los parámetros del mundo (bioma, semillas, colores, descripción IA) quedan vinculados al proyecto para poder recuperarlos y regenerarlos en cualquier momento.
+
 ### Archivos clave
 
 | Archivo | Descripción |
 |---|---|
 | [src/routes/worldmap.ts](src/routes/worldmap.ts) | Endpoint `POST /api/worldmap` — acepta prompt libre o contenido RPG |
-| [frontend/components/results/WorldMap3D.tsx](frontend/components/results/WorldMap3D.tsx) | Motor Three.js: terreno, agua, árboles, edificios, WASD |
-| [frontend/pages/WorldCreatorPage.tsx](frontend/pages/WorldCreatorPage.tsx) | Página World Creator con textarea + descripción IA + mapa |
+| [frontend/components/results/WorldMap3D.tsx](frontend/components/results/WorldMap3D.tsx) | Motor Three.js: terreno, agua, árboles, edificios, WASD, glTF loader, FPS |
+| [frontend/pages/WorldCreatorPage.tsx](frontend/pages/WorldCreatorPage.tsx) | Página World Creator con textarea + descripción IA + mapa + proyectos |
 
 ---

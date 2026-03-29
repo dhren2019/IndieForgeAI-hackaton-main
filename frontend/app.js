@@ -3,25 +3,43 @@ var __getProtoOf = Object.getPrototypeOf;
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+function __accessProp(key) {
+  return this[key];
+}
+var __toESMCache_node;
+var __toESMCache_esm;
 var __toESM = (mod, isNodeMode, target) => {
+  var canCache = mod != null && typeof mod === "object";
+  if (canCache) {
+    var cache = isNodeMode ? __toESMCache_node ??= new WeakMap : __toESMCache_esm ??= new WeakMap;
+    var cached = cache.get(mod);
+    if (cached)
+      return cached;
+  }
   target = mod != null ? __create(__getProtoOf(mod)) : {};
   const to = isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target;
   for (let key of __getOwnPropNames(mod))
     if (!__hasOwnProp.call(to, key))
       __defProp(to, key, {
-        get: () => mod[key],
+        get: __accessProp.bind(mod, key),
         enumerable: true
       });
+  if (canCache)
+    cache.set(mod, to);
   return to;
 };
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
+var __returnValue = (v) => v;
+function __exportSetter(name, newValue) {
+  this[name] = __returnValue.bind(null, newValue);
+}
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, {
       get: all[name],
       enumerable: true,
       configurable: true,
-      set: (newValue) => all[name] = () => newValue
+      set: __exportSetter.bind(all, name)
     });
 };
 var __esm = (fn, res) => () => (fn && (res = fn(fn = 0)), res);
@@ -1831,8 +1849,9 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/index.js
 var require_react = __commonJS((exports, module) => {
+  var react_development = __toESM(require_react_development());
   if (false) {} else {
-    module.exports = require_react_development();
+    module.exports = react_development;
   }
 });
 
@@ -2281,15 +2300,16 @@ var require_scheduler_development = __commonJS((exports) => {
 
 // node_modules/scheduler/index.js
 var require_scheduler = __commonJS((exports, module) => {
+  var scheduler_development = __toESM(require_scheduler_development());
   if (false) {} else {
-    module.exports = require_scheduler_development();
+    module.exports = scheduler_development;
   }
 });
 
 // node_modules/react-dom/cjs/react-dom.development.js
 var require_react_dom_development = __commonJS((exports) => {
-  var React = __toESM(require_react(), 1);
-  var Scheduler = __toESM(require_scheduler(), 1);
+  var React = __toESM(require_react());
+  var Scheduler = __toESM(require_scheduler());
   if (true) {
     (function() {
       if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
@@ -22735,14 +22755,15 @@ You might need to use a local HTTP server (instead of file://): ` + "https://rea
 
 // node_modules/react-dom/index.js
 var require_react_dom = __commonJS((exports, module) => {
+  var react_dom_development = __toESM(require_react_dom_development());
   if (false) {} else {
-    module.exports = require_react_dom_development();
+    module.exports = react_dom_development;
   }
 });
 
 // node_modules/react-dom/client.js
 var require_client = __commonJS((exports) => {
-  var m = __toESM(require_react_dom(), 1);
+  var m = __toESM(require_react_dom());
   if (false) {} else {
     i = m.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
     exports.createRoot = function(c, o) {
@@ -22767,7 +22788,7 @@ var require_client = __commonJS((exports) => {
 
 // node_modules/use-sync-external-store/cjs/use-sync-external-store-shim.development.js
 var require_use_sync_external_store_shim_development = __commonJS((exports) => {
-  var React = __toESM(require_react(), 1);
+  var React = __toESM(require_react());
   (function() {
     function is(x, y) {
       return x === y && (x !== 0 || 1 / x === 1 / y) || x !== x && y !== y;
@@ -22826,7 +22847,7 @@ var require_shim = __commonJS((exports, module) => {
 
 // node_modules/react/cjs/react-jsx-dev-runtime.development.js
 var require_react_jsx_dev_runtime_development = __commonJS((exports) => {
-  var React9 = __toESM(require_react(), 1);
+  var React9 = __toESM(require_react());
   if (true) {
     (function() {
       var REACT_ELEMENT_TYPE = Symbol.for("react.element");
@@ -23707,8 +23728,9 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/jsx-dev-runtime.js
 var require_jsx_dev_runtime = __commonJS((exports, module) => {
+  var react_jsx_dev_runtime_development = __toESM(require_react_jsx_dev_runtime_development());
   if (false) {} else {
-    module.exports = require_react_jsx_dev_runtime_development();
+    module.exports = react_jsx_dev_runtime_development;
   }
 });
 
@@ -51184,9 +51206,7 @@ function parallelTraverse(a, b, callback) {
     parallelTraverse(a.children[i], b.children[i], callback);
   }
 }
-var init_SkeletonUtils = __esm(() => {
-  init_three_module();
-});
+var init_SkeletonUtils = () => {};
 
 // node_modules/three/examples/jsm/loaders/GLTFLoader.js
 var exports_GLTFLoader = {};
@@ -59691,12 +59711,11 @@ var AI_MODELS = [
 var DEFAULT_MODEL = "llama-3.3-70b-versatile";
 var TYPE_META = {
   npc: { icon: "\uD83E\uDDD9", label: "NPC", desc: "Personajes y personalidades", color: "#f59e0b" },
-  quest: { icon: "⚔️", label: "Misín", desc: "Misiones y objetivos", color: "#3b82f6" },
-  item: { icon: "\uD83D\uDC8E", label: "Objeto", desc: "Armaduras, reliquias y objetos", color: "#10b981" },
-  lore: { icon: "\uD83D\uDCDC", label: "Trasfondo", desc: "Historia del mundo y secretos", color: "#a78bfa" },
-  weapon: { icon: "\uD83D\uDDE1️", label: "Arma", desc: "Espadas, bastones y armas", color: "#ef4444" },
-  enemy: { icon: "\uD83D\uDC80", label: "Enemigo", desc: "Bestias, demonios y jefes", color: "#6b7280" },
-  worldmap: { icon: "\uD83C\uDF0D", label: "Mundo 3D", desc: "Mapas de terreno procedurales", color: "#22d3ee" }
+  quest: { icon: "⚔️", label: "MISIONES", desc: "Misiones y objetivos", color: "#3b82f6" },
+  item: { icon: "\uD83D\uDC8E", label: "OBJETO", desc: "Armaduras, reliquias y objetos", color: "#10b981" },
+  lore: { icon: "\uD83D\uDCDC", label: "HISTORIA", desc: "Historia del mundo y secretos", color: "#a78bfa" },
+  weapon: { icon: "\uD83D\uDDE1️", label: "ARMAS", desc: "Espadas, bastones y armas", color: "#ef4444" },
+  enemy: { icon: "\uD83D\uDC80", label: "ENEMIGOS", desc: "Bestias, demonios y jefes", color: "#6b7280" }
 };
 var GENEROS = ["Fantasía", "Ciencia Ficción", "Cyberpunk", "Western", "Terror", "Steampunk", "Post-Apocalíptico"];
 var ROLES_NPC = ["Mercader", "Villano", "Mentor", "Guardia", "Espía", "Sanador", "Asesino", "Errante"];
@@ -59725,7 +59744,6 @@ var FIELD_LABELS = {
   location: "Ubicación",
   twist: "Giro",
   rarity: "Rareza",
-  description: "Descripción",
   effect: "Efecto",
   value: "Valor",
   era: "Era",
@@ -59758,7 +59776,21 @@ var FIELD_LABELS = {
   region: "Región",
   factions_desc: "Facciones",
   key_figures: "Figuras clave",
-  impact: "Impacto"
+  impact: "Impacto",
+  history: "Historia",
+  overview: "Visión general",
+  synopsis: "Sinopsis",
+  important_events: "Eventos importantes",
+  geography: "Geografía",
+  magic_or_power: "Magia y poder",
+  myths_and_prophecies: "Mitos y profecías",
+  moral_dilemma: "Dilema moral",
+  failure_consequences: "Consecuencias del fracaso",
+  npcs_involved: "NPCs involucrados",
+  relationships: "Relaciones",
+  curse: "Maldición",
+  requirements: "Requisitos",
+  encounter_tips: "Consejos de encuentro"
 };
 
 // frontend/state/app-state.tsx
@@ -61743,8 +61775,8 @@ function PageContainer({ children, narrow = false, wide = false }) {
 }
 
 // frontend/hooks/useGenerate.ts
-var import_react44 = __toESM(require_react(), 1);
 init_api();
+var import_react44 = __toESM(require_react(), 1);
 function useGenerate() {
   const [state, setState] = import_react44.useState({
     loading: false,
@@ -61909,7 +61941,7 @@ var import_react48 = __toESM(require_react(), 1);
 // frontend/components/history/HistoryItem.tsx
 var jsx_dev_runtime23 = __toESM(require_jsx_dev_runtime(), 1);
 function HistoryItem({ gen, onClick }) {
-  const meta = TYPE_META[gen.type];
+  const meta = TYPE_META[gen.type] ?? { icon: "\uD83D\uDCC4", label: gen.type, color: "#888888" };
   const title = getGenerationTitle(gen.result, gen.type, gen.id);
   const preview = getPreviewText(gen.result);
   return /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Card, {
@@ -63104,8 +63136,8 @@ function SocialPage({ onToast }) {
 var import_react55 = __toESM(require_react(), 1);
 
 // frontend/components/projects/ProjectItemCard.tsx
-var import_react54 = __toESM(require_react(), 1);
 init_three_module();
+var import_react54 = __toESM(require_react(), 1);
 
 // node_modules/three/examples/jsm/controls/OrbitControls.js
 init_three_module();
@@ -63980,8 +64012,8 @@ function interceptControlUp(event) {
 }
 
 // frontend/components/results/WorldMap3D.tsx
-var import_react53 = __toESM(require_react(), 1);
 init_three_module();
+var import_react53 = __toESM(require_react(), 1);
 
 // node_modules/simplex-noise/dist/esm/simplex-noise.js
 var SQRT3 = /* @__PURE__ */ Math.sqrt(3);

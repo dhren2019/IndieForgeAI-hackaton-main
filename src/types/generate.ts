@@ -16,24 +16,28 @@ export interface NPCMeta {
   name?: string;
   genre?: string;
   role?: string;
+  userPrompt?: string;
 }
 
 export interface QuestMeta {
   title?: string;
   genre?: string;
   difficulty?: string;
+  userPrompt?: string;
 }
 
 export interface ItemMeta {
   name?: string;
   genre?: string;
   rarity?: string;
+  userPrompt?: string;
 }
 
 export interface LoreMeta {
   topic?: string;
   genre?: string;
   tone?: string;
+  userPrompt?: string;
 }
 
 export interface WeaponMeta {
@@ -42,6 +46,7 @@ export interface WeaponMeta {
   weaponClass?: string;
   element?: string;
   style?: string;
+  userPrompt?: string;
 }
 
 export interface EnemyMeta {
@@ -49,6 +54,7 @@ export interface EnemyMeta {
   genre?: string;
   enemyType?: string;
   difficulty?: string;
+  userPrompt?: string;
 }
 
 export type PromptMeta = NPCMeta | QuestMeta | ItemMeta | LoreMeta | WeaponMeta | EnemyMeta;

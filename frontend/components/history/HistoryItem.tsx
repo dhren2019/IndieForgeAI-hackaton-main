@@ -11,7 +11,7 @@ interface HistoryItemProps {
 }
 
 export function HistoryItem({ gen, onClick }: HistoryItemProps) {
-  const meta    = TYPE_META[gen.type];
+  const meta    = TYPE_META[gen.type as keyof typeof TYPE_META] ?? { icon: "📄", label: gen.type, color: "#888888" };
   const title   = getGenerationTitle(gen.result, gen.type, gen.id);
   const preview = getPreviewText(gen.result);
 

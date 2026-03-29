@@ -70,15 +70,15 @@ export function validateAndSanitize(
   }
 
   // Truncate excessively long strings to keep responses clean
-  const sanitized = sanitizeStrings(data, 600);
+  const sanitized = sanitizeStrings(data, 3000);
   return { valid: true, data: sanitized, missingFields: [] };
 }
 
 const REQUIRED_FIELDS: Record<GenerationType, string[]> = {
   npc:    ["name", "role", "personality", "dialogue"],
   quest:  ["title", "objective", "reward"],
-  item:   ["name", "type", "description", "effect"],
-  lore:   ["title", "summary"],
+  item:   ["name", "type", "appearance", "effect"],
+  lore:   ["title", "history"],
   weapon: ["name", "class", "damage", "special_ability"],
   enemy:  ["name", "type", "attack_style", "weakness"],
 };
