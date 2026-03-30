@@ -14,11 +14,11 @@ export type CharacterType = "npc" | "quest" | "item" | "lore" | "weapon" | "enem
 
 const TYPE_STYLE: Record<CharacterType, string> = {
   npc:    "character full body, detailed costume and accessories worn on the character",
-  quest:  "adventure scene, epic concept art, characters in action",
+  quest:  "character full body, main protagonist or quest NPC, detailed costume and equipment",
   item:   "single magical item, glowing, product concept art, dark studio background, no character, no hands",
   lore:   "epic cinematic scene illustration, atmospheric environment, dramatic lighting, vivid world-building",
-  weapon: "single weapon design, detailed metalwork, dark background, no character, no hands holding it",
-  enemy:  "monster or villain full body, terrifying, muscular, detailed armor",
+  weapon: "single weapon, detailed metalwork and engravings, dark studio background, no character, no hands holding it",
+  enemy:  "creature or monster full body design, terrifying, detailed anatomy and armor, consistent species and form",
 };
 
 // Genre-to-aesthetic mapping — applied on top of TYPE_STYLE
@@ -38,12 +38,12 @@ const GENRE_AESTHETIC: Record<string, string> = {
 
 // Strict isolation instructions per type — prevent the model from mixing in other content
 const TYPE_ISOLATION: Record<CharacterType, string> = {
-  npc:    "ONLY the character's body in 2 orthographic views, no floating weapons, no item callout panels, no separate object sheets, character only",
-  quest:  "scene illustration only",
-  item:   "ONLY the item itself in 2 views, no character, no hands, no person, item only on clean background",
-  lore:   "world illustration only",
-  weapon: "ONLY the weapon itself in 2 views, no character, no hands, no person holding it, weapon only on clean background",
-  enemy:  "ONLY the enemy creature's body in 2 orthographic views, no floating weapons separate from creature, enemy character only",
+  npc:    "ONLY the same individual character in 2 orthographic views (front and back), same outfit, same face, same design, no extra panels, no different characters, character only",
+  quest:  "ONLY the same individual character in 2 orthographic views (front and back), no scene backgrounds, character only",
+  item:   "ONLY the exact same item in exactly 2 views (front and back of the same object), NO character, NO hands, NO person, NO different item variation, same item from two sides only on clean white background",
+  lore:   "world scene illustration only, no character sheets, no split panels",
+  weapon: "ONLY the exact same weapon in exactly 2 views (front face and back face of the same weapon), NO character, NO hands, NO person holding it, NO different weapon, same weapon design from two angles only on clean white background",
+  enemy:  "ONLY the same single creature in exactly 2 orthographic views (front and back of the same entity), DO NOT generate a different species, DO NOT add a humanoid variant, DO NOT draw two different creatures, same creature from front and from behind only, no floating separate weapons",
 };
 
 export interface ImageGenResult {
@@ -106,12 +106,38 @@ export function buildImagePrompt(
   const style     = TYPE_STYLE[type] ?? "concept art";
   const isolation = TYPE_ISOLATION[type] ?? "";
 
-  // 2-view design sheet layout instructions per type
-  const sheetInstructions = type === "item" || type === "weapon"
-    ? "design sheet, 16:9 horizontal layout, exactly TWO views of the same object side by side: [left half: front view] [right half: back view], plain white background, no character, no hands, studio product lighting"
-    : type === "lore"
-    ? "epic panoramic scene illustration, 16:9 horizontal wide shot, showing the world, environment and events described above, cinematic atmospheric lighting, no text, no UI, no emblems, painterly game concept art style"
-    : "character design reference sheet, 16:9 horizontal layout, exactly TWO views of the same character: [left half: full body front view facing forward, neutral standing pose, arms slightly out] [right half: full body back view, same pose seen from behind], plain white background, no extra panels, no weapons floating separately";
+  // 2-view design sheet layout instructions per type — each must be extremely explicit
+  // so the AI renders the SAME object/character from front AND back, not two separate items
+  let sheetInstructions: string;
+  if (type === "weapon") {
+    sheetInstructions =
+      "weapon design reference sheet, 16:9 horizontal single-image layout, EXACTLY TWO views of THE EXACT SAME WEAPON on one image: " +
+      "[LEFT HALF: front face of the weapon, flat orthographic view, full weapon visible, centered vertically] " +
+      "[RIGHT HALF: rear/back face of THE IDENTICAL SAME WEAPON rotated 180 degrees to show the other side, same proportions, same engravings, same materials], " +
+      "pure white background, NO hands, NO character, NO person, NO second different weapon, soft studio lighting from above";
+  } else if (type === "item") {
+    sheetInstructions =
+      "item design reference sheet, 16:9 horizontal single-image layout, EXACTLY TWO views of THE EXACT SAME ITEM on one image: " +
+      "[LEFT HALF: front face of the item, flat orthographic view, full item visible, centered] " +
+      "[RIGHT HALF: rear/back face of THE IDENTICAL SAME ITEM rotated to show the back side, same shape, same materials], " +
+      "pure white background, NO hands, NO character, NO person, NO different item, soft studio product lighting";
+  } else if (type === "enemy") {
+    sheetInstructions =
+      "creature/monster design reference sheet, 16:9 horizontal single-image layout, EXACTLY TWO orthographic views of THE SAME SINGLE CREATURE on one image: " +
+      "[LEFT HALF: full body FRONT view, creature facing directly toward the viewer, neutral stance, full body visible from head to feet] " +
+      "[RIGHT HALF: full body REAR/BACK view of THE EXACT SAME CREATURE rotated 180 degrees, same body shape, same armor, same textures, seen from behind], " +
+      "pure white background, DO NOT draw a different creature species, DO NOT add a humanoid variant if creature is a beast, DO NOT generate two different entities, same creature only";
+  } else if (type === "lore") {
+    sheetInstructions =
+      "epic panoramic scene illustration, 16:9 horizontal wide shot, showing the world, environment and events described above, cinematic atmospheric lighting, no text, no UI, no emblems, painterly game concept art style";
+  } else {
+    // npc, quest — character design sheet
+    sheetInstructions =
+      "character design reference sheet, 16:9 horizontal single-image layout, EXACTLY TWO orthographic views of THE SAME INDIVIDUAL CHARACTER on one image: " +
+      "[LEFT HALF: full body FRONT view, character facing directly toward the viewer, neutral standing pose, arms slightly out from body, full body visible from head to feet] " +
+      "[RIGHT HALF: full body REAR/BACK view of THE EXACT SAME CHARACTER rotated 180 degrees, identical outfit, identical hair, identical design, seen from behind], " +
+      "pure white background, NO extra panels, NO different characters, NO weapons floating separately, same individual only";
+  }
 
   const basePrompt = `${name}, ${desc}, ${style}, ${genreStyle}, ${sheetInstructions}, ${isolation}, high quality, detailed linework, professional game concept art, dramatic lighting`;
   const finalPrompt = userHint ? `${basePrompt}, ${userHint}` : basePrompt;
