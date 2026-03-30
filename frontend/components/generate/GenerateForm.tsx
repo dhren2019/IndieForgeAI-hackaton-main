@@ -87,16 +87,16 @@ export function GenerateForm({ onGenerate, loading, model, onModelChange }: Gene
               value={val("difficulty")} onChange={(v) => set("difficulty", v)} />
           </>}
 
-          {/* Shared visual hint — always visible */}
+          {/* Shared personal prompt — always visible */}
           <div className="form-field form-field--full">
             <label className="form-field__label" htmlFor="userPrompt">
-              🎨 Descripción visual (opcional)
-              <span className="form-field__hint">&nbsp;· guiará la ilustración generada</span>
+              ✍️ PROMPT PERSONAL
+              <span className="form-field__hint">&nbsp;· (OPCIONAL) — guiará toda la narrativa generada</span>
             </label>
             <textarea
               id="userPrompt"
               className="form-field__textarea"
-              placeholder='ej. "piel azul, cicatriz en mejilla izquierda, capa roja desgarrada, expresión feroz"'
+              placeholder='ej. "Historia que transcurre en la edad media, tono oscuro y sombrío, ambiente de guerra y traición"'
               value={val("userPrompt")}
               rows={3}
               onChange={(e) => set("userPrompt", e.target.value)}

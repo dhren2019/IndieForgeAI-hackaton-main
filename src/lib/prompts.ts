@@ -57,11 +57,11 @@ export interface EnemyMeta {
 export type PromptMeta = NPCMeta | QuestMeta | ItemMeta | LoreMeta | WeaponMeta | EnemyMeta;
 
 // ---------------------------------------------------------------------------
-// Helper — appends user visual hints if present
+// Helper — appends the user's personal prompt directive (narrative + visual)
 // ---------------------------------------------------------------------------
 function visualHint(userPrompt?: string): string {
   if (!userPrompt || !userPrompt.trim()) return "";
-  return `\n\nINDICACIONES VISUALES Y CREATIVAS DEL USUARIO (intégralas con prioridad en los campos de apariencia, descripción y lore): "${userPrompt.trim()}"`;
+  return `\n\nPROMPT PERSONAL DEL USUARIO — PRIORIDAD MÁXIMA: el siguiente texto describe la historia, ambientación, época, atmósfera y contexto que el usuario quiere. DEBES integrarlo en TODOS los campos relevantes del JSON (historia, apariencia, lore, ambientación, tono narrativo, descripción, etc.) y hacer que el contenido generado gire completamente alrededor de estas indicaciones: "${userPrompt.trim()}"`;
 }
 
 // ---------------------------------------------------------------------------

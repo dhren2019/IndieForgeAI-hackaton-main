@@ -5,7 +5,89 @@ import { Modal }           from "../ui/Modal";
 import { WorldMapPanel }   from "../results/WorldMap3D";
 import type { WorldMapParams } from "../results/WorldMap3D";
 import { TYPE_META }       from "../../types/generate";
-import { getGenerationTitle, getPreviewText, timeAgo } from "../../lib/formatters";
+import { getGenerationTitle, getPreviewText, timeAgo, labelFor } from "../../lib/formatters";
+
+// ── Type→accent color for the expand modal ───────────────────────────────────
+const TYPE_ACCENT: Record<string, string> = {
+  npc:      "var(--npc)",
+  quest:    "var(--quest)",
+  item:     "var(--item)",
+  lore:     "var(--lore)",
+  weapon:   "var(--weapon)",
+  enemy:    "var(--enemy)",
+  worldmap: "var(--info)",
+};
+
+// ── Per-field icon + accent colour ───────────────────────────────────────────
+const FIELD_META: Record<string, { icon: string; color: string }> = {
+  name:                 { icon: "🏷️", color: "var(--npc)" },
+  title:                { icon: "🏷️", color: "var(--npc)" },
+  role:                 { icon: "⚔️",  color: "var(--npc)" },
+  race:                 { icon: "🧬",  color: "var(--npc)" },
+  age:                  { icon: "📅",  color: "var(--muted)" },
+  class:                { icon: "⚔️",  color: "var(--weapon)" },
+  type:                 { icon: "📌",  color: "var(--enemy)" },
+  rarity:               { icon: "💎",  color: "var(--item)" },
+  difficulty:           { icon: "🎯",  color: "var(--quest)" },
+  era:                  { icon: "📜",  color: "var(--lore)" },
+  region:               { icon: "🗺️", color: "var(--lore)" },
+  element:              { icon: "🔥",  color: "var(--weapon)" },
+  style:                { icon: "🎭",  color: "var(--npc)" },
+  appearance:           { icon: "👁️", color: "#c4b5fd" },
+  hp:                   { icon: "❤️",  color: "var(--weapon)" },
+  armor:                { icon: "🛡️", color: "var(--enemy)" },
+  damage:               { icon: "⚔️",  color: "var(--weapon)" },
+  speed:                { icon: "💨",  color: "var(--quest)" },
+  range:                { icon: "📏",  color: "var(--quest)" },
+  value:                { icon: "💰",  color: "var(--npc)" },
+  weight:               { icon: "⚖️",  color: "var(--enemy)" },
+  backstory:            { icon: "📖",  color: "var(--lore)" },
+  lore:                 { icon: "📜",  color: "var(--lore)" },
+  overview:             { icon: "📋",  color: "var(--lore)" },
+  history:              { icon: "🏛️", color: "var(--lore)" },
+  personality:          { icon: "🧠",  color: "#c4b5fd" },
+  motivation:           { icon: "💫",  color: "#c4b5fd" },
+  secret:               { icon: "🔐",  color: "var(--weapon)" },
+  dialogue:             { icon: "💬",  color: "var(--quest)" },
+  synopsis:             { icon: "📋",  color: "var(--quest)" },
+  objective:            { icon: "🎯",  color: "var(--quest)" },
+  combat_style:         { icon: "⚔️",  color: "var(--weapon)" },
+  attack_style:         { icon: "⚔️",  color: "var(--weapon)" },
+  special_ability:      { icon: "✨",  color: "#c4b5fd" },
+  passive:              { icon: "🔮",  color: "var(--lore)" },
+  weakness:             { icon: "⚠️",  color: "var(--npc)" },
+  resistance:           { icon: "🛡️", color: "var(--item)" },
+  abilities:            { icon: "✨",  color: "#c4b5fd" },
+  geography:            { icon: "🗺️", color: "var(--item)" },
+  magic_or_power:       { icon: "🌟",  color: "var(--lore)" },
+  myths_and_prophecies: { icon: "🔮",  color: "#c4b5fd" },
+  factions:             { icon: "⚔️",  color: "var(--weapon)" },
+  key_figures:          { icon: "👑",  color: "var(--npc)" },
+  important_events:     { icon: "⚡",  color: "var(--quest)" },
+  impact:               { icon: "💥",  color: "var(--weapon)" },
+  relationships:        { icon: "🤝",  color: "var(--item)" },
+  location:             { icon: "📍",  color: "var(--item)" },
+  twist:                { icon: "🌀",  color: "#c4b5fd" },
+  moral_dilemma:        { icon: "⚖️",  color: "var(--npc)" },
+  reward:               { icon: "💰",  color: "var(--npc)" },
+  failure_consequences: { icon: "💀",  color: "var(--weapon)" },
+  npcs_involved:        { icon: "👥",  color: "var(--quest)" },
+  enemies:              { icon: "💀",  color: "var(--weapon)" },
+  steps:                { icon: "📋",  color: "var(--quest)" },
+  effect:               { icon: "✨",  color: "#c4b5fd" },
+  curse:                { icon: "💀",  color: "var(--weapon)" },
+  requirements:         { icon: "🔑",  color: "var(--enemy)" },
+  crafting_material:    { icon: "🔨",  color: "var(--npc)" },
+  drops:                { icon: "💰",  color: "var(--npc)" },
+  encounter_tips:       { icon: "💡",  color: "var(--item)" },
+};
+
+// Short fields that render as compact chips, not cards
+const STAT_FIELDS = new Set([
+  "hp", "armor", "damage", "speed", "range", "value",
+  "weight", "rarity", "difficulty", "class", "race",
+  "age", "era", "element", "style",
+]);
 import type { Generation } from "../../types/generate";
 
 // ── Inline GLB viewer ─────────────────────────────────────────────────────────
@@ -150,7 +232,6 @@ function ExpandModal({ gen, title, onClose }: {
 }) {
   const isWorldMap = gen.type === "worldmap";
   const has3D      = !!gen.glb_url;
-  const previewText = getPreviewText(gen.result);
 
   if (isWorldMap) {
     const params = gen.result as unknown as WorldMapParams;
@@ -163,23 +244,80 @@ function ExpandModal({ gen, title, onClose }: {
     );
   }
 
+  const SKIP_FIELDS   = new Set(["_genre", "userPrompt"]);
+  const accentColor   = TYPE_ACCENT[gen.type] ?? "var(--accent)";
+  const entries       = Object.entries(gen.result).filter(([k, v]) => {
+    if (SKIP_FIELDS.has(k)) return false;
+    const s = String(v ?? "");
+    return s && s !== "undefined" && s !== "null" && s !== "0";
+  });
+
+  const statEntries = entries.filter(([k, v]) =>
+    STAT_FIELDS.has(k) ||
+    (!Array.isArray(v) && typeof v !== "object" && String(v ?? "").length <= 40)
+  );
+
+  const contentEntries = entries.filter(([k, v]) =>
+    !STAT_FIELDS.has(k) &&
+    (Array.isArray(v) || typeof v === "object" || String(v ?? "").length > 40)
+  );
+
   return (
     <Modal open onClose={onClose} title={title} size="lg">
       <div className="proj-expand__content">
-        {gen.image_url && (
-          <img src={gen.image_url} alt={title} className="proj-expand__img" />
+        {gen.image_url && <img src={gen.image_url} alt={title} className="proj-expand__img" />}
+        {has3D && <GlbViewer url={gen.glb_url!} />}
+
+        {/* ── Stat chips ── */}
+        {statEntries.length > 0 && (
+          <div className="proj-expand__stats">
+            {statEntries.map(([k, v]) => {
+              const fm = FIELD_META[k];
+              return (
+                <div
+                  key={k}
+                  className="proj-expand__stat"
+                  style={{ "--stat-color": fm?.color ?? accentColor } as React.CSSProperties}
+                >
+                  {fm?.icon && <span className="proj-expand__stat-icon">{fm.icon}</span>}
+                  <span className="proj-expand__stat-label">{labelFor(k)}</span>
+                  <span className="proj-expand__stat-value">{String(v)}</span>
+                </div>
+              );
+            })}
+          </div>
         )}
-        {has3D && (
-          <GlbViewer url={gen.glb_url!} />
-        )}
-        {previewText && (
-          <p className="proj-expand__desc">{previewText}</p>
-        )}
-        {!gen.image_url && !has3D && !previewText && (
-          <pre className="proj-expand__json">
-            {JSON.stringify(gen.result, null, 2)}
-          </pre>
-        )}
+
+        {/* ── Content field cards ── */}
+        <div className="proj-expand__fields">
+          {contentEntries.map(([k, v]) => {
+            const fm    = FIELD_META[k];
+            const isArr = Array.isArray(v);
+            return (
+              <div
+                key={k}
+                className="proj-expand__field"
+                style={{ "--field-color": fm?.color ?? accentColor } as React.CSSProperties}
+              >
+                <div className="proj-expand__field-header">
+                  {fm?.icon && <span className="proj-expand__field-icon">{fm.icon}</span>}
+                  <span className="proj-expand__field-label">{labelFor(k)}</span>
+                </div>
+                {isArr ? (
+                  <div className="proj-expand__field-list">
+                    {(v as unknown[]).map((item, i) => (
+                      <p key={i} className="proj-expand__field-item">{String(item)}</p>
+                    ))}
+                  </div>
+                ) : (
+                  String(v ?? "").split("\n\n").map((para, i) => (
+                    <p key={i} className="proj-expand__field-text">{para}</p>
+                  ))
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </Modal>
   );

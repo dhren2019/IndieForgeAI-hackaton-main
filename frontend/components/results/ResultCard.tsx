@@ -48,12 +48,13 @@ function FieldsView({
   return (
     <div className="fields-grid">
       {Object.entries(data).map(([k, v]) => {
-        const rawStr    = Array.isArray(v) ? v.join(" · ") : String(v);
-        const TRUNC_KEYS = new Set(["appearance", "backstory", "dialogue"]);
-        const strVal    = TRUNC_KEYS.has(k) && rawStr.length > 100 ? rawStr.slice(0, 100) + "…" : rawStr;
+        // Join arrays with double-newline so modal can render each item as its own paragraph
+        const rawStr    = Array.isArray(v) ? (v as unknown[]).map(String).join("\n\n") : String(v);
+        const isLong    = rawStr.length > 100;
         const featured  = k in FEATURED_FIELD_ICONS;
-        const expandable = featured || (EXPANDABLE_FIELDS.has(k) && rawStr.length > 60);
+        const expandable = featured || EXPANDABLE_FIELDS.has(k) || isLong;
         const icon       = FEATURED_FIELD_ICONS[k];
+        const displayStr = isLong ? rawStr.slice(0, 100) + "…" : rawStr;
         return (
           <div
             className={`field-item${expandable ? " field-item--expandable" : ""}${featured ? " field-item--featured" : ""}`}
@@ -67,11 +68,11 @@ function FieldsView({
               {expandable && <span className="field-item__expand-icon">⤢</span>}
             </div>
             <div className="field-item__value">
-              {Array.isArray(v)
-                ? v.map((item, i) => (
+              {!isLong && Array.isArray(v)
+                ? (v as unknown[]).map((item, i) => (
                     <span key={i} className="field-item__tag">{String(item)}</span>
                   ))
-                : strVal}
+                : displayStr}
             </div>
           </div>
         );
@@ -164,7 +165,11 @@ export function ResultCard({
           title={fieldModal.label}
           size="md"
         >
-          <p className="field-modal__text">{fieldModal.value}</p>
+          <div className="field-modal__text">
+            {fieldModal.value.split("\n\n").map((para, i) => (
+              <p key={i} className="field-modal__para">{para}</p>
+            ))}
+          </div>
         </Modal>
       )}
 

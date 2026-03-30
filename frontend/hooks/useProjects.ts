@@ -53,7 +53,7 @@ export function useProjects() {
     const { error } = await apiAddToProject(projectId, generationId);
     if (!error) {
       setProjects((p) =>
-        p.map((x) => x.id === projectId ? { ...x, item_count: x.item_count + 1 } : x)
+        p.map((x) => x.id === projectId ? { ...x, item_count: Number(x.item_count) + 1 } : x)
       );
     }
     return !error;
@@ -63,7 +63,7 @@ export function useProjects() {
     const { error } = await apiRemoveFromProject(projectId, generationId);
     if (!error) {
       setProjects((p) =>
-        p.map((x) => x.id === projectId ? { ...x, item_count: Math.max(0, x.item_count - 1) } : x)
+        p.map((x) => x.id === projectId ? { ...x, item_count: Math.max(0, Number(x.item_count) - 1) } : x)
       );
     }
     return !error;

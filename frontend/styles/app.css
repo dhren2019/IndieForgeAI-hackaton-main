@@ -909,6 +909,89 @@ input, textarea, select {
   white-space: pre-wrap;
   word-break: break-word;
 }
+/* Visual fields list inside project expand modal */
+.proj-expand__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+/* Stat chips row */
+.proj-expand__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--border);
+}
+.proj-expand__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 8px;
+  border-radius: var(--r-full);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid color-mix(in srgb, var(--stat-color, var(--border)) 60%, transparent);
+  font-size: var(--text-xs);
+}
+.proj-expand__stat-icon { font-size: 0.85rem; flex-shrink: 0; }
+.proj-expand__stat-label {
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 2px;
+}
+.proj-expand__stat-value {
+  color: var(--stat-color, var(--text));
+  font-weight: 700;
+}
+
+/* Field cards with colored left border */
+.proj-expand__field {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--field-color, var(--accent));
+  border-radius: var(--r-lg);
+  padding: var(--sp-3) var(--sp-4);
+}
+.proj-expand__field-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+.proj-expand__field-icon { font-size: 1rem; flex-shrink: 0; }
+.proj-expand__field-label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--field-color, var(--muted));
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.proj-expand__field-text {
+  font-size: var(--text-sm);
+  line-height: 1.75;
+  color: var(--text);
+  margin: 0 0 var(--sp-2) 0;
+}
+.proj-expand__field-text:last-child { margin-bottom: 0; }
+.proj-expand__field-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.proj-expand__field-item {
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  color: var(--text);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--field-color, var(--border));
+  border-radius: var(--r-md);
+  padding: var(--sp-2) var(--sp-3);
+  margin: 0;
+}
 
 .projects-page__auth-wall {
   display: flex;

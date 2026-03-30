@@ -16,7 +16,7 @@ const TYPE_STYLE: Record<CharacterType, string> = {
   npc:    "character full body, detailed costume and accessories worn on the character",
   quest:  "adventure scene, epic concept art, characters in action",
   item:   "single magical item, glowing, product concept art, dark studio background, no character, no hands",
-  lore:   "world / faction emblem illustration, detailed, parchment style",
+  lore:   "epic cinematic scene illustration, atmospheric environment, dramatic lighting, vivid world-building",
   weapon: "single weapon design, detailed metalwork, dark background, no character, no hands holding it",
   enemy:  "monster or villain full body, terrifying, muscular, detailed armor",
 };
@@ -75,6 +75,12 @@ export function buildImagePrompt(
   if (result.class)       descriptors.push(String(result.class));
   if (result.difficulty)  descriptors.push(`${result.difficulty} difficulty`);
   if (result.rarity)      descriptors.push(String(result.rarity));
+  // For lore: add era, region, geography as key narrative context
+  if (type === "lore") {
+    if (result.era)      descriptors.push(String(result.era).slice(0, 60));
+    if (result.region)   descriptors.push(String(result.region).slice(0, 80));
+    if (result.geography) descriptors.push(String(result.geography).slice(0, 100));
+  }
 
   // Use the AI-generated visual description first, then fallback fields
   const visualDesc =
@@ -83,8 +89,10 @@ export function buildImagePrompt(
     null;
   if (visualDesc) descriptors.push(visualDesc);
 
-  // Include backstory/lore for mood and context
+  // Include backstory/lore/history for mood and context
   const loreSnippet =
+    result.history   ? String(result.history).slice(0, 120) :
+    result.overview  ? String(result.overview).slice(0, 100) :
     result.backstory ? String(result.backstory).slice(0, 80) :
     result.lore      ? String(result.lore).slice(0, 80) :
     result.summary   ? String(result.summary).slice(0, 80) :
@@ -102,7 +110,7 @@ export function buildImagePrompt(
   const sheetInstructions = type === "item" || type === "weapon"
     ? "design sheet, 16:9 horizontal layout, exactly TWO views of the same object side by side: [left half: front view] [right half: back view], plain white background, no character, no hands, studio product lighting"
     : type === "lore"
-    ? "world lore illustration, 16:9 horizontal panoramic, detailed environment and faction imagery, dramatic lighting"
+    ? "epic panoramic scene illustration, 16:9 horizontal wide shot, showing the world, environment and events described above, cinematic atmospheric lighting, no text, no UI, no emblems, painterly game concept art style"
     : "character design reference sheet, 16:9 horizontal layout, exactly TWO views of the same character: [left half: full body front view facing forward, neutral standing pose, arms slightly out] [right half: full body back view, same pose seen from behind], plain white background, no extra panels, no weapons floating separately";
 
   const basePrompt = `${name}, ${desc}, ${style}, ${genreStyle}, ${sheetInstructions}, ${isolation}, high quality, detailed linework, professional game concept art, dramatic lighting`;

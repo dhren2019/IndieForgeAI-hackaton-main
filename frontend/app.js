@@ -3,43 +3,25 @@ var __getProtoOf = Object.getPrototypeOf;
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-function __accessProp(key) {
-  return this[key];
-}
-var __toESMCache_node;
-var __toESMCache_esm;
 var __toESM = (mod, isNodeMode, target) => {
-  var canCache = mod != null && typeof mod === "object";
-  if (canCache) {
-    var cache = isNodeMode ? __toESMCache_node ??= new WeakMap : __toESMCache_esm ??= new WeakMap;
-    var cached = cache.get(mod);
-    if (cached)
-      return cached;
-  }
   target = mod != null ? __create(__getProtoOf(mod)) : {};
   const to = isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target;
   for (let key of __getOwnPropNames(mod))
     if (!__hasOwnProp.call(to, key))
       __defProp(to, key, {
-        get: __accessProp.bind(mod, key),
+        get: () => mod[key],
         enumerable: true
       });
-  if (canCache)
-    cache.set(mod, to);
   return to;
 };
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
-var __returnValue = (v) => v;
-function __exportSetter(name, newValue) {
-  this[name] = __returnValue.bind(null, newValue);
-}
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, {
       get: all[name],
       enumerable: true,
       configurable: true,
-      set: __exportSetter.bind(all, name)
+      set: (newValue) => all[name] = () => newValue
     });
 };
 var __esm = (fn, res) => () => (fn && (res = fn(fn = 0)), res);
@@ -1849,9 +1831,8 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/index.js
 var require_react = __commonJS((exports, module) => {
-  var react_development = __toESM(require_react_development());
   if (false) {} else {
-    module.exports = react_development;
+    module.exports = require_react_development();
   }
 });
 
@@ -2300,16 +2281,15 @@ var require_scheduler_development = __commonJS((exports) => {
 
 // node_modules/scheduler/index.js
 var require_scheduler = __commonJS((exports, module) => {
-  var scheduler_development = __toESM(require_scheduler_development());
   if (false) {} else {
-    module.exports = scheduler_development;
+    module.exports = require_scheduler_development();
   }
 });
 
 // node_modules/react-dom/cjs/react-dom.development.js
 var require_react_dom_development = __commonJS((exports) => {
-  var React = __toESM(require_react());
-  var Scheduler = __toESM(require_scheduler());
+  var React = __toESM(require_react(), 1);
+  var Scheduler = __toESM(require_scheduler(), 1);
   if (true) {
     (function() {
       if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
@@ -22755,15 +22735,14 @@ You might need to use a local HTTP server (instead of file://): ` + "https://rea
 
 // node_modules/react-dom/index.js
 var require_react_dom = __commonJS((exports, module) => {
-  var react_dom_development = __toESM(require_react_dom_development());
   if (false) {} else {
-    module.exports = react_dom_development;
+    module.exports = require_react_dom_development();
   }
 });
 
 // node_modules/react-dom/client.js
 var require_client = __commonJS((exports) => {
-  var m = __toESM(require_react_dom());
+  var m = __toESM(require_react_dom(), 1);
   if (false) {} else {
     i = m.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
     exports.createRoot = function(c, o) {
@@ -22788,7 +22767,7 @@ var require_client = __commonJS((exports) => {
 
 // node_modules/use-sync-external-store/cjs/use-sync-external-store-shim.development.js
 var require_use_sync_external_store_shim_development = __commonJS((exports) => {
-  var React = __toESM(require_react());
+  var React = __toESM(require_react(), 1);
   (function() {
     function is(x, y) {
       return x === y && (x !== 0 || 1 / x === 1 / y) || x !== x && y !== y;
@@ -22847,7 +22826,7 @@ var require_shim = __commonJS((exports, module) => {
 
 // node_modules/react/cjs/react-jsx-dev-runtime.development.js
 var require_react_jsx_dev_runtime_development = __commonJS((exports) => {
-  var React9 = __toESM(require_react());
+  var React9 = __toESM(require_react(), 1);
   if (true) {
     (function() {
       var REACT_ELEMENT_TYPE = Symbol.for("react.element");
@@ -23728,9 +23707,8 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/jsx-dev-runtime.js
 var require_jsx_dev_runtime = __commonJS((exports, module) => {
-  var react_jsx_dev_runtime_development = __toESM(require_react_jsx_dev_runtime_development());
   if (false) {} else {
-    module.exports = react_jsx_dev_runtime_development;
+    module.exports = require_react_jsx_dev_runtime_development();
   }
 });
 
@@ -51206,7 +51184,9 @@ function parallelTraverse(a, b, callback) {
     parallelTraverse(a.children[i], b.children[i], callback);
   }
 }
-var init_SkeletonUtils = () => {};
+var init_SkeletonUtils = __esm(() => {
+  init_three_module();
+});
 
 // node_modules/three/examples/jsm/loaders/GLTFLoader.js
 var exports_GLTFLoader = {};
@@ -60048,14 +60028,14 @@ function useProjects() {
   const addToProject = async (projectId, generationId) => {
     const { error } = await apiAddToProject(projectId, generationId);
     if (!error) {
-      setProjects((p) => p.map((x) => x.id === projectId ? { ...x, item_count: x.item_count + 1 } : x));
+      setProjects((p) => p.map((x) => x.id === projectId ? { ...x, item_count: Number(x.item_count) + 1 } : x));
     }
     return !error;
   };
   const removeFromProject = async (projectId, generationId) => {
     const { error } = await apiRemoveFromProject(projectId, generationId);
     if (!error) {
-      setProjects((p) => p.map((x) => x.id === projectId ? { ...x, item_count: Math.max(0, x.item_count - 1) } : x));
+      setProjects((p) => p.map((x) => x.id === projectId ? { ...x, item_count: Math.max(0, Number(x.item_count) - 1) } : x));
     }
     return !error;
   };
@@ -60868,17 +60848,17 @@ function GenerateForm({ onGenerate, loading, model, onModelChange }) {
                     className: "form-field__label",
                     htmlFor: "userPrompt",
                     children: [
-                      "\uD83C\uDFA8 Descripción visual (opcional)",
+                      "✍️ PROMPT PERSONAL",
                       /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                         className: "form-field__hint",
-                        children: " · guiará la ilustración generada"
+                        children: " · (OPCIONAL) — guiará toda la narrativa generada"
                       }, undefined, false, undefined, this)
                     ]
                   }, undefined, true, undefined, this),
                   /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("textarea", {
                     id: "userPrompt",
                     className: "form-field__textarea",
-                    placeholder: 'ej. "piel azul, cicatriz en mejilla izquierda, capa roja desgarrada, expresión feroz"',
+                    placeholder: 'ej. "Historia que transcurre en la edad media, tono oscuro y sombrío, ambiente de guerra y traición"',
                     value: val("userPrompt"),
                     rows: 3,
                     onChange: (e) => set("userPrompt", e.target.value)
@@ -61120,7 +61100,7 @@ var THREE_D_MODELS = [
     hint: "Calidad básica pero muy rápido. Ideal para formas simples y pruebas rápidas."
   }
 ];
-function Model3DPreview({ imageUrl, generationId, onGlbReady }) {
+function Model3DPreview({ imageUrl, generationId, type, onGlbReady }) {
   const [model, setModel] = import_react40.useState("instant-mesh");
   const [loading, setLoading] = import_react40.useState(false);
   const [glbUrl, setGlbUrl] = import_react40.useState(null);
@@ -61130,7 +61110,8 @@ function Model3DPreview({ imageUrl, generationId, onGlbReady }) {
     setLoading(true);
     setError(null);
     setGlbUrl(null);
-    const frontView = await cropFrontHalf(imageUrl);
+    const FULL_IMAGE_TYPES = new Set(["weapon", "item"]);
+    const frontView = FULL_IMAGE_TYPES.has(type ?? "") ? imageUrl : await cropFrontHalf(imageUrl);
     const { data, error: e } = await apiGenerate3D(frontView, model);
     setLoading(false);
     if (data?.glbUrl) {
@@ -61302,14 +61283,14 @@ function ImagePreview({
     children: [
       /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("div", {
         className: "image-preview__header",
-        children: "\uD83C\uDFA8 Hoja de diseño"
+        children: type === "lore" ? "\uD83C\uDFA8 Generar ilustración" : "\uD83C\uDFA8 Hoja de diseño"
       }, undefined, false, undefined, this),
       /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Button, {
         variant: imageUrl ? "secondary" : "primary",
         size: "sm",
         loading,
         onClick: handleGenerate,
-        children: imageUrl ? "\uD83D\uDD04 Regenerar diseño" : "\uD83C\uDFA8 Generar hoja de diseño"
+        children: imageUrl ? type === "lore" ? "\uD83D\uDD04 Regenerar ilustración" : "\uD83D\uDD04 Regenerar diseño" : type === "lore" ? "\uD83C\uDFA8 Ilustrar historia" : "\uD83C\uDFA8 Generar hoja de diseño"
       }, undefined, false, undefined, this),
       error && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV("p", {
         className: "image-preview__error",
@@ -61348,6 +61329,7 @@ function ImagePreview({
       imageUrl && show3D && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Model3DPreview, {
         imageUrl,
         generationId,
+        type,
         onGlbReady
       }, undefined, false, undefined, this)
     ]
@@ -61390,12 +61372,14 @@ function FieldsView({
   return /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
     className: "fields-grid",
     children: Object.entries(data).map(([k, v]) => {
-      const rawStr = Array.isArray(v) ? v.join(" · ") : String(v);
-      const TRUNC_KEYS = new Set(["appearance", "backstory", "dialogue"]);
-      const strVal = TRUNC_KEYS.has(k) && rawStr.length > 100 ? rawStr.slice(0, 100) + "…" : rawStr;
+      const rawStr = Array.isArray(v) ? v.map(String).join(`
+
+`) : String(v);
+      const isLong = rawStr.length > 100;
       const featured = k in FEATURED_FIELD_ICONS;
-      const expandable = featured || EXPANDABLE_FIELDS.has(k) && rawStr.length > 60;
+      const expandable = featured || EXPANDABLE_FIELDS.has(k) || isLong;
       const icon = FEATURED_FIELD_ICONS[k];
+      const displayStr = isLong ? rawStr.slice(0, 100) + "…" : rawStr;
       return /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
         className: `field-item${expandable ? " field-item--expandable" : ""}${featured ? " field-item--featured" : ""}`,
         onClick: expandable ? () => onExpand({ key: k, label: labelFor(k), value: rawStr }) : undefined,
@@ -61417,10 +61401,10 @@ function FieldsView({
           }, undefined, true, undefined, this),
           /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
             className: "field-item__value",
-            children: Array.isArray(v) ? v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("span", {
+            children: !isLong && Array.isArray(v) ? v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("span", {
               className: "field-item__tag",
               children: String(item)
-            }, i, false, undefined, this)) : strVal
+            }, i, false, undefined, this)) : displayStr
           }, undefined, false, undefined, this)
         ]
       }, k, true, undefined, this);
@@ -61511,9 +61495,14 @@ function ResultCard({
         onClose: () => setFieldModal(null),
         title: fieldModal.label,
         size: "md",
-        children: /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("p", {
+        children: /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("div", {
           className: "field-modal__text",
-          children: fieldModal.value
+          children: fieldModal.value.split(`
+
+`).map((para, i) => /* @__PURE__ */ jsx_dev_runtime19.jsxDEV("p", {
+            className: "field-modal__para",
+            children: para
+          }, i, false, undefined, this))
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
       showAddProject && /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Modal, {
@@ -61775,8 +61764,8 @@ function PageContainer({ children, narrow = false, wide = false }) {
 }
 
 // frontend/hooks/useGenerate.ts
-init_api();
 var import_react44 = __toESM(require_react(), 1);
+init_api();
 function useGenerate() {
   const [state, setState] = import_react44.useState({
     loading: false,
@@ -63136,8 +63125,8 @@ function SocialPage({ onToast }) {
 var import_react55 = __toESM(require_react(), 1);
 
 // frontend/components/projects/ProjectItemCard.tsx
-init_three_module();
 var import_react54 = __toESM(require_react(), 1);
+init_three_module();
 
 // node_modules/three/examples/jsm/controls/OrbitControls.js
 init_three_module();
@@ -64012,8 +64001,8 @@ function interceptControlUp(event) {
 }
 
 // frontend/components/results/WorldMap3D.tsx
-init_three_module();
 var import_react53 = __toESM(require_react(), 1);
+init_three_module();
 
 // node_modules/simplex-noise/dist/esm/simplex-noise.js
 var SQRT3 = /* @__PURE__ */ Math.sqrt(3);
@@ -65950,6 +65939,94 @@ function WorldMapPanel({ params }) {
 
 // frontend/components/projects/ProjectItemCard.tsx
 var jsx_dev_runtime36 = __toESM(require_jsx_dev_runtime(), 1);
+var TYPE_ACCENT = {
+  npc: "var(--npc)",
+  quest: "var(--quest)",
+  item: "var(--item)",
+  lore: "var(--lore)",
+  weapon: "var(--weapon)",
+  enemy: "var(--enemy)",
+  worldmap: "var(--info)"
+};
+var FIELD_META = {
+  name: { icon: "\uD83C\uDFF7️", color: "var(--npc)" },
+  title: { icon: "\uD83C\uDFF7️", color: "var(--npc)" },
+  role: { icon: "⚔️", color: "var(--npc)" },
+  race: { icon: "\uD83E\uDDEC", color: "var(--npc)" },
+  age: { icon: "\uD83D\uDCC5", color: "var(--muted)" },
+  class: { icon: "⚔️", color: "var(--weapon)" },
+  type: { icon: "\uD83D\uDCCC", color: "var(--enemy)" },
+  rarity: { icon: "\uD83D\uDC8E", color: "var(--item)" },
+  difficulty: { icon: "\uD83C\uDFAF", color: "var(--quest)" },
+  era: { icon: "\uD83D\uDCDC", color: "var(--lore)" },
+  region: { icon: "\uD83D\uDDFA️", color: "var(--lore)" },
+  element: { icon: "\uD83D\uDD25", color: "var(--weapon)" },
+  style: { icon: "\uD83C\uDFAD", color: "var(--npc)" },
+  appearance: { icon: "\uD83D\uDC41️", color: "#c4b5fd" },
+  hp: { icon: "❤️", color: "var(--weapon)" },
+  armor: { icon: "\uD83D\uDEE1️", color: "var(--enemy)" },
+  damage: { icon: "⚔️", color: "var(--weapon)" },
+  speed: { icon: "\uD83D\uDCA8", color: "var(--quest)" },
+  range: { icon: "\uD83D\uDCCF", color: "var(--quest)" },
+  value: { icon: "\uD83D\uDCB0", color: "var(--npc)" },
+  weight: { icon: "⚖️", color: "var(--enemy)" },
+  backstory: { icon: "\uD83D\uDCD6", color: "var(--lore)" },
+  lore: { icon: "\uD83D\uDCDC", color: "var(--lore)" },
+  overview: { icon: "\uD83D\uDCCB", color: "var(--lore)" },
+  history: { icon: "\uD83C\uDFDB️", color: "var(--lore)" },
+  personality: { icon: "\uD83E\uDDE0", color: "#c4b5fd" },
+  motivation: { icon: "\uD83D\uDCAB", color: "#c4b5fd" },
+  secret: { icon: "\uD83D\uDD10", color: "var(--weapon)" },
+  dialogue: { icon: "\uD83D\uDCAC", color: "var(--quest)" },
+  synopsis: { icon: "\uD83D\uDCCB", color: "var(--quest)" },
+  objective: { icon: "\uD83C\uDFAF", color: "var(--quest)" },
+  combat_style: { icon: "⚔️", color: "var(--weapon)" },
+  attack_style: { icon: "⚔️", color: "var(--weapon)" },
+  special_ability: { icon: "✨", color: "#c4b5fd" },
+  passive: { icon: "\uD83D\uDD2E", color: "var(--lore)" },
+  weakness: { icon: "⚠️", color: "var(--npc)" },
+  resistance: { icon: "\uD83D\uDEE1️", color: "var(--item)" },
+  abilities: { icon: "✨", color: "#c4b5fd" },
+  geography: { icon: "\uD83D\uDDFA️", color: "var(--item)" },
+  magic_or_power: { icon: "\uD83C\uDF1F", color: "var(--lore)" },
+  myths_and_prophecies: { icon: "\uD83D\uDD2E", color: "#c4b5fd" },
+  factions: { icon: "⚔️", color: "var(--weapon)" },
+  key_figures: { icon: "\uD83D\uDC51", color: "var(--npc)" },
+  important_events: { icon: "⚡", color: "var(--quest)" },
+  impact: { icon: "\uD83D\uDCA5", color: "var(--weapon)" },
+  relationships: { icon: "\uD83E\uDD1D", color: "var(--item)" },
+  location: { icon: "\uD83D\uDCCD", color: "var(--item)" },
+  twist: { icon: "\uD83C\uDF00", color: "#c4b5fd" },
+  moral_dilemma: { icon: "⚖️", color: "var(--npc)" },
+  reward: { icon: "\uD83D\uDCB0", color: "var(--npc)" },
+  failure_consequences: { icon: "\uD83D\uDC80", color: "var(--weapon)" },
+  npcs_involved: { icon: "\uD83D\uDC65", color: "var(--quest)" },
+  enemies: { icon: "\uD83D\uDC80", color: "var(--weapon)" },
+  steps: { icon: "\uD83D\uDCCB", color: "var(--quest)" },
+  effect: { icon: "✨", color: "#c4b5fd" },
+  curse: { icon: "\uD83D\uDC80", color: "var(--weapon)" },
+  requirements: { icon: "\uD83D\uDD11", color: "var(--enemy)" },
+  crafting_material: { icon: "\uD83D\uDD28", color: "var(--npc)" },
+  drops: { icon: "\uD83D\uDCB0", color: "var(--npc)" },
+  encounter_tips: { icon: "\uD83D\uDCA1", color: "var(--item)" }
+};
+var STAT_FIELDS = new Set([
+  "hp",
+  "armor",
+  "damage",
+  "speed",
+  "range",
+  "value",
+  "weight",
+  "rarity",
+  "difficulty",
+  "class",
+  "race",
+  "age",
+  "era",
+  "element",
+  "style"
+]);
 function GlbViewer({ url }) {
   const ref = import_react54.useRef(null);
   import_react54.useEffect(() => {
@@ -66110,7 +66187,6 @@ function WorldMapPreview({ result }) {
 function ExpandModal({ gen, title, onClose }) {
   const isWorldMap = gen.type === "worldmap";
   const has3D = !!gen.glb_url;
-  const previewText = getPreviewText(gen.result);
   if (isWorldMap) {
     const params = gen.result;
     return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Modal, {
@@ -66126,6 +66202,16 @@ function ExpandModal({ gen, title, onClose }) {
       }, undefined, false, undefined, this)
     }, undefined, false, undefined, this);
   }
+  const SKIP_FIELDS = new Set(["_genre", "userPrompt"]);
+  const accentColor = TYPE_ACCENT[gen.type] ?? "var(--accent)";
+  const entries = Object.entries(gen.result).filter(([k, v]) => {
+    if (SKIP_FIELDS.has(k))
+      return false;
+    const s = String(v ?? "");
+    return s && s !== "undefined" && s !== "null" && s !== "0";
+  });
+  const statEntries = entries.filter(([k, v]) => STAT_FIELDS.has(k) || !Array.isArray(v) && typeof v !== "object" && String(v ?? "").length <= 40);
+  const contentEntries = entries.filter(([k, v]) => !STAT_FIELDS.has(k) && (Array.isArray(v) || typeof v === "object" || String(v ?? "").length > 40));
   return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Modal, {
     open: true,
     onClose,
@@ -66142,13 +66228,67 @@ function ExpandModal({ gen, title, onClose }) {
         has3D && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(GlbViewer, {
           url: gen.glb_url
         }, undefined, false, undefined, this),
-        previewText && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
-          className: "proj-expand__desc",
-          children: previewText
+        statEntries.length > 0 && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+          className: "proj-expand__stats",
+          children: statEntries.map(([k, v]) => {
+            const fm = FIELD_META[k];
+            return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+              className: "proj-expand__stat",
+              style: { "--stat-color": fm?.color ?? accentColor },
+              children: [
+                fm?.icon && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+                  className: "proj-expand__stat-icon",
+                  children: fm.icon
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+                  className: "proj-expand__stat-label",
+                  children: labelFor(k)
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+                  className: "proj-expand__stat-value",
+                  children: String(v)
+                }, undefined, false, undefined, this)
+              ]
+            }, k, true, undefined, this);
+          })
         }, undefined, false, undefined, this),
-        !gen.image_url && !has3D && !previewText && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("pre", {
-          className: "proj-expand__json",
-          children: JSON.stringify(gen.result, null, 2)
+        /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+          className: "proj-expand__fields",
+          children: contentEntries.map(([k, v]) => {
+            const fm = FIELD_META[k];
+            const isArr = Array.isArray(v);
+            return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+              className: "proj-expand__field",
+              style: { "--field-color": fm?.color ?? accentColor },
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+                  className: "proj-expand__field-header",
+                  children: [
+                    fm?.icon && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+                      className: "proj-expand__field-icon",
+                      children: fm.icon
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+                      className: "proj-expand__field-label",
+                      children: labelFor(k)
+                    }, undefined, false, undefined, this)
+                  ]
+                }, undefined, true, undefined, this),
+                isArr ? /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+                  className: "proj-expand__field-list",
+                  children: v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
+                    className: "proj-expand__field-item",
+                    children: String(item)
+                  }, i, false, undefined, this))
+                }, undefined, false, undefined, this) : String(v ?? "").split(`
+
+`).map((para, i) => /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
+                  className: "proj-expand__field-text",
+                  children: para
+                }, i, false, undefined, this))
+              ]
+            }, k, true, undefined, this);
+          })
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this)

@@ -7,6 +7,7 @@ import type { ThreeDModelId } from "../../lib/api";
 interface Model3DPreviewProps {
   imageUrl:       string;   // the 2-D design sheet (front+back)
   generationId?:  number;
+  type?:          string;   // generation type so we can skip crop for weapons/items
   onGlbReady?:    (url: string) => void;
 }
 
@@ -76,7 +77,7 @@ const THREE_D_MODELS: Array<{
  * Calls /api/trellis, /api/instant-mesh, or /api/shap-e depending on the
  * selected model and renders the returned .glb with Google's <model-viewer>.
  */
-export function Model3DPreview({ imageUrl, generationId, onGlbReady }: Model3DPreviewProps) {
+export function Model3DPreview({ imageUrl, generationId, type, onGlbReady }: Model3DPreviewProps) {
   const [model,   setModel]   = useState<ThreeDModelId>("instant-mesh");
   const [loading, setLoading] = useState(false);
   const [glbUrl,  setGlbUrl]  = useState<string | null>(null);
@@ -89,9 +90,13 @@ export function Model3DPreview({ imageUrl, generationId, onGlbReady }: Model3DPr
     setError(null);
     setGlbUrl(null);
 
-    // Crop to left half (front view only) so the 3D model doesn't see
-    // both the front and back character and create duplicate geometry
-    const frontView = await cropFrontHalf(imageUrl);
+    // Weapons and items use the full 2-view design sheet so both sides inform the
+    // 3D reconstruction. Characters (npc, enemy) use only the front-view half to
+    // prevent duplicate geometry from the back view.
+    const FULL_IMAGE_TYPES = new Set(["weapon", "item"]);
+    const frontView = FULL_IMAGE_TYPES.has(type ?? "")
+      ? imageUrl
+      : await cropFrontHalf(imageUrl);
 
     const { data, error: e } = await apiGenerate3D(frontView, model);
     setLoading(false);

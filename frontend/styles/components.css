@@ -944,6 +944,13 @@
   font-size:    var(--text-sm);
   color:        var(--text);
 }
+.field-modal__para {
+  font-size:    var(--text-sm);
+  line-height:  1.8;
+  color:        var(--text);
+  margin:       0 0 var(--sp-3) 0;
+}
+.field-modal__para:last-child { margin-bottom: 0; }
 .field-item__value { font-size: var(--text-sm); line-height: 1.6; }
 .field-item__array { display: flex; flex-wrap: wrap; gap: var(--sp-1); margin-top: var(--sp-1); }
 .array-item {

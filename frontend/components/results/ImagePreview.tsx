@@ -41,7 +41,9 @@ export function ImagePreview({
 
   return (
     <div className="image-preview">
-      <div className="image-preview__header">🎨 Hoja de diseño</div>
+      <div className="image-preview__header">
+        {type === "lore" ? "🎨 Generar ilustración" : "🎨 Hoja de diseño"}
+      </div>
 
       <Button
         variant={imageUrl ? "secondary" : "primary"}
@@ -49,7 +51,9 @@ export function ImagePreview({
         loading={loading}
         onClick={handleGenerate}
       >
-        {imageUrl ? "🔄 Regenerar diseño" : "🎨 Generar hoja de diseño"}
+        {imageUrl
+          ? (type === "lore" ? "🔄 Regenerar ilustración" : "🔄 Regenerar diseño")
+          : (type === "lore" ? "🎨 Ilustrar historia" : "🎨 Generar hoja de diseño")}
       </Button>
 
       {error && <p className="image-preview__error">{error}</p>}
@@ -73,7 +77,7 @@ export function ImagePreview({
       )}
 
       {imageUrl && show3D && (
-        <Model3DPreview imageUrl={imageUrl} generationId={generationId} onGlbReady={onGlbReady} />
+        <Model3DPreview imageUrl={imageUrl} generationId={generationId} type={type} onGlbReady={onGlbReady} />
       )}
     </div>
   );
