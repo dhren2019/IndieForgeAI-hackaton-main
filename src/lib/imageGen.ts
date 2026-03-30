@@ -40,10 +40,18 @@ const GENRE_AESTHETIC: Record<string, string> = {
 const TYPE_ISOLATION: Record<CharacterType, string> = {
   npc:    "ONLY the same individual character in 2 orthographic views (front and back), same outfit, same face, same design, no extra panels, no different characters, character only",
   quest:  "ONLY the same individual character in 2 orthographic views (front and back), no scene backgrounds, character only",
-  item:   "ONLY the exact same item in exactly 2 views (front and back of the same object), NO character, NO hands, NO person, NO different item variation, same item from two sides only on clean white background",
+  item:   "ONLY the exact same item in exactly 2 views (front and back). " +
+          "NO character, NO hands, NO person, NO pedestal, NO wooden stand, NO shoes, NO base props, NO floor objects. " +
+          "The back view shows ONLY the same item rotated 180 degrees — nothing added, nothing removed. Plain white background.",
   lore:   "world scene illustration only, no character sheets, no split panels",
-  weapon: "ONLY the exact same weapon in exactly 2 views (front face and back face of the same weapon), NO character, NO hands, NO person holding it, NO different weapon, same weapon design from two angles only on clean white background",
-  enemy:  "ONLY the same single creature in exactly 2 orthographic views (front and back of the same entity), DO NOT generate a different species, DO NOT add a humanoid variant, DO NOT draw two different creatures, same creature from front and from behind only, no floating separate weapons",
+  weapon: "ONLY the exact same weapon in exactly 2 views (front face and back face). " +
+          "The weapon CATEGORY shown must match the class field exactly (bastón = staff shape, espada = sword shape, hacha = axe shape, etc.). " +
+          "NO character, NO hands, NO person. NO second different weapon shape. " +
+          "The back view shows ONLY the same weapon rotated 180 degrees — same length, same hilt, same blade shape. Plain white background.",
+  enemy:  "ONLY the same single creature shown twice (front view and back view). " +
+          "The BACK VIEW must show the SAME body parts as the front view — including ALL wings, ALL horns, the tail, and all armor — just seen from behind. " +
+          "DO NOT remove wings in the back view. DO NOT remove tail in the back view. DO NOT add a humanoid if the creature is a beast. " +
+          "DO NOT generate two different species. Same creature, same design, front and back only.",
 };
 
 export interface ImageGenResult {
@@ -66,15 +74,29 @@ export function buildImagePrompt(
   const rawGenre   = result._genre ? String(result._genre).toLowerCase().trim() : "";
   const genreStyle = GENRE_AESTHETIC[rawGenre] ?? (rawGenre ? `${rawGenre} aesthetic` : "fantasy RPG art style");
 
-  // Build a rich descriptor from AI-generated fields
+  // Build a rich descriptor from AI-generated fields.
+  // For weapons/items the CLASS and TYPE must come FIRST — the item name may contain
+  // misleading words (e.g. "Grandespada" when the class is "bastón") that bias the model
+  // toward the wrong shape. Leading with the category keeps the visual correct.
   const descriptors: string[] = [];
-  if (result.race)        descriptors.push(String(result.race));
-  if (result.role)        descriptors.push(String(result.role));
-  if (result.type && type !== "npc") descriptors.push(String(result.type));
-  if (result.element)     descriptors.push(`${result.element} element`);
-  if (result.class)       descriptors.push(String(result.class));
-  if (result.difficulty)  descriptors.push(`${result.difficulty} difficulty`);
-  if (result.rarity)      descriptors.push(String(result.rarity));
+  if (type === "weapon" || type === "item") {
+    // Priority order: class → type → element → rarity → name
+    if (result.class)     descriptors.push(String(result.class));       // e.g. "bastón", "espada corta"
+    if (result.type)      descriptors.push(String(result.type));        // e.g. "cuerpo a cuerpo"
+    if (result.element)   descriptors.push(`${result.element} element`);
+    if (result.rarity)    descriptors.push(String(result.rarity));
+    // name is demoted — only use it as a label, not as a shape descriptor
+    descriptors.push(`named "${name}"`);
+  } else {
+    // For characters (npc, enemy, quest) keep original order
+    if (result.race)        descriptors.push(String(result.race));
+    if (result.role)        descriptors.push(String(result.role));
+    if (result.type && type !== "npc") descriptors.push(String(result.type));
+    if (result.element)     descriptors.push(`${result.element} element`);
+    if (result.class)       descriptors.push(String(result.class));
+    if (result.difficulty)  descriptors.push(`${result.difficulty} difficulty`);
+    if (result.rarity)      descriptors.push(String(result.rarity));
+  }
   // For lore: add era, region, geography as key narrative context
   if (type === "lore") {
     if (result.era)      descriptors.push(String(result.era).slice(0, 60));
@@ -110,23 +132,26 @@ export function buildImagePrompt(
   // so the AI renders the SAME object/character from front AND back, not two separate items
   let sheetInstructions: string;
   if (type === "weapon") {
+    // Extract class early to reinforce the weapon category shape
+    const weaponClass = result.class ? String(result.class) : "weapon";
     sheetInstructions =
-      "weapon design reference sheet, 16:9 horizontal single-image layout, EXACTLY TWO views of THE EXACT SAME WEAPON on one image: " +
-      "[LEFT HALF: front face of the weapon, flat orthographic view, full weapon visible, centered vertically] " +
-      "[RIGHT HALF: rear/back face of THE IDENTICAL SAME WEAPON rotated 180 degrees to show the other side, same proportions, same engravings, same materials], " +
-      "pure white background, NO hands, NO character, NO person, NO second different weapon, soft studio lighting from above";
+      `${weaponClass} design reference sheet, 16:9 horizontal single-image layout, EXACTLY TWO views of THE EXACT SAME ${weaponClass.toUpperCase()} on one image: ` +
+      `[LEFT HALF: front face of the ${weaponClass}, flat orthographic top-down view, full ${weaponClass} visible, centered vertically, floating on white background] ` +
+      `[RIGHT HALF: rear/back face of THE IDENTICAL SAME ${weaponClass} rotated 180 degrees, same proportions, same engravings, same materials, same overall shape and size], ` +
+      "pure white background, NO hands, NO character, NO person, NO second different weapon type, soft studio lighting from above, both views same scale";
   } else if (type === "item") {
+    const itemType = result.type ? String(result.type) : (result.class ? String(result.class) : "item");
     sheetInstructions =
-      "item design reference sheet, 16:9 horizontal single-image layout, EXACTLY TWO views of THE EXACT SAME ITEM on one image: " +
-      "[LEFT HALF: front face of the item, flat orthographic view, full item visible, centered] " +
-      "[RIGHT HALF: rear/back face of THE IDENTICAL SAME ITEM rotated to show the back side, same shape, same materials], " +
-      "pure white background, NO hands, NO character, NO person, NO different item, soft studio product lighting";
+      `${itemType} design reference sheet, 16:9 horizontal single-image layout, EXACTLY TWO views of THE EXACT SAME ${itemType.toUpperCase()} on one image: ` +
+      `[LEFT HALF: front face of the ${itemType}, flat orthographic view, full object visible, centered, floating on white background] ` +
+      `[RIGHT HALF: rear/back face of THE IDENTICAL SAME ${itemType} rotated 180 degrees, same shape, same materials, same size], ` +
+      "pure white background, NO hands, NO character, NO person, NO wooden stand, NO pedestal, NO shoes, NO floor props, soft studio product lighting, both views same scale";
   } else if (type === "enemy") {
     sheetInstructions =
       "creature/monster design reference sheet, 16:9 horizontal single-image layout, EXACTLY TWO orthographic views of THE SAME SINGLE CREATURE on one image: " +
-      "[LEFT HALF: full body FRONT view, creature facing directly toward the viewer, neutral stance, full body visible from head to feet] " +
-      "[RIGHT HALF: full body REAR/BACK view of THE EXACT SAME CREATURE rotated 180 degrees, same body shape, same armor, same textures, seen from behind], " +
-      "pure white background, DO NOT draw a different creature species, DO NOT add a humanoid variant if creature is a beast, DO NOT generate two different entities, same creature only";
+      "[LEFT HALF: full body FRONT view, creature facing directly toward the viewer, neutral stance, ALL body features visible including wings, tail, horns, full body from head to feet] " +
+      "[RIGHT HALF: full body REAR/BACK view of THE EXACT SAME CREATURE rotated 180 degrees, ALL THE SAME FEATURES seen from behind — wings visible from behind, tail visible from behind, same armor, same textures, NO features removed], " +
+      "pure white background, DO NOT draw a different creature species, DO NOT add a humanoid variant if creature is a beast, both views must show identical body parts";
   } else if (type === "lore") {
     sheetInstructions =
       "epic panoramic scene illustration, 16:9 horizontal wide shot, showing the world, environment and events described above, cinematic atmospheric lighting, no text, no UI, no emblems, painterly game concept art style";
@@ -139,7 +164,12 @@ export function buildImagePrompt(
       "pure white background, NO extra panels, NO different characters, NO weapons floating separately, same individual only";
   }
 
-  const basePrompt = `${name}, ${desc}, ${style}, ${genreStyle}, ${sheetInstructions}, ${isolation}, high quality, detailed linework, professional game concept art, dramatic lighting`;
+  // For weapon/item the prompt leads with class, not name (name may mislead the model's shape)
+  const subjectLabel = (type === "weapon" || type === "item")
+    ? desc   // desc already starts with class for these types
+    : `${name}, ${desc}`;
+
+  const basePrompt = `${subjectLabel}, ${style}, ${genreStyle}, ${sheetInstructions}, ${isolation}, high quality, detailed linework, professional game concept art, dramatic lighting`;
   const finalPrompt = userHint ? `${basePrompt}, ${userHint}` : basePrompt;
 
   return finalPrompt.replace(/\s+/g, " ").trim();
