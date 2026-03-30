@@ -7,7 +7,7 @@
 ![Bun](https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react)
-![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
+![Three.js](https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=three.js&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![HuggingFace](https://img.shields.io/badge/HuggingFace-FBAE17?style=for-the-badge&logo=huggingface&logoColor=black)
 ![PostgreSQL](https://img.shields.io/badge/Postgres-316192?style=for-the-badge&logo=postgresql&logoColor=white)
@@ -18,12 +18,18 @@
 - IndieForge AI es una plataforma full‑stack para generar contenido de juego (texto, imágenes) y transformar hojas de diseño en modelos 3D listos para integrar en pipelines de juego (.glb/.obj). Está diseñada para prototipado rápido, colaboración y publicación de assets.
 
 **Contenido del README**
-- Resumen y objetivos
-- Badges y recursos visuales
-- Modelos IA disponibles (LLM & multimodal)
-- Pipeline Image → 3D y modelos incorporados
-- Cómo ejecutar (desarrollo y despliegue)
-- Endpoints principales y recomendaciones de producción
+- [Visión y objetivos](#visión-y-objetivos)
+- [Stack y tecnologías](#stack-y-tecnologías)
+- [Modelos LLM disponibles](#modelos-llm-disponibles-detallado)
+- [Pipeline Image → 3D](#pipelines-image--3d-modelos-incorporados)
+- [Point Cloud Loader — Animación mientras se crea el mundo](#-point-cloud-loader--animación-de-terreno-procedural)
+- [Export Pack — Descarga de proyectos en ZIP](#-export-pack--descarga-de-proyectos-en-zip)
+- [Base de datos](#-base-de-datos)
+- [Social — Algoritmo ML de recomendación](#-social--algoritmo-de-machine-learning-para-el-feed)
+- [Invocación Épica — Efecto WOW](#-invocación-épica--efecto-wow-de-generación)
+- [World Creator](#-world-creator--mapa-del-mundo-3d-procedural)
+- [Desarrollo local](#desarrollo-local)
+- [Endpoints clave](#endpoints-clave-rápido)
 
 ---
 
@@ -35,12 +41,19 @@
 ---
 
 ## Stack y tecnologías
-- Backend: Bun (TypeScript)
-- Frontend: Next.js + React + TypeScript
-- Base de datos: PostgreSQL
-- IA: Hugging Face Spaces, Groq, Shap‑E, Trellis2, ImagenGen
-- Visual: `<model-viewer>` para inspección 3D
-- Docker / Docker Compose para despliegues locales
+| Tecnología | Uso |
+|---|---|
+| **Bun** | Runtime + bundler + servidor HTTP (TypeScript) |
+| **React 18** | Frontend SPA con hooks y estado global |
+| **Three.js** | Renderizado WebGL 3D (mundo procedural, point cloud, model-viewer) |
+| **simplex-noise** | Generación fBm de terreno procedural |
+| **PostgreSQL** | Base de datos relacional (generaciones, posts, interacciones) |
+| **Clerk** | Autenticación (JWT + cookies, login social) |
+| **Groq API** | LLM principal para generación de texto (Llama, Mixtral, etc.) |
+| **HuggingFace** | Generación de imágenes (FLUX.1-schnell) + modelo fine-tuned Qwen3 |
+| **Shap-E / Trellis2** | Pipelines de reconstrucción Image → 3D |
+| **JSZip** | Generación de archivos ZIP para Export Pack |
+| **Docker / Docker Compose** | Despliegue contenedorizado |
 
 
 ## Recursos visuales
@@ -87,6 +100,335 @@ En la UI el usuario puede elegir el motor (rápido → Shap‑E, calidad → Tre
 
 ---
 
+## 🏔️ Point Cloud Loader — Animación de terreno procedural
+
+Mientras la IA genera el mundo (texto + parámetros de terreno) y mientras Three.js inicializa la escena 3D o carga los assets glTF, en lugar de mostrar una pantalla negra o un spinner genérico, se renderiza un **mapa de terreno animado en nube de puntos** que da la sensación de que el mundo se está "formando" en tiempo real.
+
+### Cómo funciona
+
+1. Se crea una cuadrícula de **120 × 120 puntos** (14 400 puntos) en un plano XZ
+2. La altura de cada punto se calcula con **fBm (Fractional Brownian Motion)** de 6 octavas usando `simplex-noise`
+3. El color se asigna por altitud, imitando la paleta del mapa real:
+   - 🌊 **Agua profunda** (azul oscuro) → **Agua somera** (azul medio)
+   - 🏖️ **Playa / arena** (ocre)
+   - 🌿 **Vegetación baja** (verde) → **Altiplano** (marrón)
+   - 🪨 **Roca** (gris) → ❄️ **Nieve** (blanco)
+4. Se añaden **3 000 puntos de agua** a la altura del nivel del mar con efecto shimmer (opacidad sinusoidal)
+5. **800 estrellas de fondo** para dar contexto espacial
+6. La cámara **orbita lentamente** alrededor del terreno con movimiento vertical suave
+7. Un `ResizeObserver` mantiene el canvas **a ancho completo del contenedor** del mapa
+
+### Dónde aparece
+
+| Momento | Componente | Descripción |
+|---|---|---|
+| Generación IA activa | `WorldCreatorPage.tsx` | Mientras Groq procesa el prompt y genera lore + parámetros |
+| Inicialización 3D | `WorldMap3D.tsx` (overlay) | Mientras Three.js construye la escena y/o carga glTFs |
+
+### Archivos clave
+
+| Archivo | Descripción |
+|---|---|
+| `frontend/components/ui/PointCloudLoader.tsx` | Componente React + Three.js con terreno procedural |
+| `frontend/styles/components.css` | Clases `.wc-pointcloud*` y `.wc-map-loader-overlay` |
+
+---
+
+## 📦 Export Pack — Descarga de proyectos en ZIP
+
+Los usuarios pueden descargar todo un proyecto como un **"Export Pack"** — un archivo ZIP listo para importar en motores de juego (Unity, Godot, etc.).
+
+### Contenido del ZIP
+
+```
+📦 mi-proyecto_export.zip
+├── game-bible.json          ← Datos estructurados de cada generación
+├── game-bible.md            ← Resumen legible en Markdown
+├── unity-data.json          ← Array plano optimizado para Unity (C# deserializable)
+├── godot-data.json          ← Array plano optimizado para Godot (GDScript parseable)
+└── assets/
+    ├── images/              ← PNGs/JPGs de cada generación (decodificados de base64)
+    │   ├── 001_Aldric.png
+    │   ├── 002_Espada_Flamigera.png
+    │   └── ...
+    └── models/              ← Modelos .glb de cada generación
+        ├── 001_Aldric.glb
+        ├── 002_Espada_Flamigera.glb
+        └── ...
+```
+
+### `game-bible.json`
+
+Contiene el objeto completo del proyecto con todos los metadatos:
+
+```json
+{
+  "project": "Mi RPG Medieval",
+  "exported": "2026-03-30T12:00:00.000Z",
+  "item_count": 15,
+  "items": [
+    {
+      "id": 42,
+      "type": "npc",
+      "prompt_meta": { "genre": "medieval", "role": "merchant" },
+      "result": { "name": "Aldric", "class": "Mercader", "stats": { ... } },
+      "image_url": "assets/images/001_Aldric.png",
+      "glb_url": "assets/models/001_Aldric.glb",
+      "created_at": "2026-03-28T10:30:00Z"
+    }
+  ]
+}
+```
+
+### `game-bible.md`
+
+Documento Markdown con el lore completo del proyecto, incluyendo estadísticas, descripciones y enlaces relativos a las imágenes y modelos.
+
+### `unity-data.json` / `godot-data.json`
+
+Arrays planos con rutas relativas a los assets, listos para deserializar en los respectivos motores:
+
+```json
+{
+  "items": [
+    {
+      "id": 42,
+      "type": "npc",
+      "slug": "001_Aldric",
+      "data": { "name": "Aldric", ... },
+      "image": "assets/images/001_Aldric.png",
+      "model": "assets/models/001_Aldric.glb"
+    }
+  ]
+}
+```
+
+### Cómo usarlo
+
+1. Abre la sección **Proyectos** y selecciona un proyecto
+2. Haz clic en el botón **📦 Export Pack** en la cabecera del proyecto
+3. Se genera el ZIP en el servidor y se descarga automáticamente
+
+### Endpoint
+
+```
+GET /api/projects/:id/export
+```
+
+Requiere autenticación (Clerk cookies). Devuelve `Content-Type: application/zip`.
+
+### Archivos clave
+
+| Archivo | Descripción |
+|---|---|
+| `src/routes/project-export.ts` | Lógica de generación del ZIP con JSZip |
+| `src/routes/projects.ts` | Enrutamiento — redirige `/export` al handler |
+| `frontend/pages/ProjectsPage.tsx` | Botón "Export Pack" en el header del detalle |
+
+---
+
+## 🗄️ Base de datos
+
+La base de datos es **PostgreSQL** y se migra automáticamente al arrancar el servidor (`src/db/schema.sql`). El esquema soporta todo el ciclo de vida: generación → organización → publicación → interacción social.
+
+### Diagrama ER
+
+![Diagrama ER de la base de datos](public/images-doc/bbdd.png)
+
+### Tablas principales
+
+| Tabla | Propósito | Relaciones clave |
+|---|---|---|
+| **`users`** | Usuarios registrados (Clerk) y anónimos (cookie) | `session_id` como identificador universal |
+| **`generations`** | Cada generación de contenido (NPC, quest, item, weapon, enemy, lore) | Contiene `prompt_meta` (JSON), `result` (JSON), `image_url`, `glb_url` |
+| **`favorites`** | Marcadores de favoritos del usuario | FK → `generations(id)`, UNIQUE(`session_id`, `generation_id`) |
+| **`projects`** | Carpetas/proyectos para organizar generaciones | Propiedad por `session_id` |
+| **`project_items`** | Relación N:M entre proyectos y generaciones | PK compuesta (`project_id`, `generation_id`) |
+| **`posts`** | Publicaciones sociales con título, descripción, tipo y assets | FK opcional → `generations(id)` |
+| **`post_tags`** | Etiquetas de cada publicación | PK compuesta (`post_id`, `tag`) |
+| **`tag_follows`** | Etiquetas que sigue cada usuario | PK compuesta (`session_id`, `tag`) |
+| **`post_likes`** | Likes de usuarios a publicaciones | PK compuesta (`session_id`, `post_id`) |
+| **`post_comments`** | Comentarios en publicaciones (máx. 300 chars) | FK → `posts(id)` |
+| **`user_interactions`** | Señales de comportamiento para el algoritmo ML | Tipos: `view`, `expand`, `like`, `comment` |
+
+### Índices de rendimiento
+
+```sql
+-- Generaciones
+CREATE INDEX idx_generations_session ON generations(session_id);
+CREATE INDEX idx_generations_type    ON generations(type);
+
+-- Posts sociales
+CREATE INDEX idx_posts_session  ON posts(session_id);
+CREATE INDEX idx_posts_type     ON posts(type);
+CREATE INDEX idx_posts_created  ON posts(created_at);
+
+-- Interacciones ML (críticos para el feed de recomendación)
+CREATE INDEX idx_ui_session        ON user_interactions(session_id);
+CREATE INDEX idx_ui_post           ON user_interactions(post_id);
+CREATE INDEX idx_ui_session_post   ON user_interactions(session_id, post_id);
+CREATE INDEX idx_ui_session_action ON user_interactions(session_id, action);
+```
+
+### Migración de sesiones anónimas → Clerk
+
+Cuando un usuario anónimo (cookie) inicia sesión con Clerk por primera vez, se ejecuta una migración que transfiere **todas** sus generaciones, favoritos, proyectos, posts, likes, comentarios, follows e interacciones al nuevo `session_id` de Clerk. Esto garantiza que no se pierde ningún dato.
+
+---
+
+## 🧠 Social — Algoritmo de Machine Learning para el Feed
+
+El feed social de IndieForge AI no muestra los posts por orden cronológico simple. Implementa un **algoritmo de recomendación basado en 6 señales ponderadas** que personaliza el contenido para cada usuario según sus interacciones históricas.
+
+### Señales del algoritmo
+
+El score final de cada post se calcula como la **suma ponderada** de estas señales:
+
+| Señal | Peso | Descripción | Ventana temporal |
+|---|---|---|---|
+| **S1 — Etiquetas seguidas** | `×5.0` | Si el post tiene etiquetas que el usuario sigue directamente | Sin límite |
+| **S2 — Afinidad por tipo** | `×0.5 × Σ(action_weight)` | Pondera las interacciones previas del usuario con posts del mismo tipo (NPC, weapon, etc.) | 45 días |
+| **S3 — Afinidad por etiqueta** | `×2.0` | Cuenta cuántas veces el usuario interactuó con posts que comparten etiquetas con el post candidato | 30 días |
+| **S4 — Filtrado colaborativo** | `×3.5` | Cuántos usuarios con gustos similares (que dieron like a los mismos posts que tú) también dieron like a este post | Sin límite |
+| **S5 — Popularidad** | `×0.4` | Total de likes del post (señal débil para evitar sesgo de popularidad) | Sin límite |
+| **S6 — Recencia** | `×4.0 × e^(-d/3)` | Decaimiento exponencial — los posts recientes tienen más peso (vida media ≈ 3 días) | Exponencial |
+| **P — Penalización visto** | `-1.5 × views` | Penaliza posts que el usuario ya vio recientemente | 24 horas |
+
+### Pesos de interacción (S2)
+
+Cada tipo de interacción tiene un peso diferente para calcular la afinidad:
+
+| Acción | Peso | Significado |
+|---|---|---|
+| `like` | 3.0 | Señal fuerte de interés |
+| `comment` | 2.5 | Engagement activo |
+| `expand` | 1.0 | Curiosidad / lectura detallada |
+| `view` | 0.1 | Señal pasiva (bajo peso, alto volumen) |
+
+### Filtrado colaborativo (S4)
+
+```
+Para cada post candidato P:
+  1. Encuentra usuarios U_similar = {usuarios que dieron like a posts que TÚ también likeastes}
+  2. Cuenta cuántos de U_similar también dieron like a P
+  3. Score_S4 = count(U_similar que likearon P) × 3.5
+```
+
+Este mecanismo detecta "tribus" de usuarios con gustos similares sin necesidad de datos demográficos explícitos.
+
+### Decaimiento temporal (S6)
+
+La recencia usa un **decaimiento exponencial** con vida media de ~3 días:
+
+```
+Score_S6 = 4.0 × e^(−days_since_creation / 3.0)
+```
+
+| Edad del post | Score S6 |
+|---|---|
+| 0 días (recién creado) | 4.00 |
+| 1 día | 2.87 |
+| 3 días | 1.47 |
+| 7 días | 0.39 |
+| 14 días | 0.04 |
+
+### Deduplicación de vistas
+
+Las interacciones de tipo `view` se deduplicane por sesión + post en ventanas de 30 minutos para evitar inflar el contador de vistas con recargas de página.
+
+### Captura de señales en el frontend
+
+El frontend envía automáticamente señales de interacción:
+
+```typescript
+// Al hacer scroll y el post entra en viewport → "view"
+apiRecordInteraction(post.id, "view");
+
+// Al expandir el detalle de un post → "expand"
+apiRecordInteraction(post.id, "expand");
+
+// Like y comment se registran automáticamente en el handler del backend
+```
+
+### Trending (algoritmo separado)
+
+El tab "Trending" usa un algoritmo más simple basado en **actividad en las últimas 48 horas**:
+
+```
+Score_trending = likes_48h × 3 + comments_48h × 2 + interactions_48h × 1
+```
+
+Solo muestra posts de los últimos 7 días.
+
+### Exclusiones
+
+- Los posts del propio usuario **nunca** aparecen en su feed
+- Los posts ya likeados se **excluyen** (ya los conoces)
+- Posts vistos recientemente se **penalizan** pero no se excluyen (pueden subir si reciben likes)
+
+### Archivos clave
+
+| Archivo | Descripción |
+|---|---|
+| `src/db/client.ts` → `getFeed()` | Query SQL con las 6 señales como subqueries correlacionadas |
+| `src/db/client.ts` → `recordInteraction()` | Registro de señales con deduplicación de views |
+| `src/db/client.ts` → `getTrendingPosts()` | Algoritmo de trending (48h) |
+| `src/routes/social.ts` | Endpoints REST para feed, trending, interactions |
+| `frontend/hooks/useSocialFeed.ts` | Hook React que gestiona tabs (feed/trending/explorar) |
+| `frontend/components/social/FeedPost.tsx` | Envía señales view/expand al backend via IntersectionObserver |
+
+---
+
+## ✨ Invocación Épica — Efecto WOW de generación
+
+Cuando el usuario genera contenido (NPC, arma, quest, etc.), en lugar de ver simplemente un spinner, se muestra una **animación de invocación arcana** estilo RPG/gacha que crea tensión y expectativa.
+
+### Qué se ve
+
+1. **Tres círculos concéntricos** que pulsan con el color del tipo de generación
+2. **Runas nórdicas (Futhark)** girando en dos anillos — exterior (18 runas, sentido horario) e interior (12 runas, sentido antihorario)
+3. **6 líneas radiales** como un pentáculo/crosshair que rota lentamente
+4. **Hexágono central** que gira como emblema del "sello"
+5. **Partículas de energía** que flotan hacia arriba desde el borde del círculo
+6. **Gradiente radial** de fondo que pulsa con el acento de color
+
+### Colores por tipo
+
+| Tipo | Color | Sensación |
+|---|---|---|
+| NPC | 💜 `#a855f7` | Místico / mágico |
+| Quest | 💙 `#3b82f6` | Aventura / exploración |
+| Item | 💛 `#f59e0b` | Tesoro / recompensa |
+| Lore | 💚 `#10b981` | Conocimiento / naturaleza |
+| Weapon | ❤️ `#ef4444` | Peligro / poder |
+| Enemy | 🔴 `#dc2626` | Amenaza / combate |
+
+### Fase de revelación
+
+Cuando la IA termina de generar, el círculo ejecuta un **"reveal flash"**:
+1. El brillo del canvas se multiplica ×3 (filtro CSS `brightness`)
+2. Llama de partículas se multiplica (95% de spawn rate vs 35%)
+3. El canvas hace scale(1.15) + fade out en 0.9 segundos
+4. Al terminar la animación, aparece el `ResultCard` con el contenido generado
+
+### Implementación técnica
+
+- Canvas 2D con requestAnimationFrame (sin Three.js → liviano)
+- ResizeObserver para responsividad
+- Sistema de partículas con pool y reciclaje de vida
+- Transición de fases: `idle → summoning → reveal → done → idle`
+- El componente se auto-oculta cuando no hay generación activa
+
+### Archivos clave
+
+| Archivo | Descripción |
+|---|---|
+| `frontend/components/ui/SummonCircle.tsx` | Componente canvas con runas, partículas y reveal |
+| `frontend/pages/HomePage.tsx` | Integración: se activa con `loading` y revela el resultado |
+| `frontend/styles/components.css` | Animaciones CSS (`summonFadeIn`, `summonFlash`, `summonPulseText`) |
+
+---
+
 ## Funcionamiento (resumen técnico)
 1. Generación: `POST /api/generate` — recibe prompt + metadatos → ejecuta LLM seleccionado (ej. Qwen3-0.6B) → devuelve JSON estructurado.
 2. Imagen: el usuario sube o genera imágenes (HF/Groq) — `PATCH /api/generations/:id/image` guarda `image_url`.
@@ -101,6 +443,9 @@ En la UI el usuario puede elegir el motor (rápido → Shap‑E, calidad → Tre
 - `PATCH /api/generations/:id/glb` — guardar `glb_url`
 - `POST /api/shap-e`, `POST /api/trellis`, `POST /api/imagegen` — reconstrucción 3D
 - `POST /api/social/posts` — crear post con `image_url` y `glb_url`
+- `GET /api/social/feed` — feed personalizado con algoritmo ML
+- `POST /api/social/interactions` — registrar señal de interacción (view/expand/like/comment)
+- `GET /api/projects/:id/export` — descargar Export Pack (ZIP)
 
 ---
 

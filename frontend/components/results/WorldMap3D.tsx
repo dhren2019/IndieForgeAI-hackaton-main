@@ -21,6 +21,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import * as THREE          from "three";
 import { OrbitControls }   from "three/examples/jsm/controls/OrbitControls.js";
 import { createNoise2D }   from "simplex-noise";
+import { PointCloudLoader } from "../ui/PointCloudLoader";
 
 // ── Public types ──────────────────────────────────────────────────────────────
 
@@ -1597,9 +1598,10 @@ export function WorldMapPanel({ params }: WorldMapPanelProps) {
   const fpvRef          = useRef(false);
   const keysRef         = useRef({ w: false, a: false, s: false, d: false, shift: false });
   const eulerRef        = useRef(new THREE.Euler(0, 0, 0, "YXZ"));
-  const [explorer, setExplorer]     = useState(false);
-  const [fpvMode,  setFpvMode]      = useState(false);
+  const [explorer,   setExplorer]   = useState(false);
+  const [fpvMode,    setFpvMode]    = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const [mapLoading, setMapLoading] = useState(true);
   const terrainDataRef = useRef<{
     noise2D: (x: number, y: number) => number;
     warpNoise: (x: number, y: number) => number;
@@ -1646,6 +1648,9 @@ export function WorldMapPanel({ params }: WorldMapPanelProps) {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+
+    // Reset the loader every time params change (new map or new world)
+    setMapLoading(true);
 
     let rafId    = 0;
     let disposed = false;
@@ -1930,6 +1935,9 @@ export function WorldMapPanel({ params }: WorldMapPanelProps) {
       };
       animate();
 
+      // ── Signal that the map has fully loaded ──────────────────────────
+      if (!disposed) setMapLoading(false);
+
       // ── Register Three.js cleanup ─────────────────────────────────────
       onCleanup.push(() => {
         if (document.pointerLockElement) document.exitPointerLock();
@@ -1986,9 +1994,21 @@ export function WorldMapPanel({ params }: WorldMapPanelProps) {
   const mystic  = Math.round(params.mysticism * 100);
   const landmarkList = (params.landmarks ?? []).join(", ");
 
+  const loadingText = params.use_assets
+    ? "Cargando assets glTF del mundo…"
+    : "Construyendo el mapa 3D…";
+  const loadingSubtext = params.use_assets
+    ? "Importando modelos de vegetación, rocas y landmarks del bioma"
+    : "Generando terreno procedural, asentamientos y landmarks";
+
   return (
     <div className="wc-map-canvas-wrap">
-      <div className="wc-map-canvas" ref={containerRef} />
+      {mapLoading && (
+        <div className="wc-map-loader-overlay">
+          <PointCloudLoader text={loadingText} subtext={loadingSubtext} />
+        </div>
+      )}
+      <div className="wc-map-canvas" ref={containerRef} style={mapLoading ? { visibility: "hidden" } : undefined} />
 
       {/* HUD top-left */}
       <div className="wc-map-hud">

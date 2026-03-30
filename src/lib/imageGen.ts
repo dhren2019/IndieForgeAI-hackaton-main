@@ -104,21 +104,29 @@ export function buildImagePrompt(
     if (result.geography) descriptors.push(String(result.geography).slice(0, 100));
   }
 
-  // Use the AI-generated visual description first, then fallback fields
-  const visualDesc =
-    result.appearance   ? String(result.appearance).slice(0, 140) :
-    result.description  ? String(result.description).slice(0, 140) :
-    null;
+  // Use the AI-generated visual description first, then fallback fields.
+  // For weapons and items, skip the appearance/description text entirely —
+  // it often references lore-based names (e.g. "Grandespada") or prose that
+  // contradicts the actual class field, causing the image model to render the
+  // wrong weapon shape. The class + element + rarity is sufficient to define the visual.
+  const visualDesc = (type === "weapon" || type === "item")
+    ? null
+    : result.appearance   ? String(result.appearance).slice(0, 140)
+    : result.description  ? String(result.description).slice(0, 140)
+    : null;
   if (visualDesc) descriptors.push(visualDesc);
 
-  // Include backstory/lore/history for mood and context
-  const loreSnippet =
-    result.history   ? String(result.history).slice(0, 120) :
-    result.overview  ? String(result.overview).slice(0, 100) :
-    result.backstory ? String(result.backstory).slice(0, 80) :
-    result.lore      ? String(result.lore).slice(0, 80) :
-    result.summary   ? String(result.summary).slice(0, 80) :
-    null;
+  // Include backstory/lore/history for mood and context.
+  // Weapons and items skip lore text — prose descriptions often reference the
+  // wrong weapon shape and confuse the image model.
+  const loreSnippet = (type === "weapon" || type === "item")
+    ? null
+    : result.history   ? String(result.history).slice(0, 120)
+    : result.overview  ? String(result.overview).slice(0, 100)
+    : result.backstory ? String(result.backstory).slice(0, 80)
+    : result.lore      ? String(result.lore).slice(0, 80)
+    : result.summary   ? String(result.summary).slice(0, 80)
+    : null;
   if (loreSnippet) descriptors.push(loreSnippet);
 
   // User's own visual prompt overrides/extends everything else

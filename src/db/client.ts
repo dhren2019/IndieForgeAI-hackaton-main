@@ -197,6 +197,11 @@ export async function getFavorites(session_id: string, cookie_session_id?: strin
   return rows.map(deserializeGeneration);
 }
 
+export async function getGenerationById(id: number): Promise<Generation | null> {
+  const rows = await sql`SELECT * FROM generations WHERE id = ${id} LIMIT 1` as Record<string, unknown>[];
+  return rows.length ? deserializeGeneration(rows[0]) : null;
+}
+
 export async function updateGenerationImage(id: number, image_url: string): Promise<void> {
   await sql`UPDATE generations SET image_url = ${image_url} WHERE id = ${id}`;
 }

@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { PageContainer }       from "../components/layout/PageContainer";
 import { WorldMapPanel }       from "../components/results/WorldMap3D";
 import { Button }              from "../components/ui/Button";
-import { Loader }              from "../components/ui/Loader";
+import { PointCloudLoader }    from "../components/ui/PointCloudLoader";
 import { Modal }               from "../components/ui/Modal";
 import { AddToProjectPanel }   from "../components/projects/ProjectModal";
 import type { WorldMapParams } from "../components/results/WorldMap3D";
@@ -702,13 +702,12 @@ export function WorldCreatorPage({ onToast }: WorldCreatorPageProps) {
           </div>
         )}
 
-        {/* Loading state */}
+        {/* Loading state — animated point cloud */}
         {loading && (
-          <div className="wc-loading">
-            <Loader size="lg" />
-            <p className="wc-loading__text">La IA está imaginando tu mundo...</p>
-            <p className="wc-loading__sub">Generando lore, extrayendo parámetros de terreno y preparando el mapa 3D</p>
-          </div>
+          <PointCloudLoader
+            text="La IA está imaginando tu mundo…"
+            subtext="Generando lore, extrayendo parámetros de terreno y preparando el mapa 3D"
+          />
         )}
 
         {/* AI description */}

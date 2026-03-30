@@ -19,6 +19,7 @@ import {
   listProjectItems,
   getGenerationProjectIds,
 } from "../services/project.service";
+import { projectExportRoute } from "./project-export";
 import { ok, err } from "../utils/response";
 
 export async function projectsRoute(req: Request, sessionId: string, cookieSessionId?: string | null): Promise<Response> {
@@ -57,6 +58,11 @@ export async function projectsRoute(req: Request, sessionId: string, cookieSessi
   if (idMatch) {
     const projectId = Number(idMatch[1]);
     const sub       = idMatch[2] ?? "";
+
+    // GET /api/projects/:id/export
+    if (sub === "/export" && method === "GET") {
+      return projectExportRoute(req, sessionId, projectId);
+    }
 
     // DELETE /api/projects/:id
     if (sub === "" && method === "DELETE") {

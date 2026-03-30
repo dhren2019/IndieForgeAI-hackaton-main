@@ -90,14 +90,12 @@ export function Model3DPreview({ imageUrl, generationId, type, onGlbReady }: Mod
     setError(null);
     setGlbUrl(null);
 
-    // Weapons, items and enemies use the full 2-view design sheet so both
-    // front and back views inform the 3D reconstruction (better geometry).
-    // NPCs crop to the left half (front view only) to avoid duplicate geometry
-    // since the back view can confuse multi-view reconstruction for humans.
-    const FULL_IMAGE_TYPES = new Set(["weapon", "item", "enemy"]);
-    const frontView = FULL_IMAGE_TYPES.has(type ?? "")
-      ? imageUrl
-      : await cropFrontHalf(imageUrl);
+    // Always crop the design sheet to the left half (front view) before sending
+    // to the 3D reconstruction model. The design sheet has [front | back] side by
+    // side; using the full image confuses multi-view models into trying to reconstruct
+    // two separate copies. The front view alone yields clean, consistent geometry for
+    // all types — characters, weapons, items and enemies alike.
+    const frontView = await cropFrontHalf(imageUrl);
 
     const { data, error: e } = await apiGenerate3D(frontView, model);
     setLoading(false);

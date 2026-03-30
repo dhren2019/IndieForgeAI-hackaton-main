@@ -36,6 +36,7 @@ export function ProjectsPage({ onToast }: ProjectsPageProps) {
   const [editingId, setEditingId]         = useState<number | null>(null);
   const [editName, setEditName]           = useState("");
   const [editEmoji, setEditEmoji]         = useState("📁");
+  const [exporting, setExporting]         = useState(false);
 
   // Load items when a project is selected
   const openProject = useCallback(async (p: ProjectData) => {
@@ -90,6 +91,33 @@ export function ProjectsPage({ onToast }: ProjectsPageProps) {
         setSelected((s) => s ? { ...s, name: updated.name, emoji: updated.emoji } : s);
     }
     setEditingId(null);
+  };
+
+  const handleExport = async () => {
+    if (!selected || exporting) return;
+    setExporting(true);
+    try {
+      const res = await fetch(`/api/projects/${selected.id}/export`, { credentials: "include" });
+      if (!res.ok) {
+        const json = await res.json().catch(() => null) as { error?: string } | null;
+        onToast(json?.error ?? "Error al exportar", "error");
+        return;
+      }
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = `${selected.name.replace(/[^a-zA-Z0-9_\- ]/g, "").trim() || "project"}_export.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      onToast("Export Pack descargado");
+    } catch (e) {
+      onToast("Error al exportar", "error");
+    } finally {
+      setExporting(false);
+    }
   };
 
   // Not signed in — show auth wall
@@ -300,6 +328,14 @@ export function ProjectsPage({ onToast }: ProjectsPageProps) {
                     <span className="projects-sidebar__item-count">{items.length}</span>
                   </span>
                   <span className="projects-detail__view-toggle">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleExport}
+                      disabled={exporting || items.length === 0}
+                    >
+                      {exporting ? "Exportando…" : "📦 Export Pack"}
+                    </Button>
                     <button
                       className={`projects-detail__view-btn${viewMode === "grid" ? " projects-detail__view-btn--active" : ""}`}
                       onClick={() => setViewMode("grid")}

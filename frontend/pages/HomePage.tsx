@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { GenerateForm }  from "../components/generate/GenerateForm";
 import { ResultCard }    from "../components/results/ResultCard";
 import { PublishModal }  from "../components/social/PublishModal";
+import { SummonCircle } from "../components/ui/SummonCircle";
 import { PageContainer } from "../components/layout/PageContainer";
 import { useAppState }   from "../state/app-state";
 import { useGenerate }   from "../hooks/useGenerate";
@@ -19,13 +20,17 @@ export function HomePage({ onToast }: HomePageProps) {
   const [publishing, setPublishing]     = useState(false);
   const [glbUrl,     setGlbUrl]         = useState<string | undefined>(undefined);
   const [imageUrl,   setImageUrl]       = useState<string | undefined>(undefined);
+  const [genType,    setGenType]        = useState<GenerationType>("npc");
+  const [showResult, setShowResult]     = useState(true);
 
   const handleGenerate = async (type: GenerationType, meta: Record<string, string>, model: string) => {
     setGlbUrl(undefined);   // reset on new generation
     setImageUrl(undefined);
+    setGenType(type);
+    setShowResult(false);
     const result = await generate(type, meta, model);
     if (result) { setLatest(result); onToast("\u00a1Generado exitosamente! \u2728"); }
-    else         onToast(error ?? "Error al generar", "error");
+    else         { setShowResult(true); onToast(error ?? "Error al generar", "error"); }
   };
 
   return (
@@ -52,7 +57,14 @@ export function HomePage({ onToast }: HomePageProps) {
           />
         </section>
 
-        {latest && (
+        {/* Summoning circle during generation */}
+        <SummonCircle
+          active={loading}
+          type={genType}
+          onRevealDone={() => setShowResult(true)}
+        />
+
+        {latest && showResult && (
           <section className="home-layout__result">
             <ResultCard
               gen={latest}

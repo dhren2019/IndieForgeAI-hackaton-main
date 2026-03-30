@@ -12,6 +12,7 @@ import { FavoritesPage }            from "./pages/FavoritesPage";
 import { SocialPage }               from "./pages/SocialPage";
 import { ProjectsPage }             from "./pages/ProjectsPage";
 import { WorldCreatorPage }         from "./pages/WorldCreatorPage";
+import { ForgePage }                from "./pages/ForgePage";
 import { setTokenGetter }           from "./lib/auth-token";
 
 const CLERK_KEY = process.env.CLERK_PUBLISHABLE_KEY ?? "";
@@ -43,6 +44,7 @@ function Pages() {
         {tab === "social"         && <SocialPage     onToast={showToast} />}
         {tab === "projects"       && <ProjectsPage   onToast={showToast} />}
         {tab === "worldcreator"   && <WorldCreatorPage onToast={showToast} />}
+        {tab === "forge"           && <ForgePage onToast={showToast} />}
       </main>
       <ToastContainer toasts={toasts} />
     </>

@@ -11,6 +11,7 @@ const NAV_ITEMS: { id: AppTab; label: string; icon: string }[] = [
   { id: "social",       label: "Social",        icon: "🌐" },
   { id: "projects",     label: "Proyectos",     icon: "🗂️" },
   { id: "worldcreator", label: "World Creator", icon: "🌍" },
+  { id: "forge",        label: "Fusion Forge", icon: "🔥" },
 ];
 
 export function LeftNav() {

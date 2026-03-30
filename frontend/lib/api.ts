@@ -181,3 +181,12 @@ export async function apiRecordInteraction(
 ) {
   return postJSON("/api/social/interactions", { post_id: postId, action });
 }
+
+// ── Forge (Fusion) ────────────────────────────────────────────────────────────
+export async function apiForge(generationIdA: number, generationIdB: number, model?: string) {
+  return postJSON<Generation>("/api/forge", {
+    generation_id_a: generationIdA,
+    generation_id_b: generationIdB,
+    ...(model ? { model } : {}),
+  });
+}

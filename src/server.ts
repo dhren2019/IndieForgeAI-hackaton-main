@@ -25,6 +25,7 @@ import { shapERoute }                 from "./routes/shap-e";
 import { healthRoute }                from "./routes/health";
 import { projectsRoute }              from "./routes/projects";
 import { worldMapRoute, saveWorldRoute } from "./routes/worldmap";
+import { forgeRoute }                 from "./routes/forge";
 import { sql }                          from "bun";
 import { logger }                     from "./utils/logger";
 import { readFileSync }               from "fs";
@@ -103,6 +104,9 @@ async function router(req: Request, sessionId: string, cookieSessionId?: string 
   }
   // Generate
   if (pathname === "/api/generate" && method === "POST")   return generateRoute(req, sessionId);
+
+  // Forge (fusion)
+  if (pathname === "/api/forge" && method === "POST")      return forgeRoute(req, sessionId);
 
   // Image generation
   if (pathname === "/api/imagen" && method === "POST")     return imageRoute(req, sessionId);

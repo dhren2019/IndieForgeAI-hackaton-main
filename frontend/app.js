@@ -3,25 +3,43 @@ var __getProtoOf = Object.getPrototypeOf;
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+function __accessProp(key) {
+  return this[key];
+}
+var __toESMCache_node;
+var __toESMCache_esm;
 var __toESM = (mod, isNodeMode, target) => {
+  var canCache = mod != null && typeof mod === "object";
+  if (canCache) {
+    var cache = isNodeMode ? __toESMCache_node ??= new WeakMap : __toESMCache_esm ??= new WeakMap;
+    var cached = cache.get(mod);
+    if (cached)
+      return cached;
+  }
   target = mod != null ? __create(__getProtoOf(mod)) : {};
   const to = isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target;
   for (let key of __getOwnPropNames(mod))
     if (!__hasOwnProp.call(to, key))
       __defProp(to, key, {
-        get: () => mod[key],
+        get: __accessProp.bind(mod, key),
         enumerable: true
       });
+  if (canCache)
+    cache.set(mod, to);
   return to;
 };
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
+var __returnValue = (v) => v;
+function __exportSetter(name, newValue) {
+  this[name] = __returnValue.bind(null, newValue);
+}
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, {
       get: all[name],
       enumerable: true,
       configurable: true,
-      set: (newValue) => all[name] = () => newValue
+      set: __exportSetter.bind(all, name)
     });
 };
 var __esm = (fn, res) => () => (fn && (res = fn(fn = 0)), res);
@@ -1831,8 +1849,9 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/index.js
 var require_react = __commonJS((exports, module) => {
+  var react_development = __toESM(require_react_development());
   if (false) {} else {
-    module.exports = require_react_development();
+    module.exports = react_development;
   }
 });
 
@@ -2281,15 +2300,16 @@ var require_scheduler_development = __commonJS((exports) => {
 
 // node_modules/scheduler/index.js
 var require_scheduler = __commonJS((exports, module) => {
+  var scheduler_development = __toESM(require_scheduler_development());
   if (false) {} else {
-    module.exports = require_scheduler_development();
+    module.exports = scheduler_development;
   }
 });
 
 // node_modules/react-dom/cjs/react-dom.development.js
 var require_react_dom_development = __commonJS((exports) => {
-  var React = __toESM(require_react(), 1);
-  var Scheduler = __toESM(require_scheduler(), 1);
+  var React = __toESM(require_react());
+  var Scheduler = __toESM(require_scheduler());
   if (true) {
     (function() {
       if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
@@ -22735,14 +22755,15 @@ You might need to use a local HTTP server (instead of file://): ` + "https://rea
 
 // node_modules/react-dom/index.js
 var require_react_dom = __commonJS((exports, module) => {
+  var react_dom_development = __toESM(require_react_dom_development());
   if (false) {} else {
-    module.exports = require_react_dom_development();
+    module.exports = react_dom_development;
   }
 });
 
 // node_modules/react-dom/client.js
 var require_client = __commonJS((exports) => {
-  var m = __toESM(require_react_dom(), 1);
+  var m = __toESM(require_react_dom());
   if (false) {} else {
     i = m.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
     exports.createRoot = function(c, o) {
@@ -22767,7 +22788,7 @@ var require_client = __commonJS((exports) => {
 
 // node_modules/use-sync-external-store/cjs/use-sync-external-store-shim.development.js
 var require_use_sync_external_store_shim_development = __commonJS((exports) => {
-  var React = __toESM(require_react(), 1);
+  var React = __toESM(require_react());
   (function() {
     function is(x, y) {
       return x === y && (x !== 0 || 1 / x === 1 / y) || x !== x && y !== y;
@@ -22826,7 +22847,7 @@ var require_shim = __commonJS((exports, module) => {
 
 // node_modules/react/cjs/react-jsx-dev-runtime.development.js
 var require_react_jsx_dev_runtime_development = __commonJS((exports) => {
-  var React9 = __toESM(require_react(), 1);
+  var React9 = __toESM(require_react());
   if (true) {
     (function() {
       var REACT_ELEMENT_TYPE = Symbol.for("react.element");
@@ -23707,8 +23728,9 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/jsx-dev-runtime.js
 var require_jsx_dev_runtime = __commonJS((exports, module) => {
+  var react_jsx_dev_runtime_development = __toESM(require_react_jsx_dev_runtime_development());
   if (false) {} else {
-    module.exports = require_react_jsx_dev_runtime_development();
+    module.exports = react_jsx_dev_runtime_development;
   }
 });
 
@@ -23773,6 +23795,7 @@ __export(exports_api, {
   apiGenerateImage: () => apiGenerateImage,
   apiGenerate3D: () => apiGenerate3D,
   apiGenerate: () => apiGenerate,
+  apiForge: () => apiForge,
   apiFollowedTags: () => apiFollowedTags,
   apiFollowTag: () => apiFollowTag,
   apiFeed: () => apiFeed,
@@ -23884,6 +23907,13 @@ async function apiUnfollowTag(tag) {
 }
 async function apiRecordInteraction(postId, action) {
   return postJSON("/api/social/interactions", { post_id: postId, action });
+}
+async function apiForge(generationIdA, generationIdB, model) {
+  return postJSON("/api/forge", {
+    generation_id_a: generationIdA,
+    generation_id_b: generationIdB,
+    ...model ? { model } : {}
+  });
 }
 var THREE_D_ENDPOINTS;
 var init_api = __esm(() => {
@@ -51184,9 +51214,7 @@ function parallelTraverse(a, b, callback) {
     parallelTraverse(a.children[i], b.children[i], callback);
   }
 }
-var init_SkeletonUtils = __esm(() => {
-  init_three_module();
-});
+var init_SkeletonUtils = () => {};
 
 // node_modules/three/examples/jsm/loaders/GLTFLoader.js
 var exports_GLTFLoader = {};
@@ -53581,7 +53609,7 @@ var init_GLTFLoader = __esm(() => {
 });
 
 // frontend/app.tsx
-var import_react57 = __toESM(require_react(), 1);
+var import_react61 = __toESM(require_react(), 1);
 var import_client = __toESM(require_client(), 1);
 
 // node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/error-Dl9xmUf3.mjs
@@ -60461,7 +60489,8 @@ var NAV_ITEMS = [
   { id: "favorites", label: "Favoritos", icon: "★" },
   { id: "social", label: "Social", icon: "\uD83C\uDF10" },
   { id: "projects", label: "Proyectos", icon: "\uD83D\uDDC2️" },
-  { id: "worldcreator", label: "World Creator", icon: "\uD83C\uDF0D" }
+  { id: "worldcreator", label: "World Creator", icon: "\uD83C\uDF0D" },
+  { id: "forge", label: "Fusion Forge", icon: "\uD83D\uDD25" }
 ];
 function LeftNav() {
   const { tab, setTab, navCollapsed, toggleNav } = useAppState();
@@ -60562,7 +60591,7 @@ function ToastContainer({ toasts }) {
 }
 
 // frontend/pages/HomePage.tsx
-var import_react46 = __toESM(require_react(), 1);
+var import_react47 = __toESM(require_react(), 1);
 
 // frontend/components/generate/GenerateForm.tsx
 var import_react39 = __toESM(require_react(), 1);
@@ -61110,8 +61139,7 @@ function Model3DPreview({ imageUrl, generationId, type, onGlbReady }) {
     setLoading(true);
     setError(null);
     setGlbUrl(null);
-    const FULL_IMAGE_TYPES = new Set(["weapon", "item"]);
-    const frontView = FULL_IMAGE_TYPES.has(type ?? "") ? imageUrl : await cropFrontHalf(imageUrl);
+    const frontView = await cropFrontHalf(imageUrl);
     const { data, error: e } = await apiGenerate3D(frontView, model);
     setLoading(false);
     if (data?.glbUrl) {
@@ -61754,25 +61782,232 @@ function PublishModal({ gen, onClose, onPublished, onToast, initialGlbUrl, initi
   }, undefined, true, undefined, this);
 }
 
-// frontend/components/layout/PageContainer.tsx
+// frontend/components/ui/SummonCircle.tsx
+var import_react44 = __toESM(require_react(), 1);
 var jsx_dev_runtime21 = __toESM(require_jsx_dev_runtime(), 1);
+var RUNES = "ᚠᚢᚦᚨᚱᚲᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟᛡᛣᛥᛧᛨ";
+var TYPE_COLOURS = {
+  npc: "#a855f7",
+  quest: "#3b82f6",
+  item: "#f59e0b",
+  lore: "#10b981",
+  weapon: "#ef4444",
+  enemy: "#dc2626"
+};
+function SummonCircle({ active, onRevealDone, type = "npc" }) {
+  const canvasRef = import_react44.useRef(null);
+  const [phase, setPhase] = import_react44.useState("idle");
+  const phaseRef = import_react44.useRef(phase);
+  phaseRef.current = phase;
+  const prevActiveRef = import_react44.useRef(active);
+  import_react44.useEffect(() => {
+    if (active && !prevActiveRef.current) {
+      setPhase("summoning");
+    }
+    if (!active && prevActiveRef.current && phaseRef.current === "summoning") {
+      setPhase("reveal");
+      const t = setTimeout(() => {
+        setPhase("done");
+        onRevealDone?.();
+        setTimeout(() => setPhase("idle"), 600);
+      }, 900);
+      return () => clearTimeout(t);
+    }
+    prevActiveRef.current = active;
+  }, [active, onRevealDone]);
+  import_react44.useEffect(() => {
+    if (phase !== "summoning" && phase !== "reveal")
+      return;
+    const canvas = canvasRef.current;
+    if (!canvas)
+      return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx)
+      return;
+    let disposed = false;
+    let frameId = 0;
+    let t = 0;
+    const accent = TYPE_COLOURS[type] ?? "#a855f7";
+    const particles = [];
+    const addParticle = (cx, cy, radius) => {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = radius * (0.7 + Math.random() * 0.5);
+      particles.push({
+        x: cx + Math.cos(angle) * dist,
+        y: cy + Math.sin(angle) * dist,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: -Math.random() * 1.2 - 0.3,
+        life: 0,
+        maxLife: 40 + Math.random() * 40,
+        size: 1.5 + Math.random() * 2.5
+      });
+    };
+    const DPR = Math.min(window.devicePixelRatio, 2);
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * DPR;
+      canvas.height = rect.height * DPR;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(canvas);
+    const animate = () => {
+      if (disposed)
+        return;
+      frameId = requestAnimationFrame(animate);
+      t += 0.02;
+      const W = canvas.width / DPR;
+      const H = canvas.height / DPR;
+      const cx = W / 2;
+      const cy = H / 2;
+      const R = Math.min(W, H) * 0.36;
+      ctx.clearRect(0, 0, W, H);
+      const isReveal = phaseRef.current === "reveal";
+      const pulse = isReveal ? 1 : 0.5 + Math.sin(t * 2) * 0.25;
+      const grd = ctx.createRadialGradient(cx, cy, R * 0.2, cx, cy, R * 1.6);
+      grd.addColorStop(0, accent + (isReveal ? "55" : "18"));
+      grd.addColorStop(0.5, accent + "08");
+      grd.addColorStop(1, "transparent");
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, W, H);
+      for (let i = 0;i < 3; i++) {
+        const r = R * (0.65 + i * 0.2);
+        const lw = i === 1 ? 2 : 1;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.strokeStyle = accent + (isReveal ? "cc" : Math.round(pulse * 120).toString(16).padStart(2, "0"));
+        ctx.lineWidth = lw;
+        ctx.stroke();
+      }
+      const runeR = R * 0.85;
+      const runeCount = 18;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(t * 0.3);
+      ctx.font = `${R * 0.14}px serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      for (let i = 0;i < runeCount; i++) {
+        const a = i / runeCount * Math.PI * 2;
+        const rx = Math.cos(a) * runeR;
+        const ry = Math.sin(a) * runeR;
+        const idx = (i + Math.floor(t * 2)) % RUNES.length;
+        ctx.fillStyle = accent + (isReveal ? "ff" : Math.round((0.4 + Math.sin(t * 3 + i) * 0.3) * 255).toString(16).padStart(2, "0"));
+        ctx.fillText(RUNES[idx], rx, ry);
+      }
+      ctx.restore();
+      const innerR = R * 0.5;
+      const innerCount = 12;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(-t * 0.5);
+      ctx.font = `${R * 0.1}px serif`;
+      for (let i = 0;i < innerCount; i++) {
+        const a = i / innerCount * Math.PI * 2;
+        const rx = Math.cos(a) * innerR;
+        const ry = Math.sin(a) * innerR;
+        const idx = (i + Math.floor(t * 3) + 7) % RUNES.length;
+        ctx.fillStyle = accent + "88";
+        ctx.fillText(RUNES[idx], rx, ry);
+      }
+      ctx.restore();
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(t * 0.15);
+      ctx.strokeStyle = accent + "30";
+      ctx.lineWidth = 1;
+      for (let i = 0;i < 6; i++) {
+        const a = i / 6 * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * R * 0.25, Math.sin(a) * R * 0.25);
+        ctx.lineTo(Math.cos(a) * R * 1.05, Math.sin(a) * R * 1.05);
+        ctx.stroke();
+      }
+      ctx.restore();
+      ctx.save();
+      ctx.translate(cx, cy);
+      const emblemR = R * 0.18;
+      ctx.beginPath();
+      for (let i = 0;i < 6; i++) {
+        const a = i / 6 * Math.PI * 2 - Math.PI / 2 + t * 0.4;
+        const m = i === 0 ? "moveTo" : "lineTo";
+        ctx[m](Math.cos(a) * emblemR, Math.sin(a) * emblemR);
+      }
+      ctx.closePath();
+      ctx.fillStyle = accent + "30";
+      ctx.strokeStyle = accent + (isReveal ? "ff" : "88");
+      ctx.lineWidth = 2;
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+      if (Math.random() < (isReveal ? 0.95 : 0.35)) {
+        addParticle(cx, cy, R);
+      }
+      for (let i = particles.length - 1;i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life += 1;
+        if (p.life > p.maxLife) {
+          particles.splice(i, 1);
+          continue;
+        }
+        const alpha = 1 - p.life / p.maxLife;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+        ctx.fillStyle = accent + Math.round(alpha * 200).toString(16).padStart(2, "0");
+        ctx.fill();
+      }
+      if (isReveal) {
+        const flashAlpha = Math.max(0, 1 - t % 3 * 0.7);
+        ctx.fillStyle = `rgba(255,255,255,${flashAlpha * 0.6})`;
+        ctx.fillRect(0, 0, W, H);
+      }
+    };
+    animate();
+    return () => {
+      disposed = true;
+      cancelAnimationFrame(frameId);
+      ro.disconnect();
+    };
+  }, [phase, type]);
+  if (phase === "idle" || phase === "done")
+    return null;
+  return /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("div", {
+    className: `summon-circle ${phase === "reveal" ? "summon-circle--reveal" : ""}`,
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("canvas", {
+        ref: canvasRef,
+        className: "summon-circle__canvas"
+      }, undefined, false, undefined, this),
+      phase === "summoning" && /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("p", {
+        className: "summon-circle__text",
+        children: "Invocando…"
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+
+// frontend/components/layout/PageContainer.tsx
+var jsx_dev_runtime22 = __toESM(require_jsx_dev_runtime(), 1);
 function PageContainer({ children, narrow = false, wide = false }) {
-  return /* @__PURE__ */ jsx_dev_runtime21.jsxDEV("main", {
+  return /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("main", {
     className: `page-container ${narrow ? "page-container--narrow" : ""} ${wide ? "page-container--wide" : ""}`,
     children
   }, undefined, false, undefined, this);
 }
 
 // frontend/hooks/useGenerate.ts
-var import_react44 = __toESM(require_react(), 1);
 init_api();
+var import_react45 = __toESM(require_react(), 1);
 function useGenerate() {
-  const [state, setState] = import_react44.useState({
+  const [state, setState] = import_react45.useState({
     loading: false,
     error: null,
     result: null
   });
-  const generate = import_react44.useCallback(async (type, meta, model) => {
+  const generate = import_react45.useCallback(async (type, meta, model) => {
     setState({ loading: true, error: null, result: null });
     const { data, error } = await apiGenerate(type, meta, model);
     if (error || !data) {
@@ -61786,14 +62021,14 @@ function useGenerate() {
 }
 
 // frontend/hooks/useFavorites.ts
-var import_react45 = __toESM(require_react(), 1);
+var import_react46 = __toESM(require_react(), 1);
 init_api();
 function useFavorites() {
-  const [favorites, setFavorites] = import_react45.useState([]);
-  const [favIds, setFavIds] = import_react45.useState(new Set);
-  const [loading, setLoading] = import_react45.useState(false);
+  const [favorites, setFavorites] = import_react46.useState([]);
+  const [favIds, setFavIds] = import_react46.useState(new Set);
+  const [loading, setLoading] = import_react46.useState(false);
   const { userId, isLoaded, getToken, isSignedIn } = useAuth();
-  const reload = import_react45.useCallback(async () => {
+  const reload = import_react46.useCallback(async () => {
     setTokenGetter(isSignedIn ? getToken : null);
     setLoading(true);
     const { data } = await apiFavorites();
@@ -61803,11 +62038,11 @@ function useFavorites() {
     }
     setLoading(false);
   }, [getToken, isSignedIn]);
-  import_react45.useEffect(() => {
+  import_react46.useEffect(() => {
     if (isLoaded)
       reload();
   }, [reload, isLoaded, userId]);
-  const toggle = import_react45.useCallback(async (id, add) => {
+  const toggle = import_react46.useCallback(async (id, add) => {
     if (add) {
       await apiAddFavorite(id);
       setFavIds((s) => new Set(s).add(id));
@@ -61825,78 +62060,89 @@ function useFavorites() {
 }
 
 // frontend/pages/HomePage.tsx
-var jsx_dev_runtime22 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime23 = __toESM(require_jsx_dev_runtime(), 1);
 function HomePage({ onToast }) {
   const { latest, setLatest, setTab, selectedModel, setSelectedModel } = useAppState();
   const { generate, loading, error } = useGenerate();
   const { favIds, toggle: toggleFav } = useFavorites();
-  const [publishing, setPublishing] = import_react46.useState(false);
-  const [glbUrl, setGlbUrl] = import_react46.useState(undefined);
-  const [imageUrl, setImageUrl] = import_react46.useState(undefined);
+  const [publishing, setPublishing] = import_react47.useState(false);
+  const [glbUrl, setGlbUrl] = import_react47.useState(undefined);
+  const [imageUrl, setImageUrl] = import_react47.useState(undefined);
+  const [genType, setGenType] = import_react47.useState("npc");
+  const [showResult, setShowResult] = import_react47.useState(true);
   const handleGenerate = async (type, meta, model) => {
     setGlbUrl(undefined);
     setImageUrl(undefined);
+    setGenType(type);
+    setShowResult(false);
     const result = await generate(type, meta, model);
     if (result) {
       setLatest(result);
       onToast("¡Generado exitosamente! ✨");
-    } else
+    } else {
+      setShowResult(true);
       onToast(error ?? "Error al generar", "error");
+    }
   };
-  return /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
     className: "page-bg-wrap",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
         className: "social-bg",
         "aria-hidden": "true",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--1"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--2"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--3"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--4"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
             className: "social-bg__grid"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(PageContainer, {
+      /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(PageContainer, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
             className: "page-hero",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("h1", {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("h1", {
                 className: "page-hero__title",
                 children: "Generador"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("p", {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("p", {
                 className: "page-hero__sub",
                 children: "Crea personajes, mazmorras, objetos y más con IA"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
             className: "home-layout",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("section", {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("section", {
                 className: "home-layout__form",
-                children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(GenerateForm, {
+                children: /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(GenerateForm, {
                   onGenerate: handleGenerate,
                   loading,
                   model: selectedModel,
                   onModelChange: setSelectedModel
                 }, undefined, false, undefined, this)
               }, undefined, false, undefined, this),
-              latest && /* @__PURE__ */ jsx_dev_runtime22.jsxDEV("section", {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(SummonCircle, {
+                active: loading,
+                type: genType,
+                onRevealDone: () => setShowResult(true)
+              }, undefined, false, undefined, this),
+              latest && showResult && /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("section", {
                 className: "home-layout__result",
-                children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(ResultCard, {
+                children: /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(ResultCard, {
                   gen: latest,
                   isFav: favIds.has(latest.id),
                   onFavToggle: (id, add) => {
@@ -61910,7 +62156,7 @@ function HomePage({ onToast }) {
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          publishing && latest && /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(PublishModal, {
+          publishing && latest && /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(PublishModal, {
             gen: latest,
             initialGlbUrl: glbUrl,
             initialImageUrl: imageUrl,
@@ -61925,39 +62171,39 @@ function HomePage({ onToast }) {
 }
 
 // frontend/pages/HistoryPage.tsx
-var import_react48 = __toESM(require_react(), 1);
+var import_react49 = __toESM(require_react(), 1);
 
 // frontend/components/history/HistoryItem.tsx
-var jsx_dev_runtime23 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime24 = __toESM(require_jsx_dev_runtime(), 1);
 function HistoryItem({ gen, onClick }) {
   const meta = TYPE_META[gen.type] ?? { icon: "\uD83D\uDCC4", label: gen.type, color: "#888888" };
   const title = getGenerationTitle(gen.result, gen.type, gen.id);
   const preview = getPreviewText(gen.result);
-  return /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Card, {
+  return /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Card, {
     hoverable: true,
     className: "history-item",
     onClick: () => onClick(gen),
     children: [
-      /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
         className: "history-item__header",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Badge, {
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Badge, {
             type: gen.type,
             icon: meta.icon,
             label: meta.label,
             small: true
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("span", {
             className: "history-item__title",
             children: title
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("span", {
             className: "history-item__time",
             children: timeAgo(gen.created_at)
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      preview && /* @__PURE__ */ jsx_dev_runtime23.jsxDEV("p", {
+      preview && /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("p", {
         className: "history-item__preview",
         children: preview
       }, undefined, false, undefined, this)
@@ -61966,24 +62212,24 @@ function HistoryItem({ gen, onClick }) {
 }
 
 // frontend/components/ui/Skeletons.tsx
-var jsx_dev_runtime24 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime25 = __toESM(require_jsx_dev_runtime(), 1);
 function ProjectsSkeleton() {
-  return /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
     className: "projects-skeleton",
-    children: [0, 1, 2, 3].map((i) => /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+    children: [0, 1, 2, 3].map((i) => /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
       className: "projects-skeleton__item",
       style: { animationDelay: `${i * 0.1}s` },
       children: [
-        /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
           className: "projects-skeleton__emoji"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
           className: "projects-skeleton__info",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
               className: "feed-skeleton__line feed-skeleton__line--name"
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
               className: "feed-skeleton__line feed-skeleton__line--date"
             }, undefined, false, undefined, this)
           ]
@@ -61993,71 +62239,71 @@ function ProjectsSkeleton() {
   }, undefined, false, undefined, this);
 }
 function FeedSkeleton() {
-  return /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
     className: "feed-skeleton",
     children: [
-      [0, 1, 2].map((i) => /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+      [0, 1, 2].map((i) => /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
         className: "feed-skeleton__card",
         style: { animationDelay: `${i * 0.12}s` },
         children: [
-          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
             className: "feed-skeleton__header",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
                 className: "feed-skeleton__avatar"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
                 className: "feed-skeleton__meta",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+                  /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
                     className: "feed-skeleton__line feed-skeleton__line--name"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+                  /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
                     className: "feed-skeleton__line feed-skeleton__line--date"
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
             className: "feed-skeleton__line feed-skeleton__line--title"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
             className: "feed-skeleton__line feed-skeleton__line--body"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
             className: "feed-skeleton__line feed-skeleton__line--body feed-skeleton__line--short"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
             className: "feed-skeleton__image"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
             className: "feed-skeleton__footer",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
                 className: "feed-skeleton__pill"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
                 className: "feed-skeleton__pill"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
                 className: "feed-skeleton__pill feed-skeleton__pill--wide"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this)
         ]
       }, i, true, undefined, this)),
-      /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
         className: "feed-skeleton__orbs",
         "aria-hidden": "true",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("span", {
             className: "feed-skeleton__orb feed-skeleton__orb--1"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("span", {
             className: "feed-skeleton__orb feed-skeleton__orb--2"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("span", {
             className: "feed-skeleton__orb feed-skeleton__orb--3"
           }, undefined, false, undefined, this)
         ]
@@ -62067,28 +62313,28 @@ function FeedSkeleton() {
 }
 
 // frontend/components/history/HistoryList.tsx
-var jsx_dev_runtime25 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime26 = __toESM(require_jsx_dev_runtime(), 1);
 function HistoryList({ items, loading, onSelect, emptyMsg }) {
   if (loading)
-    return /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(FeedSkeleton, {}, undefined, false, undefined, this);
+    return /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(FeedSkeleton, {}, undefined, false, undefined, this);
   if (items.length === 0) {
-    return /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
       className: "empty-state",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
           className: "empty-state__icon",
           children: "\uD83D\uDDC3️"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("p", {
+        /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("p", {
           className: "empty-state__msg",
           children: emptyMsg
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime25.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
     className: "history-list",
-    children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(HistoryItem, {
+    children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(HistoryItem, {
       gen,
       onClick: onSelect
     }, gen.id, false, undefined, this))
@@ -62096,13 +62342,13 @@ function HistoryList({ items, loading, onSelect, emptyMsg }) {
 }
 
 // frontend/hooks/useHistory.ts
-var import_react47 = __toESM(require_react(), 1);
+var import_react48 = __toESM(require_react(), 1);
 init_api();
 function useHistory() {
-  const [history, setHistory] = import_react47.useState([]);
-  const [loading, setLoading] = import_react47.useState(false);
+  const [history, setHistory] = import_react48.useState([]);
+  const [loading, setLoading] = import_react48.useState(false);
   const { userId, isLoaded, getToken, isSignedIn } = useAuth();
-  const reload = import_react47.useCallback(async () => {
+  const reload = import_react48.useCallback(async () => {
     setTokenGetter(isSignedIn ? getToken : null);
     setLoading(true);
     const { data } = await apiHistory(10);
@@ -62110,7 +62356,7 @@ function useHistory() {
       setHistory(data);
     setLoading(false);
   }, [getToken, isSignedIn]);
-  import_react47.useEffect(() => {
+  import_react48.useEffect(() => {
     if (isLoaded)
       reload();
   }, [reload, isLoaded, userId]);
@@ -62119,57 +62365,57 @@ function useHistory() {
 }
 
 // frontend/pages/HistoryPage.tsx
-var jsx_dev_runtime26 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime27 = __toESM(require_jsx_dev_runtime(), 1);
 function HistoryPage({ onToast }) {
   const { history, loading } = useHistory();
   const { favIds, toggle: toggleFav } = useFavorites();
-  const [selected, setSelected] = import_react48.useState(null);
-  const [publishing, setPublishing] = import_react48.useState(false);
-  return /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+  const [selected, setSelected] = import_react49.useState(null);
+  const [publishing, setPublishing] = import_react49.useState(false);
+  return /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
     className: "page-bg-wrap",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
         className: "social-bg",
         "aria-hidden": "true",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--1"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--2"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--3"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--4"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
             className: "social-bg__grid"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(PageContainer, {
+      /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(PageContainer, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
             className: "page-hero",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("h1", {
+              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("h1", {
                 className: "page-hero__title",
                 children: "Historial"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("p", {
+              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("p", {
                 className: "page-hero__sub",
                 children: "Todas tus generaciones anteriores"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
             className: "split-layout",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("aside", {
+              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("aside", {
                 className: "split-layout__list",
-                children: /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(HistoryList, {
+                children: /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(HistoryList, {
                   items: history,
                   loading,
                   onSelect: (g) => {
@@ -62180,9 +62426,9 @@ function HistoryPage({ onToast }) {
                   emptyMsg: "No hay generaciones en el historial"
                 }, undefined, false, undefined, this)
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("main", {
+              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("main", {
                 className: "split-layout__detail",
-                children: selected ? /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(ResultCard, {
+                children: selected ? /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(ResultCard, {
                   gen: selected,
                   isFav: favIds.has(selected.id),
                   onFavToggle: (id, add) => {
@@ -62190,14 +62436,14 @@ function HistoryPage({ onToast }) {
                     onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
                   },
                   onShare: () => setPublishing(true)
-                }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+                }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
                   className: "empty-state",
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("div", {
+                    /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
                       className: "empty-state__icon",
                       children: "\uD83D\uDCDC"
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime26.jsxDEV("p", {
+                    /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("p", {
                       className: "empty-state__text",
                       children: "Selecciona una entrada del historial"
                     }, undefined, false, undefined, this)
@@ -62206,7 +62452,7 @@ function HistoryPage({ onToast }) {
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          publishing && selected && /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(PublishModal, {
+          publishing && selected && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(PublishModal, {
             gen: selected,
             initialGlbUrl: selected.glb_url ?? undefined,
             initialImageUrl: selected.image_url ?? undefined,
@@ -62221,31 +62467,31 @@ function HistoryPage({ onToast }) {
 }
 
 // frontend/pages/FavoritesPage.tsx
-var import_react49 = __toESM(require_react(), 1);
+var import_react50 = __toESM(require_react(), 1);
 
 // frontend/components/favorites/FavoriteList.tsx
-var jsx_dev_runtime27 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime28 = __toESM(require_jsx_dev_runtime(), 1);
 function FavoriteList({ items, loading, onSelect }) {
   if (loading)
-    return /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(FeedSkeleton, {}, undefined, false, undefined, this);
+    return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(FeedSkeleton, {}, undefined, false, undefined, this);
   if (items.length === 0) {
-    return /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
       className: "empty-state",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
           className: "empty-state__icon",
           children: "★"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("p", {
+        /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("p", {
           className: "empty-state__msg",
           children: "Aún no hay favoritos. Guarda una generación haciendo clic en ☆ Guardar."
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime27.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
     className: "history-list",
-    children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(HistoryItem, {
+    children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(HistoryItem, {
       gen,
       onClick: onSelect
     }, gen.id, false, undefined, this))
@@ -62253,56 +62499,56 @@ function FavoriteList({ items, loading, onSelect }) {
 }
 
 // frontend/pages/FavoritesPage.tsx
-var jsx_dev_runtime28 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime29 = __toESM(require_jsx_dev_runtime(), 1);
 function FavoritesPage({ onToast }) {
   const { favorites, loading, favIds, toggle: toggleFav } = useFavorites();
-  const [selected, setSelected] = import_react49.useState(null);
-  const [publishing, setPublishing] = import_react49.useState(false);
-  return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+  const [selected, setSelected] = import_react50.useState(null);
+  const [publishing, setPublishing] = import_react50.useState(false);
+  return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
     className: "page-bg-wrap",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
         className: "social-bg",
         "aria-hidden": "true",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--1"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--2"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--3"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--4"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
             className: "social-bg__grid"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(PageContainer, {
+      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(PageContainer, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
             className: "page-hero",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("h1", {
+              /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("h1", {
                 className: "page-hero__title",
                 children: "Favoritos"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("p", {
+              /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("p", {
                 className: "page-hero__sub",
                 children: "Tus creaciones guardadas"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
             className: "split-layout",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("aside", {
+              /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("aside", {
                 className: "split-layout__list",
-                children: /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(FavoriteList, {
+                children: /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(FavoriteList, {
                   items: favorites,
                   loading,
                   onSelect: (g) => {
@@ -62312,9 +62558,9 @@ function FavoritesPage({ onToast }) {
                   selectedId: selected?.id
                 }, undefined, false, undefined, this)
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("main", {
+              /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("main", {
                 className: "split-layout__detail",
-                children: selected ? /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(ResultCard, {
+                children: selected ? /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(ResultCard, {
                   gen: selected,
                   isFav: favIds.has(selected.id),
                   onFavToggle: (id, add) => {
@@ -62322,14 +62568,14 @@ function FavoritesPage({ onToast }) {
                     onToast(add ? "Guardado en favoritos" : "Eliminado de favoritos");
                   },
                   onShare: () => setPublishing(true)
-                }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+                }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
                   className: "empty-state",
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("div", {
+                    /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
                       className: "empty-state__icon",
                       children: "⭐"
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime28.jsxDEV("p", {
+                    /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("p", {
                       className: "empty-state__text",
                       children: "Selecciona un favorito para verlo"
                     }, undefined, false, undefined, this)
@@ -62338,7 +62584,7 @@ function FavoritesPage({ onToast }) {
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          publishing && selected && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(PublishModal, {
+          publishing && selected && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(PublishModal, {
             gen: selected,
             initialGlbUrl: selected.glb_url ?? undefined,
             initialImageUrl: selected.image_url ?? undefined,
@@ -62353,18 +62599,18 @@ function FavoritesPage({ onToast }) {
 }
 
 // frontend/components/social/FeedPost.tsx
-var import_react51 = __toESM(require_react(), 1);
+var import_react52 = __toESM(require_react(), 1);
 
 // frontend/components/social/CommentList.tsx
-var import_react50 = __toESM(require_react(), 1);
+var import_react51 = __toESM(require_react(), 1);
 init_api();
-var jsx_dev_runtime29 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime30 = __toESM(require_jsx_dev_runtime(), 1);
 function CommentList({ postId, onToast }) {
-  const [comments, setComments] = import_react50.useState([]);
-  const [loading, setLoading] = import_react50.useState(true);
-  const [text, setText] = import_react50.useState("");
-  const [sending, setSending] = import_react50.useState(false);
-  import_react50.useEffect(() => {
+  const [comments, setComments] = import_react51.useState([]);
+  const [loading, setLoading] = import_react51.useState(true);
+  const [text, setText] = import_react51.useState("");
+  const [sending, setSending] = import_react51.useState(false);
+  import_react51.useEffect(() => {
     apiGetComments(postId).then(({ data }) => {
       if (data)
         setComments(data);
@@ -62387,43 +62633,43 @@ function CommentList({ postId, onToast }) {
     setSending(false);
   };
   if (loading)
-    return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Loader, {
+    return /* @__PURE__ */ jsx_dev_runtime30.jsxDEV(Loader, {
       size: "sm",
       label: "Cargando comentarios…"
     }, undefined, false, undefined, this);
-  return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
     className: "comment-list",
     children: [
-      comments.length === 0 && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("p", {
+      comments.length === 0 && /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("p", {
         className: "comment-list__empty",
         children: "Sin comentarios. ¡Sé el primero!"
       }, undefined, false, undefined, this),
-      comments.map((c) => /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
+      comments.map((c) => /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
         className: "comment-item",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
             className: "comment-item__meta",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
                 className: "comment-item__author",
                 children: c.author
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
                 className: "comment-item__time",
                 children: timeAgo(c.created_at)
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("p", {
+          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("p", {
             className: "comment-item__content",
             children: c.content
           }, undefined, false, undefined, this)
         ]
       }, c.id, true, undefined, this)),
-      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
         className: "comment-input",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV("input", {
+          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("input", {
             className: "comment-input__field",
             placeholder: "Escribe un comentario… (Enter para enviar)",
             value: text,
@@ -62434,7 +62680,7 @@ function CommentList({ postId, onToast }) {
             },
             maxLength: 300
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Button, {
+          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV(Button, {
             variant: "primary",
             size: "sm",
             loading: sending,
@@ -62450,20 +62696,20 @@ function CommentList({ postId, onToast }) {
 
 // frontend/components/social/FeedPost.tsx
 init_api();
-var jsx_dev_runtime30 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime31 = __toESM(require_jsx_dev_runtime(), 1);
 function FieldsView2({ data }) {
-  return /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
     className: "fields-grid fields-grid--compact",
-    children: Object.entries(data).map(([k, v]) => /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+    children: Object.entries(data).map(([k, v]) => /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
       className: "field-item",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
           className: "field-item__key",
           children: labelFor(k)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
           className: "field-item__value",
-          children: Array.isArray(v) ? v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
+          children: Array.isArray(v) ? v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
             className: "field-item__tag",
             children: String(item)
           }, i, false, undefined, this)) : String(v)
@@ -62481,13 +62727,13 @@ function FeedPost({
   onDelete,
   onToast
 }) {
-  const [expanded, setExpanded] = import_react51.useState(false);
-  const [showCmts, setShowCmts] = import_react51.useState(false);
-  const [liked, setLiked] = import_react51.useState(post.liked_by_me);
-  const [likeCount, setLikeCount] = import_react51.useState(post.like_count);
-  const [cmtCount, setCmtCount] = import_react51.useState(post.comment_count);
-  const [showUnshareModal, setShowUnshareModal] = import_react51.useState(false);
-  import_react51.useEffect(() => {
+  const [expanded, setExpanded] = import_react52.useState(false);
+  const [showCmts, setShowCmts] = import_react52.useState(false);
+  const [liked, setLiked] = import_react52.useState(post.liked_by_me);
+  const [likeCount, setLikeCount] = import_react52.useState(post.like_count);
+  const [cmtCount, setCmtCount] = import_react52.useState(post.comment_count);
+  const [showUnshareModal, setShowUnshareModal] = import_react52.useState(false);
+  import_react52.useEffect(() => {
     apiRecordInteraction(post.id, "view");
   }, [post.id]);
   const meta = TYPE_META[post.type];
@@ -62520,20 +62766,20 @@ function FeedPost({
     if (next)
       apiRecordInteraction(post.id, "expand");
   };
-  return /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("article", {
+  return /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("article", {
     className: `post-card${isOwn ? " post-card--own" : ""}`,
     style: { "--type-color": meta.color },
     children: [
-      /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
         className: "post-card__accent"
       }, undefined, false, undefined, this),
-      isOwn && /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("button", {
+      isOwn && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("button", {
         className: "post-card__unshare",
         onClick: openUnshare,
         title: "Dejar de compartir (el contenido se conserva en tu historial)",
         "aria-label": "Dejar de compartir",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("svg", {
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("svg", {
             width: "14",
             height: "14",
             viewBox: "0 0 24 24",
@@ -62543,34 +62789,34 @@ function FeedPost({
             strokeLinecap: "round",
             strokeLinejoin: "round",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("circle", {
+              /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("circle", {
                 cx: "18",
                 cy: "5",
                 r: "3"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("circle", {
+              /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("circle", {
                 cx: "6",
                 cy: "12",
                 r: "3"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("circle", {
+              /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("circle", {
                 cx: "18",
                 cy: "19",
                 r: "3"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("line", {
+              /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("line", {
                 x1: "8.59",
                 y1: "13.51",
                 x2: "15.42",
                 y2: "17.49"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("line", {
+              /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("line", {
                 x1: "15.41",
                 y1: "6.51",
                 x2: "8.59",
                 y2: "10.49"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("line", {
+              /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("line", {
                 x1: "3",
                 y1: "3",
                 x2: "21",
@@ -62578,66 +62824,66 @@ function FeedPost({
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
             className: "post-card__unshare-label",
             children: "Dejar de compartir"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("header", {
+      /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("header", {
         className: "post-card__header",
         onClick: handleExpand,
         children: [
-          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV(Badge, {
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(Badge, {
             type: post.type,
             icon: meta.icon,
             label: meta.label,
             small: true
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
             className: "post-card__title-area",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("h3", {
+              /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("h3", {
                 className: "post-card__title",
                 children: post.title
               }, undefined, false, undefined, this),
-              post.description && /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("p", {
+              post.description && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("p", {
                 className: "post-card__desc",
                 children: post.description
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
             className: "post-card__meta",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
                 className: "post-card__author",
                 children: post.author
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
                 className: "post-card__time",
                 children: timeAgo(post.created_at)
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
             className: "post-card__chevron",
             children: expanded ? "▲" : "▼"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      post.image_url && /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+      post.image_url && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
         className: "post-image-wrap",
-        children: /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("img", {
+        children: /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("img", {
           src: post.image_url,
           alt: "Hoja de diseño",
           className: "post-image"
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      post.glb_url && /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+      post.glb_url && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
         className: "post-3d-viewer",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("model-viewer", {
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("model-viewer", {
             src: post.glb_url,
             alt: "Modelo 3D",
             "auto-rotate": true,
@@ -62646,11 +62892,11 @@ function FeedPost({
             "environment-image": "neutral",
             class: "post-3d-viewer__canvas"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
             className: "post-3d-viewer__hint",
             children: "\uD83D\uDDB1 Arrastra para rotar · Scroll para zoom"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("a", {
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("a", {
             href: post.glb_url,
             download: "personaje-3d.glb",
             className: "post-glb-download",
@@ -62658,25 +62904,25 @@ function FeedPost({
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      !expanded && preview && /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("p", {
+      !expanded && preview && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("p", {
         className: "post-card__preview",
         children: preview
       }, undefined, false, undefined, this),
-      expanded && /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+      expanded && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
         className: "post-card__body",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV(FieldsView2, {
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(FieldsView2, {
             data: post.result
           }, undefined, false, undefined, this),
-          post.generation_id && /* @__PURE__ */ jsx_dev_runtime30.jsxDEV(ImagePreview, {
+          post.generation_id && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(ImagePreview, {
             type: post.type,
             result: post.result
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      post.tags.length > 0 && /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+      post.tags.length > 0 && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
         className: "post-card__tags",
-        children: post.tags.map((tag) => /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
+        children: post.tags.map((tag) => /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
           className: `tag-pill${followedTags.has(tag) ? " tag-pill--followed" : ""}`,
           onClick: (e) => {
             e.stopPropagation();
@@ -62689,21 +62935,21 @@ function FeedPost({
           ]
         }, tag, true, undefined, this))
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
         className: "post-card__footer",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("button", {
             className: `like-btn${liked ? " like-btn--active" : ""}`,
             onClick: handleLike,
             children: [
               liked ? "❤️" : "\uD83E\uDD0D",
               " ",
-              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
                 children: likeCount
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("button", {
             className: "comment-btn",
             onClick: (e) => {
               e.stopPropagation();
@@ -62712,12 +62958,12 @@ function FeedPost({
             },
             children: [
               "\uD83D\uDCAC ",
-              /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
                 children: cmtCount
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          post.tags.length > 0 && /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("button", {
+          post.tags.length > 0 && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("button", {
             className: "tag-filter-btn",
             onClick: (e) => {
               e.stopPropagation();
@@ -62730,30 +62976,30 @@ function FeedPost({
           }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      showCmts && /* @__PURE__ */ jsx_dev_runtime30.jsxDEV(CommentList, {
+      showCmts && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(CommentList, {
         postId: post.id,
         onToast
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime30.jsxDEV(Modal, {
+      /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(Modal, {
         open: showUnshareModal,
         onClose: () => setShowUnshareModal(false),
         title: "Dejar de compartir",
-        footer: /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("div", {
+        footer: /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
           style: { display: "flex", gap: "8px", justifyContent: "flex-end" },
           children: [
-            /* @__PURE__ */ jsx_dev_runtime30.jsxDEV(Button, {
+            /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(Button, {
               variant: "ghost",
               onClick: () => setShowUnshareModal(false),
               children: "Cancelar"
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime30.jsxDEV(Button, {
+            /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(Button, {
               variant: "danger",
               onClick: performUnshare,
               children: "Dejar de compartir"
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        children: /* @__PURE__ */ jsx_dev_runtime30.jsxDEV("p", {
+        children: /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("p", {
           children: "¿Quieres dejar de compartir esta publicación en la comunidad? No se eliminará de tu Historial, Favoritos ni Proyectos."
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this)
@@ -62762,7 +63008,7 @@ function FeedPost({
 }
 
 // frontend/components/social/FeedList.tsx
-var jsx_dev_runtime31 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime32 = __toESM(require_jsx_dev_runtime(), 1);
 function FeedList({
   posts,
   loading,
@@ -62774,25 +63020,25 @@ function FeedList({
   onToast
 }) {
   if (loading)
-    return /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(FeedSkeleton, {}, undefined, false, undefined, this);
+    return /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(FeedSkeleton, {}, undefined, false, undefined, this);
   if (posts.length === 0) {
-    return /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
       className: "empty-state",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
           className: "empty-state__icon",
           children: "\uD83D\uDCED"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("p", {
+        /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("p", {
           className: "empty-state__text",
           children: "No hay publicaciones aquí todavía."
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
     className: "feed-list",
-    children: posts.map((p) => /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(FeedPost, {
+    children: posts.map((p) => /* @__PURE__ */ jsx_dev_runtime32.jsxDEV(FeedPost, {
       post: p,
       followedTags,
       onTagFilter,
@@ -62805,9 +63051,9 @@ function FeedList({
 }
 
 // frontend/components/layout/Sidebar.tsx
-var jsx_dev_runtime32 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime33 = __toESM(require_jsx_dev_runtime(), 1);
 function Sidebar({ children }) {
-  return /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("aside", {
+  return /* @__PURE__ */ jsx_dev_runtime33.jsxDEV("aside", {
     className: "sidebar",
     children
   }, undefined, false, undefined, this);
@@ -62816,10 +63062,10 @@ function SidebarSection({
   title,
   children
 }) {
-  return /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime33.jsxDEV("div", {
     className: "sidebar__section",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime32.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime33.jsxDEV("div", {
         className: "sidebar__title",
         children: title
       }, undefined, false, undefined, this),
@@ -62829,23 +63075,23 @@ function SidebarSection({
 }
 
 // frontend/components/ui/Tabs.tsx
-var jsx_dev_runtime33 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime34 = __toESM(require_jsx_dev_runtime(), 1);
 function Tabs({
   tabs,
   active,
   onChange,
   variant = "nav"
 }) {
-  return /* @__PURE__ */ jsx_dev_runtime33.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
     className: `tabs tabs--${variant}`,
     role: "tablist",
-    children: tabs.map((tab) => /* @__PURE__ */ jsx_dev_runtime33.jsxDEV("button", {
+    children: tabs.map((tab) => /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
       role: "tab",
       "aria-selected": active === tab.id,
       className: `tabs__tab ${active === tab.id ? "tabs__tab--active" : ""}`,
       onClick: () => onChange(tab.id),
       children: [
-        tab.icon && /* @__PURE__ */ jsx_dev_runtime33.jsxDEV("span", {
+        tab.icon && /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
           className: "tabs__icon",
           children: tab.icon
         }, undefined, false, undefined, this),
@@ -62856,19 +63102,19 @@ function Tabs({
 }
 
 // frontend/hooks/useSocialFeed.ts
-var import_react52 = __toESM(require_react(), 1);
+var import_react53 = __toESM(require_react(), 1);
 init_api();
 function useSocialFeed() {
-  const [posts, setPosts] = import_react52.useState([]);
-  const [loading, setLoading] = import_react52.useState(false);
-  const [subTab, setSubTab] = import_react52.useState("feed");
-  const [sortMode, setSortMode] = import_react52.useState("reciente");
-  const [filterTag, setFilterTag] = import_react52.useState(null);
-  const [followedTags, setFollowedTags] = import_react52.useState(new Set);
-  const [popularTags, setPopularTags] = import_react52.useState([]);
+  const [posts, setPosts] = import_react53.useState([]);
+  const [loading, setLoading] = import_react53.useState(false);
+  const [subTab, setSubTab] = import_react53.useState("feed");
+  const [sortMode, setSortMode] = import_react53.useState("reciente");
+  const [filterTag, setFilterTag] = import_react53.useState(null);
+  const [followedTags, setFollowedTags] = import_react53.useState(new Set);
+  const [popularTags, setPopularTags] = import_react53.useState([]);
   const { userId, isLoaded, getToken, isSignedIn } = useAuth();
-  const reqCounter = import_react52.useRef(0);
-  const loadPosts = import_react52.useCallback(async () => {
+  const reqCounter = import_react53.useRef(0);
+  const loadPosts = import_react53.useCallback(async () => {
     const reqId = ++reqCounter.current;
     setTokenGetter(isSignedIn ? getToken : null);
     setLoading(true);
@@ -62887,18 +63133,18 @@ function useSocialFeed() {
     setPosts(data ?? []);
     setLoading(false);
   }, [subTab, filterTag, sortMode, getToken, isSignedIn]);
-  const loadMeta = import_react52.useCallback(async () => {
+  const loadMeta = import_react53.useCallback(async () => {
     const [tags, popular] = await Promise.all([apiFollowedTags(), apiPopularTags()]);
     if (tags.data)
       setFollowedTags(new Set(tags.data));
     if (popular.data)
       setPopularTags(popular.data);
   }, []);
-  import_react52.useEffect(() => {
+  import_react53.useEffect(() => {
     if (isLoaded)
       loadPosts();
   }, [loadPosts, isLoaded, userId]);
-  import_react52.useEffect(() => {
+  import_react53.useEffect(() => {
     if (isLoaded)
       loadMeta();
   }, [loadMeta, isLoaded, userId]);
@@ -62939,7 +63185,7 @@ function useSocialFeed() {
 }
 
 // frontend/pages/SocialPage.tsx
-var jsx_dev_runtime34 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime35 = __toESM(require_jsx_dev_runtime(), 1);
 var SUB_TABS = [
   { id: "feed", label: "Feed", icon: "\uD83C\uDFE0" },
   { id: "trending", label: "Tendencias", icon: "\uD83D\uDD25" },
@@ -62968,68 +63214,68 @@ function SocialPage({ onToast }) {
   } = useSocialFeed();
   const mySessionId = userId ?? (document.cookie.split("; ").find((r) => r.startsWith("session_id="))?.split("=")[1] ?? "");
   const hasSidebarContent = followedTags.size > 0 || popularTags.length > 0;
-  return /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
     className: "social-page",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
         className: "social-bg",
         "aria-hidden": "true",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--1"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--2"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--3"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--4"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
             className: "social-bg__grid"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime34.jsxDEV(PageContainer, {
+      /* @__PURE__ */ jsx_dev_runtime35.jsxDEV(PageContainer, {
         wide: true,
         children: [
-          /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
             className: "social-page__hero",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("h1", {
+              /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("h1", {
                 className: "social-page__hero-title",
                 children: "Comunidad"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("p", {
+              /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("p", {
                 className: "social-page__hero-sub",
                 children: "Descubre y comparte creaciones de la comunidad IndieForge"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
             className: "social-layout",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
                 className: "social-layout__main",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+                  /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
                     className: "social-tabs-bar",
-                    children: /* @__PURE__ */ jsx_dev_runtime34.jsxDEV(Tabs, {
+                    children: /* @__PURE__ */ jsx_dev_runtime35.jsxDEV(Tabs, {
                       tabs: SUB_TABS,
                       active: subTab,
                       onChange: (id) => setSubTab(id),
                       variant: "sub"
                     }, undefined, false, undefined, this)
                   }, undefined, false, undefined, this),
-                  filterTag && /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+                  filterTag && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
                     className: "tag-filter-bar",
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
+                      /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
                         children: [
                           "Filtrando por ",
-                          /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("strong", {
+                          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("strong", {
                             children: [
                               "#",
                               filterTag
@@ -63037,22 +63283,22 @@ function SocialPage({ onToast }) {
                           }, undefined, true, undefined, this)
                         ]
                       }, undefined, true, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
+                      /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
                         className: "tag-filter-bar__clear",
                         onClick: () => setFilterTag(null),
                         children: "✕ Quitar filtro"
                       }, undefined, false, undefined, this)
                     ]
                   }, undefined, true, undefined, this),
-                  subTab !== "misposts" && /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+                  subTab !== "misposts" && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
                     className: "sort-bar",
-                    children: SORT_OPTIONS.map((o) => /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
+                    children: SORT_OPTIONS.map((o) => /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
                       className: `sort-btn ${sortMode === o.id ? "sort-btn--active" : ""}`,
                       onClick: () => setSortMode(o.id),
                       children: o.label
                     }, o.id, false, undefined, this))
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime34.jsxDEV(FeedList, {
+                  /* @__PURE__ */ jsx_dev_runtime35.jsxDEV(FeedList, {
                     posts,
                     loading,
                     followedTags,
@@ -63070,13 +63316,13 @@ function SocialPage({ onToast }) {
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              hasSidebarContent && /* @__PURE__ */ jsx_dev_runtime34.jsxDEV(Sidebar, {
+              hasSidebarContent && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV(Sidebar, {
                 children: [
-                  followedTags.size > 0 && /* @__PURE__ */ jsx_dev_runtime34.jsxDEV(SidebarSection, {
+                  followedTags.size > 0 && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV(SidebarSection, {
                     title: "Mis etiquetas",
-                    children: /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+                    children: /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
                       className: "sidebar-tags",
-                      children: [...followedTags].map((t) => /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
+                      children: [...followedTags].map((t) => /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
                         className: "tag-pill tag-pill--followed",
                         onClick: () => {
                           setFilterTag(t);
@@ -63089,11 +63335,11 @@ function SocialPage({ onToast }) {
                       }, t, true, undefined, this))
                     }, undefined, false, undefined, this)
                   }, undefined, false, undefined, this),
-                  popularTags.length > 0 && /* @__PURE__ */ jsx_dev_runtime34.jsxDEV(SidebarSection, {
+                  popularTags.length > 0 && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV(SidebarSection, {
                     title: "Tendencias",
-                    children: /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("div", {
+                    children: /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
                       className: "sidebar-tags",
-                      children: popularTags.slice(0, 10).map((t) => /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("button", {
+                      children: popularTags.slice(0, 10).map((t) => /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
                         className: `tag-pill ${followedTags.has(t.tag) ? "tag-pill--followed" : ""}`,
                         onClick: () => {
                           setFilterTag(t.tag);
@@ -63103,7 +63349,7 @@ function SocialPage({ onToast }) {
                         children: [
                           "#",
                           t.tag,
-                          /* @__PURE__ */ jsx_dev_runtime34.jsxDEV("span", {
+                          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
                             className: "tag-pill__count",
                             children: t.count
                           }, undefined, false, undefined, this)
@@ -63122,11 +63368,11 @@ function SocialPage({ onToast }) {
 }
 
 // frontend/pages/ProjectsPage.tsx
-var import_react55 = __toESM(require_react(), 1);
+var import_react57 = __toESM(require_react(), 1);
 
 // frontend/components/projects/ProjectItemCard.tsx
-var import_react54 = __toESM(require_react(), 1);
 init_three_module();
+var import_react56 = __toESM(require_react(), 1);
 
 // node_modules/three/examples/jsm/controls/OrbitControls.js
 init_three_module();
@@ -64001,8 +64247,8 @@ function interceptControlUp(event) {
 }
 
 // frontend/components/results/WorldMap3D.tsx
-var import_react53 = __toESM(require_react(), 1);
 init_three_module();
+var import_react55 = __toESM(require_react(), 1);
 
 // node_modules/simplex-noise/dist/esm/simplex-noise.js
 var SQRT3 = /* @__PURE__ */ Math.sqrt(3);
@@ -64115,8 +64361,220 @@ function buildPermutationTable(random) {
   return p;
 }
 
+// frontend/components/ui/PointCloudLoader.tsx
+init_three_module();
+var import_react54 = __toESM(require_react(), 1);
+var jsx_dev_runtime36 = __toESM(require_jsx_dev_runtime(), 1);
+function PointCloudLoader({
+  text = "La IA está imaginando tu mundo…",
+  subtext = "Generando lore, extrayendo parámetros de terreno y preparando el mapa 3D"
+}) {
+  const mountRef = import_react54.useRef(null);
+  const cleanupRef = import_react54.useRef(null);
+  import_react54.useEffect(() => {
+    const el = mountRef.current;
+    if (!el)
+      return;
+    let disposed = false;
+    let animFrameId = 0;
+    const initRaf = requestAnimationFrame(() => {
+      if (disposed)
+        return;
+      const W = el.clientWidth || 420;
+      const H = el.clientHeight || 340;
+      const renderer = new WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(W, H);
+      renderer.setClearColor(0, 0);
+      el.appendChild(renderer.domElement);
+      const scene = new Scene;
+      const camera = new PerspectiveCamera(50, W / H, 0.1, 1000);
+      camera.position.set(0, 6, 10);
+      camera.lookAt(0, 0, 0);
+      const noise2D = createNoise2D();
+      const GRID = 120;
+      const POINT_COUNT = GRID * GRID;
+      const EXTENT = 8;
+      const MAX_H = 2.8;
+      const WATER_LINE = 0.35;
+      const positions = new Float32Array(POINT_COUNT * 3);
+      const colors = new Float32Array(POINT_COUNT * 3);
+      for (let iz = 0;iz < GRID; iz++) {
+        for (let ix = 0;ix < GRID; ix++) {
+          const idx = iz * GRID + ix;
+          const x = (ix / (GRID - 1) - 0.5) * EXTENT * 2;
+          const z = (iz / (GRID - 1) - 0.5) * EXTENT * 2;
+          let h = 0, amp = 1, freq = 0.22, maxAmp = 0;
+          for (let oct = 0;oct < 6; oct++) {
+            h += amp * noise2D(x * freq, z * freq);
+            maxAmp += amp;
+            amp *= 0.48;
+            freq *= 2.1;
+          }
+          h = (h / maxAmp + 1) * 0.5;
+          const y = h * MAX_H;
+          positions[idx * 3 + 0] = x;
+          positions[idx * 3 + 1] = y;
+          positions[idx * 3 + 2] = z;
+          let r, g, b;
+          if (h < WATER_LINE * 0.6) {
+            r = 0.03;
+            g = 0.12;
+            b = 0.35;
+          } else if (h < WATER_LINE) {
+            r = 0.06;
+            g = 0.25;
+            b = 0.55;
+          } else if (h < WATER_LINE + 0.06) {
+            r = 0.72;
+            g = 0.62;
+            b = 0.4;
+          } else if (h < 0.55) {
+            r = 0.14 + Math.random() * 0.08;
+            g = 0.42 + Math.random() * 0.12;
+            b = 0.12 + Math.random() * 0.05;
+          } else if (h < 0.72) {
+            r = 0.28 + Math.random() * 0.08;
+            g = 0.3 + Math.random() * 0.08;
+            b = 0.14;
+          } else if (h < 0.88) {
+            r = 0.38;
+            g = 0.36;
+            b = 0.32;
+          } else {
+            r = 0.88;
+            g = 0.92;
+            b = 0.98;
+          }
+          colors[idx * 3 + 0] = r;
+          colors[idx * 3 + 1] = g;
+          colors[idx * 3 + 2] = b;
+        }
+      }
+      const geometry = new BufferGeometry;
+      geometry.setAttribute("position", new BufferAttribute(positions, 3));
+      geometry.setAttribute("color", new BufferAttribute(colors, 3));
+      const material = new PointsMaterial({
+        size: 0.1,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.92,
+        sizeAttenuation: true
+      });
+      const terrain = new Points(geometry, material);
+      scene.add(terrain);
+      const WATER_PTS = 3000;
+      const wPos = new Float32Array(WATER_PTS * 3);
+      const wCol = new Float32Array(WATER_PTS * 3);
+      for (let i = 0;i < WATER_PTS; i++) {
+        wPos[i * 3 + 0] = (Math.random() - 0.5) * EXTENT * 2;
+        wPos[i * 3 + 1] = WATER_LINE * MAX_H + (Math.random() - 0.5) * 0.06;
+        wPos[i * 3 + 2] = (Math.random() - 0.5) * EXTENT * 2;
+        wCol[i * 3 + 0] = 0.08;
+        wCol[i * 3 + 1] = 0.32 + Math.random() * 0.15;
+        wCol[i * 3 + 2] = 0.65 + Math.random() * 0.15;
+      }
+      const waterGeo = new BufferGeometry;
+      waterGeo.setAttribute("position", new BufferAttribute(wPos, 3));
+      waterGeo.setAttribute("color", new BufferAttribute(wCol, 3));
+      const waterMat = new PointsMaterial({
+        size: 0.12,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.55,
+        sizeAttenuation: true
+      });
+      scene.add(new Points(waterGeo, waterMat));
+      const STAR_N = 800;
+      const sPos = new Float32Array(STAR_N * 3);
+      for (let i = 0;i < STAR_N; i++) {
+        sPos[i * 3 + 0] = (Math.random() - 0.5) * 60;
+        sPos[i * 3 + 1] = 5 + Math.random() * 30;
+        sPos[i * 3 + 2] = (Math.random() - 0.5) * 60 - 10;
+      }
+      const starGeo = new BufferGeometry;
+      starGeo.setAttribute("position", new BufferAttribute(sPos, 3));
+      const starMat = new PointsMaterial({
+        size: 0.06,
+        color: 8952268,
+        transparent: true,
+        opacity: 0.35
+      });
+      scene.add(new Points(starGeo, starMat));
+      let t = 0;
+      const animate = () => {
+        if (disposed)
+          return;
+        animFrameId = requestAnimationFrame(animate);
+        t += 0.006;
+        camera.position.x = Math.sin(t * 0.4) * 10;
+        camera.position.z = Math.cos(t * 0.4) * 10;
+        camera.position.y = 5.5 + Math.sin(t * 0.25) * 1.2;
+        camera.lookAt(0, 0.8, 0);
+        waterMat.opacity = 0.45 + Math.sin(t * 2.5) * 0.1;
+        material.opacity = 0.82 + Math.sin(t * 1) * 0.1;
+        renderer.render(scene, camera);
+      };
+      animate();
+      const ro = new ResizeObserver(() => {
+        if (disposed)
+          return;
+        const w = el.clientWidth || 420;
+        const h = el.clientHeight || 340;
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      });
+      ro.observe(el);
+      cleanupRef.current = () => {
+        disposed = true;
+        cancelAnimationFrame(animFrameId);
+        ro.disconnect();
+        renderer.dispose();
+        geometry.dispose();
+        material.dispose();
+        waterGeo.dispose();
+        waterMat.dispose();
+        starGeo.dispose();
+        starMat.dispose();
+        if (renderer.domElement.parentNode === el) {
+          el.removeChild(renderer.domElement);
+        }
+      };
+    });
+    return () => {
+      disposed = true;
+      cancelAnimationFrame(initRaf);
+      cancelAnimationFrame(animFrameId);
+      cleanupRef.current?.();
+    };
+  }, []);
+  return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+    className: "wc-pointcloud",
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+        ref: mountRef,
+        className: "wc-pointcloud__canvas"
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+        className: "wc-pointcloud__text-wrap",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
+            className: "wc-loading__text",
+            children: text
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
+            className: "wc-loading__sub",
+            children: subtext
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+
 // frontend/components/results/WorldMap3D.tsx
-var jsx_dev_runtime35 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime37 = __toESM(require_jsx_dev_runtime(), 1);
 var MAP_SIZE = 300;
 var SEGMENTS = 200;
 var MOVE_SPEED = 0.7;
@@ -65482,19 +65940,20 @@ function dangerColor(d) {
   return "#9f1239";
 }
 function WorldMapPanel({ params }) {
-  const containerRef = import_react53.useRef(null);
-  const rendererRef = import_react53.useRef(null);
-  const cameraRef = import_react53.useRef(null);
-  const controlsRef = import_react53.useRef(null);
-  const explorerRef = import_react53.useRef(false);
-  const fpvRef = import_react53.useRef(false);
-  const keysRef = import_react53.useRef({ w: false, a: false, s: false, d: false, shift: false });
-  const eulerRef = import_react53.useRef(new Euler(0, 0, 0, "YXZ"));
-  const [explorer, setExplorer] = import_react53.useState(false);
-  const [fpvMode, setFpvMode] = import_react53.useState(false);
-  const [fullscreen, setFullscreen] = import_react53.useState(false);
-  const terrainDataRef = import_react53.useRef(null);
-  const toggleExplorer = import_react53.useCallback(() => {
+  const containerRef = import_react55.useRef(null);
+  const rendererRef = import_react55.useRef(null);
+  const cameraRef = import_react55.useRef(null);
+  const controlsRef = import_react55.useRef(null);
+  const explorerRef = import_react55.useRef(false);
+  const fpvRef = import_react55.useRef(false);
+  const keysRef = import_react55.useRef({ w: false, a: false, s: false, d: false, shift: false });
+  const eulerRef = import_react55.useRef(new Euler(0, 0, 0, "YXZ"));
+  const [explorer, setExplorer] = import_react55.useState(false);
+  const [fpvMode, setFpvMode] = import_react55.useState(false);
+  const [fullscreen, setFullscreen] = import_react55.useState(false);
+  const [mapLoading, setMapLoading] = import_react55.useState(true);
+  const terrainDataRef = import_react55.useRef(null);
+  const toggleExplorer = import_react55.useCallback(() => {
     const next = !explorerRef.current;
     explorerRef.current = next;
     fpvRef.current = false;
@@ -65505,7 +65964,7 @@ function WorldMapPanel({ params }) {
     if (document.pointerLockElement)
       document.exitPointerLock();
   }, []);
-  const toggleFPV = import_react53.useCallback(() => {
+  const toggleFPV = import_react55.useCallback(() => {
     const next = !fpvRef.current;
     fpvRef.current = next;
     explorerRef.current = next;
@@ -65520,7 +65979,7 @@ function WorldMapPanel({ params }) {
         document.exitPointerLock();
     }
   }, []);
-  const toggleFullscreen = import_react53.useCallback(() => {
+  const toggleFullscreen = import_react55.useCallback(() => {
     const el = containerRef.current?.closest(".wc-map-canvas-wrap");
     if (!el)
       return;
@@ -65529,15 +65988,16 @@ function WorldMapPanel({ params }) {
     else
       document.exitFullscreen?.();
   }, []);
-  import_react53.useEffect(() => {
+  import_react55.useEffect(() => {
     const onFsChange = () => setFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", onFsChange);
     return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
-  import_react53.useEffect(() => {
+  import_react55.useEffect(() => {
     const container = containerRef.current;
     if (!container)
       return;
+    setMapLoading(true);
     let rafId = 0;
     let disposed = false;
     const onCleanup = [];
@@ -65780,6 +66240,8 @@ function WorldMapPanel({ params }) {
         renderer.render(scene, camera);
       };
       animate();
+      if (!disposed)
+        setMapLoading(false);
       onCleanup.push(() => {
         if (document.pointerLockElement)
           document.exitPointerLock();
@@ -65816,7 +66278,7 @@ function WorldMapPanel({ params }) {
       controlsRef.current = null;
     };
   }, [params]);
-  const downloadScreenshot = import_react53.useCallback(() => {
+  const downloadScreenshot = import_react55.useCallback(() => {
     const renderer = rendererRef.current;
     if (!renderer)
       return;
@@ -65831,37 +66293,47 @@ function WorldMapPanel({ params }) {
   const dColor = dangerColor(params.danger_level);
   const mystic = Math.round(params.mysticism * 100);
   const landmarkList = (params.landmarks ?? []).join(", ");
-  return /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
+  const loadingText = params.use_assets ? "Cargando assets glTF del mundo…" : "Construyendo el mapa 3D…";
+  const loadingSubtext = params.use_assets ? "Importando modelos de vegetación, rocas y landmarks del bioma" : "Generando terreno procedural, asentamientos y landmarks";
+  return /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
     className: "wc-map-canvas-wrap",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
-        className: "wc-map-canvas",
-        ref: containerRef
+      mapLoading && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+        className: "wc-map-loader-overlay",
+        children: /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(PointCloudLoader, {
+          text: loadingText,
+          subtext: loadingSubtext
+        }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+        className: "wc-map-canvas",
+        ref: containerRef,
+        style: mapLoading ? { visibility: "hidden" } : undefined
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
         className: "wc-map-hud",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
             className: "wc-map-region",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
                 className: "wc-map-region__icon",
                 children: "\uD83D\uDDFA️"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
                 className: "wc-map-region__name",
                 children: params.region_name
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
             className: "wc-map-badges",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
                 className: "wc-map-badge wc-map-badge--biome",
                 children: biome
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
                 className: "wc-map-badge",
                 style: { color: dColor, borderColor: dColor },
                 children: [
@@ -65869,7 +66341,7 @@ function WorldMapPanel({ params }) {
                   dLabel
                 ]
               }, undefined, true, undefined, this),
-              params.mysticism >= 0.22 && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
+              params.mysticism >= 0.22 && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
                 className: "wc-map-badge wc-map-badge--mystic",
                 children: [
                   "✨ ",
@@ -65877,14 +66349,14 @@ function WorldMapPanel({ params }) {
                   "% místico"
                 ]
               }, undefined, true, undefined, this),
-              params.settlement_style && params.settlement_style !== "none" && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
+              params.settlement_style && params.settlement_style !== "none" && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
                 className: "wc-map-badge wc-map-badge--settlement",
                 children: [
                   "\uD83C\uDFF0 ",
                   params.settlement_style
                 ]
               }, undefined, true, undefined, this),
-              landmarkList && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
+              landmarkList && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
                 className: "wc-map-badge wc-map-badge--landmarks",
                 title: landmarkList,
                 children: [
@@ -65897,35 +66369,35 @@ function WorldMapPanel({ params }) {
           }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
         className: "wc-map-controls",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
             className: `wc-map-btn${explorer && !fpvMode ? " wc-map-btn--active" : ""}`,
             onClick: toggleExplorer,
             title: explorer ? "Modo órbita" : "Modo explorar (WASD)",
             children: explorer && !fpvMode ? "\uD83D\uDD04 Orbitar" : "\uD83D\uDEB6 Explorar (WASD)"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
             className: `wc-map-btn${fpvMode ? " wc-map-btn--active" : ""}`,
             onClick: toggleFPV,
             title: fpvMode ? "Salir primera persona" : "Primera persona (POV)",
             children: fpvMode ? "\uD83D\uDC41️ Salir POV" : "\uD83D\uDC41️ Primera Persona"
           }, undefined, false, undefined, this),
-          (explorer || fpvMode) && /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("span", {
+          (explorer || fpvMode) && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
             className: "wc-map-wasd-hint",
             children: [
               "W A S D",
               fpvMode ? " + Ratón · Shift=Sprint" : " · ↑ ↓ ← →"
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
             className: "wc-map-btn",
             onClick: downloadScreenshot,
             title: "Descargar captura del mapa (PNG)",
             children: "\uD83D\uDCF7 Descargar"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime35.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
             className: "wc-map-btn wc-map-btn--right",
             onClick: toggleFullscreen,
             title: fullscreen ? "Salir pantalla completa" : "Pantalla completa",
@@ -65938,7 +66410,7 @@ function WorldMapPanel({ params }) {
 }
 
 // frontend/components/projects/ProjectItemCard.tsx
-var jsx_dev_runtime36 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime38 = __toESM(require_jsx_dev_runtime(), 1);
 var TYPE_ACCENT = {
   npc: "var(--npc)",
   quest: "var(--quest)",
@@ -66028,8 +66500,8 @@ var STAT_FIELDS = new Set([
   "style"
 ]);
 function GlbViewer({ url }) {
-  const ref = import_react54.useRef(null);
-  import_react54.useEffect(() => {
+  const ref = import_react56.useRef(null);
+  import_react56.useEffect(() => {
     const container = ref.current;
     if (!container)
       return;
@@ -66105,7 +66577,7 @@ function GlbViewer({ url }) {
         container.removeChild(renderer.domElement);
     };
   }, [url]);
-  return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
     ref,
     className: "glb-viewer"
   }, undefined, false, undefined, this);
@@ -66156,28 +66628,28 @@ function WorldMapPreview({ result }) {
     #${c1} 65%,
     #${water} 68%,
     #${water} 100%)`;
-  return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
     className: "proj-item-card__world-preview",
     style: { background: gradient },
     children: [
-      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("svg", {
+      /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("svg", {
         className: "proj-item-card__world-mountains",
         viewBox: "0 0 100 40",
         preserveAspectRatio: "none",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("polygon", {
+          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("polygon", {
             points: "0,40 15,18 28,28 42,10 58,25 72,14 85,22 100,40",
             fill: `#${c2}`,
             opacity: "0.9"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("polygon", {
+          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("polygon", {
             points: "0,40 10,24 22,32 35,16 50,30 64,20 78,27 90,35 100,40",
             fill: `#${c1}`,
             opacity: "0.8"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      label && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+      label && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
         className: "proj-item-card__world-biome-tag",
         children: label
       }, undefined, false, undefined, this)
@@ -66189,14 +66661,14 @@ function ExpandModal({ gen, title, onClose }) {
   const has3D = !!gen.glb_url;
   if (isWorldMap) {
     const params = gen.result;
-    return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Modal, {
+    return /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(Modal, {
       open: true,
       onClose,
       title: `\uD83C\uDF0D ${title}`,
       size: "xl",
-      children: /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+      children: /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
         className: "proj-expand__world",
-        children: /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(WorldMapPanel, {
+        children: /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(WorldMapPanel, {
           params
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this)
@@ -66212,39 +66684,39 @@ function ExpandModal({ gen, title, onClose }) {
   });
   const statEntries = entries.filter(([k, v]) => STAT_FIELDS.has(k) || !Array.isArray(v) && typeof v !== "object" && String(v ?? "").length <= 40);
   const contentEntries = entries.filter(([k, v]) => !STAT_FIELDS.has(k) && (Array.isArray(v) || typeof v === "object" || String(v ?? "").length > 40));
-  return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Modal, {
+  return /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(Modal, {
     open: true,
     onClose,
     title,
     size: "lg",
-    children: /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+    children: /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
       className: "proj-expand__content",
       children: [
-        gen.image_url && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("img", {
+        gen.image_url && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("img", {
           src: gen.image_url,
           alt: title,
           className: "proj-expand__img"
         }, undefined, false, undefined, this),
-        has3D && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(GlbViewer, {
+        has3D && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(GlbViewer, {
           url: gen.glb_url
         }, undefined, false, undefined, this),
-        statEntries.length > 0 && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+        statEntries.length > 0 && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
           className: "proj-expand__stats",
           children: statEntries.map(([k, v]) => {
             const fm = FIELD_META[k];
-            return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+            return /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
               className: "proj-expand__stat",
               style: { "--stat-color": fm?.color ?? accentColor },
               children: [
-                fm?.icon && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+                fm?.icon && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
                   className: "proj-expand__stat-icon",
                   children: fm.icon
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+                /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
                   className: "proj-expand__stat-label",
                   children: labelFor(k)
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+                /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
                   className: "proj-expand__stat-value",
                   children: String(v)
                 }, undefined, false, undefined, this)
@@ -66252,37 +66724,37 @@ function ExpandModal({ gen, title, onClose }) {
             }, k, true, undefined, this);
           })
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
           className: "proj-expand__fields",
           children: contentEntries.map(([k, v]) => {
             const fm = FIELD_META[k];
             const isArr = Array.isArray(v);
-            return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+            return /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
               className: "proj-expand__field",
               style: { "--field-color": fm?.color ?? accentColor },
               children: [
-                /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+                /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
                   className: "proj-expand__field-header",
                   children: [
-                    fm?.icon && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+                    fm?.icon && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
                       className: "proj-expand__field-icon",
                       children: fm.icon
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+                    /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
                       className: "proj-expand__field-label",
                       children: labelFor(k)
                     }, undefined, false, undefined, this)
                   ]
                 }, undefined, true, undefined, this),
-                isArr ? /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+                isArr ? /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
                   className: "proj-expand__field-list",
-                  children: v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
+                  children: v.map((item, i) => /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("p", {
                     className: "proj-expand__field-item",
                     children: String(item)
                   }, i, false, undefined, this))
                 }, undefined, false, undefined, this) : String(v ?? "").split(`
 
-`).map((para, i) => /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
+`).map((para, i) => /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("p", {
                   className: "proj-expand__field-text",
                   children: para
                 }, i, false, undefined, this))
@@ -66304,42 +66776,42 @@ var TYPE_BG = {
   worldmap: "linear-gradient(145deg,#001a20,#003040)"
 };
 function ProjectItemCard({ gen, isFav, onFavToggle }) {
-  const [showModel, setShowModel] = import_react54.useState(false);
-  const [showExpand, setShowExpand] = import_react54.useState(false);
+  const [showModel, setShowModel] = import_react56.useState(false);
+  const [showExpand, setShowExpand] = import_react56.useState(false);
   const meta = TYPE_META[gen.type] ?? { icon: "\uD83C\uDF0D", label: gen.type, color: "#22d3ee" };
   const title = getGenerationTitle(gen.result, gen.type, gen.id);
   const previewText = getPreviewText(gen.result);
   const bg = TYPE_BG[gen.type] ?? TYPE_BG.enemy;
   const isWorldMap = gen.type === "worldmap";
-  return /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("article", {
+  return /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("article", {
     className: "proj-item-card",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
         className: "proj-item-card__visual",
         style: { background: gen.image_url ? undefined : bg },
         children: [
-          gen.image_url && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("img", {
+          gen.image_url && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("img", {
             src: gen.image_url,
             alt: title,
             className: "proj-item-card__img",
             loading: "lazy"
           }, undefined, false, undefined, this),
-          !gen.image_url && isWorldMap && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(WorldMapPreview, {
+          !gen.image_url && isWorldMap && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(WorldMapPreview, {
             result: gen.result
           }, undefined, false, undefined, this),
-          !gen.image_url && !isWorldMap && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+          !gen.image_url && !isWorldMap && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
             className: "proj-item-card__placeholder",
             style: { background: bg },
-            children: /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+            children: /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
               className: "proj-item-card__ph-icon",
               style: { color: meta.color },
               children: meta.icon
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
             className: "proj-item-card__overlay"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
             className: "proj-item-card__type-badge",
             style: { "--badge-color": meta.color },
             children: [
@@ -66348,20 +66820,20 @@ function ProjectItemCard({ gen, isFav, onFavToggle }) {
               meta.label
             ]
           }, undefined, true, undefined, this),
-          gen.glb_url && !isWorldMap && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
+          gen.glb_url && !isWorldMap && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("button", {
             className: "proj-item-card__model-btn",
             onClick: () => setShowModel(true),
             title: "Ver modelo 3D",
             children: "\uD83E\uDDCA 3D"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("button", {
             className: "proj-item-card__expand",
             onClick: () => setShowExpand(true),
             title: isWorldMap ? "Explorar mapa" : "Ampliar",
             "aria-label": "Ampliar",
             children: "⛶"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("button", {
             className: `proj-item-card__fav${isFav ? " proj-item-card__fav--on" : ""}`,
             onClick: () => onFavToggle(gen.id, !isFav),
             title: isFav ? "Quitar de favoritos" : "Añadir a favoritos",
@@ -66370,34 +66842,34 @@ function ProjectItemCard({ gen, isFav, onFavToggle }) {
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
         className: "proj-item-card__info",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
+          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("p", {
             className: "proj-item-card__title",
             title,
             children: title
           }, undefined, false, undefined, this),
-          previewText && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("p", {
+          previewText && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("p", {
             className: "proj-item-card__preview",
             children: previewText.length > 72 ? previewText.slice(0, 72) + "…" : previewText
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime36.jsxDEV("span", {
+          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
             className: "proj-item-card__date",
             children: timeAgo(gen.created_at)
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      showModel && gen.glb_url && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(Modal, {
+      showModel && gen.glb_url && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(Modal, {
         open: true,
         onClose: () => setShowModel(false),
         title: `\uD83E\uDDCA ${title}`,
         size: "lg",
-        children: /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(GlbViewer, {
+        children: /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(GlbViewer, {
           url: gen.glb_url
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      showExpand && /* @__PURE__ */ jsx_dev_runtime36.jsxDEV(ExpandModal, {
+      showExpand && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(ExpandModal, {
         gen,
         title,
         onClose: () => setShowExpand(false)
@@ -66408,7 +66880,7 @@ function ProjectItemCard({ gen, isFav, onFavToggle }) {
 
 // frontend/pages/ProjectsPage.tsx
 init_api();
-var jsx_dev_runtime37 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime39 = __toESM(require_jsx_dev_runtime(), 1);
 var EMOJI_OPTIONS2 = ["\uD83D\uDCC1", "⚔️", "\uD83E\uDDD9", "\uD83C\uDFF0", "\uD83D\uDDFA️", "\uD83D\uDC09", "\uD83D\uDC8E", "\uD83C\uDF3F", "\uD83D\uDD25", "⚡", "\uD83C\uDF19", "\uD83C\uDFAD"];
 function ProjectsPage({ onToast }) {
   const { isSignedIn, isLoaded } = useAuth();
@@ -66421,18 +66893,19 @@ function ProjectsPage({ onToast }) {
     updateProject
   } = useProjects();
   const { favIds, toggle: toggleFav } = useFavorites();
-  const [selected, setSelected] = import_react55.useState(null);
-  const [items, setItems] = import_react55.useState([]);
-  const [itemsLoading, setItemsLoading] = import_react55.useState(false);
-  const [creating, setCreating] = import_react55.useState(false);
-  const [newName, setNewName] = import_react55.useState("");
-  const [newEmoji, setNewEmoji] = import_react55.useState("\uD83D\uDCC1");
-  const [confirmDelete, setConfirmDelete] = import_react55.useState(null);
-  const [viewMode, setViewMode] = import_react55.useState("grid");
-  const [editingId, setEditingId] = import_react55.useState(null);
-  const [editName, setEditName] = import_react55.useState("");
-  const [editEmoji, setEditEmoji] = import_react55.useState("\uD83D\uDCC1");
-  const openProject = import_react55.useCallback(async (p) => {
+  const [selected, setSelected] = import_react57.useState(null);
+  const [items, setItems] = import_react57.useState([]);
+  const [itemsLoading, setItemsLoading] = import_react57.useState(false);
+  const [creating, setCreating] = import_react57.useState(false);
+  const [newName, setNewName] = import_react57.useState("");
+  const [newEmoji, setNewEmoji] = import_react57.useState("\uD83D\uDCC1");
+  const [confirmDelete, setConfirmDelete] = import_react57.useState(null);
+  const [viewMode, setViewMode] = import_react57.useState("grid");
+  const [editingId, setEditingId] = import_react57.useState(null);
+  const [editName, setEditName] = import_react57.useState("");
+  const [editEmoji, setEditEmoji] = import_react57.useState("\uD83D\uDCC1");
+  const [exporting, setExporting] = import_react57.useState(false);
+  const openProject = import_react57.useCallback(async (p) => {
     setSelected(p);
     setItemsLoading(true);
     const { data, error: error2 } = await apiGetProjectItems(p.id);
@@ -66441,7 +66914,7 @@ function ProjectsPage({ onToast }) {
     setItems(data ?? []);
     setItemsLoading(false);
   }, [onToast]);
-  import_react55.useEffect(() => {
+  import_react57.useEffect(() => {
     if (selected) {
       const fresh = projects.find((p) => p.id === selected.id);
       if (fresh)
@@ -66486,42 +66959,69 @@ function ProjectsPage({ onToast }) {
     }
     setEditingId(null);
   };
+  const handleExport = async () => {
+    if (!selected || exporting)
+      return;
+    setExporting(true);
+    try {
+      const res = await fetch(`/api/projects/${selected.id}/export`, { credentials: "include" });
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        onToast(json?.error ?? "Error al exportar", "error");
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${selected.name.replace(/[^a-zA-Z0-9_\- ]/g, "").trim() || "project"}_export.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      onToast("Export Pack descargado");
+    } catch (e) {
+      onToast("Error al exportar", "error");
+    } finally {
+      setExporting(false);
+    }
+  };
   if (isLoaded && !isSignedIn) {
-    return /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
       className: "page-bg-wrap",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
           className: "social-bg",
           "aria-hidden": "true",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
               className: "social-bg__orb social-bg__orb--1"
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
               className: "social-bg__orb social-bg__orb--2"
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
               className: "social-bg__grid"
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(PageContainer, {
-          children: /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(PageContainer, {
+          children: /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
             className: "projects-page__auth-wall",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                 className: "projects-page__auth-icon",
                 children: "\uD83D\uDDC2️"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("h2", {
+              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("h2", {
                 className: "projects-page__auth-title",
                 children: "Necesitas una cuenta"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("p", {
+              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("p", {
                 className: "projects-page__auth-sub",
                 children: "Inicia sesión para crear carpetas y organizar tus creaciones"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(Button, {
                 variant: "primary",
                 onClick: () => openSignIn(),
                 children: "Iniciar sesión"
@@ -66532,63 +67032,63 @@ function ProjectsPage({ onToast }) {
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
     className: "page-bg-wrap",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
         className: "social-bg",
         "aria-hidden": "true",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--1"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--2"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--3"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
             className: "social-bg__grid"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(PageContainer, {
+      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(PageContainer, {
         wide: true,
         children: [
-          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
             className: "page-hero",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("h1", {
+              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("h1", {
                 className: "page-hero__title",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                  /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("span", {
                     className: "plain-emoji",
                     children: "\uD83D\uDDC2️"
                   }, undefined, false, undefined, this),
                   " Proyectos"
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("p", {
+              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("p", {
                 className: "page-hero__sub",
                 children: "Organiza tus generaciones en carpetas"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
             className: "split-layout split-layout--projects",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("aside", {
+              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("aside", {
                 className: "split-layout__list projects-sidebar",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                  /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                     className: "projects-sidebar__header",
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("span", {
                         className: "projects-sidebar__count",
                         children: projLoading ? "…" : `${projects.length} proyecto${projects.length !== 1 ? "s" : ""}`
                       }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+                      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(Button, {
                         variant: "primary",
                         size: "sm",
                         icon: "＋",
@@ -66597,18 +67097,18 @@ function ProjectsPage({ onToast }) {
                       }, undefined, false, undefined, this)
                     ]
                   }, undefined, true, undefined, this),
-                  creating && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                  creating && /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                     className: "projects-sidebar__create",
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                         className: "proj-panel__emoji-row",
-                        children: EMOJI_OPTIONS2.map((e) => /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                        children: EMOJI_OPTIONS2.map((e) => /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("button", {
                           className: `proj-panel__emoji-opt${newEmoji === e ? " proj-panel__emoji-opt--active" : ""}`,
                           onClick: () => setNewEmoji(e),
                           children: e
                         }, e, false, undefined, this))
                       }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("input", {
+                      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("input", {
                         className: "proj-panel__input",
                         placeholder: "Nombre del proyecto…",
                         value: newName,
@@ -66624,17 +67124,17 @@ function ProjectsPage({ onToast }) {
                         autoFocus: true,
                         maxLength: 100
                       }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                         className: "proj-panel__create-actions",
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+                          /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(Button, {
                             variant: "primary",
                             size: "sm",
                             onClick: handleCreate,
                             disabled: !newName.trim(),
                             children: "Crear"
                           }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+                          /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(Button, {
                             variant: "ghost",
                             size: "sm",
                             onClick: () => {
@@ -66647,18 +67147,18 @@ function ProjectsPage({ onToast }) {
                       }, undefined, true, undefined, this)
                     ]
                   }, undefined, true, undefined, this),
-                  projLoading && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(ProjectsSkeleton, {}, undefined, false, undefined, this),
-                  !projLoading && projects.length === 0 && !creating && /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                  projLoading && /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(ProjectsSkeleton, {}, undefined, false, undefined, this),
+                  !projLoading && projects.length === 0 && !creating && /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                     className: "projects-sidebar__empty",
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("span", {
                         className: "projects-sidebar__empty-icon",
                         children: "\uD83D\uDCED"
                       }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("p", {
+                      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("p", {
                         children: "Aún no tienes proyectos"
                       }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+                      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(Button, {
                         variant: "secondary",
                         size: "sm",
                         onClick: () => setCreating(true),
@@ -66666,22 +67166,22 @@ function ProjectsPage({ onToast }) {
                       }, undefined, false, undefined, this)
                     ]
                   }, undefined, true, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                  /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                     className: "projects-sidebar__list",
-                    children: projects.map((p) => /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                    children: projects.map((p) => /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                       className: `projects-sidebar__item${selected?.id === p.id ? " projects-sidebar__item--active" : ""}`,
-                      children: editingId === p.id ? /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                      children: editingId === p.id ? /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                         className: "projects-sidebar__edit",
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                          /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                             className: "proj-panel__emoji-row proj-panel__emoji-row--sm",
-                            children: EMOJI_OPTIONS2.map((e) => /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                            children: EMOJI_OPTIONS2.map((e) => /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("button", {
                               className: `proj-panel__emoji-opt${editEmoji === e ? " proj-panel__emoji-opt--active" : ""}`,
                               onClick: () => setEditEmoji(e),
                               children: e
                             }, e, false, undefined, this))
                           }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("input", {
+                          /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("input", {
                             className: "proj-panel__input",
                             value: editName,
                             onChange: (e) => setEditName(e.target.value),
@@ -66694,17 +67194,17 @@ function ProjectsPage({ onToast }) {
                             autoFocus: true,
                             maxLength: 100
                           }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                          /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                             className: "proj-panel__create-actions",
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+                              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(Button, {
                                 variant: "primary",
                                 size: "sm",
                                 onClick: handleUpdate,
                                 disabled: !editName.trim(),
                                 children: "Guardar"
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(Button, {
+                              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(Button, {
                                 variant: "ghost",
                                 size: "sm",
                                 onClick: () => setEditingId(null),
@@ -66713,51 +67213,51 @@ function ProjectsPage({ onToast }) {
                             ]
                           }, undefined, true, undefined, this)
                         ]
-                      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(jsx_dev_runtime37.Fragment, {
+                      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(jsx_dev_runtime39.Fragment, {
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                          /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("button", {
                             className: "projects-sidebar__item-btn",
                             onClick: () => openProject(p),
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("span", {
                                 className: "projects-sidebar__item-emoji",
                                 children: p.emoji
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("span", {
                                 className: "projects-sidebar__item-name",
                                 children: p.name
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("span", {
                                 className: "projects-sidebar__item-count",
                                 children: p.item_count
                               }, undefined, false, undefined, this)
                             ]
                           }, undefined, true, undefined, this),
-                          confirmDelete === p.id ? /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                          confirmDelete === p.id ? /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("span", {
                             className: "projects-sidebar__confirm",
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("button", {
                                 className: "projects-modal__danger-btn",
                                 onClick: () => handleDelete(p.id),
                                 title: "Confirmar eliminación",
                                 children: "✓"
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("button", {
                                 className: "projects-modal__cancel-btn",
                                 onClick: () => setConfirmDelete(null),
                                 children: "✕"
                               }, undefined, false, undefined, this)
                             ]
-                          }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                          }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("span", {
                             className: "projects-sidebar__actions",
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("button", {
                                 className: "projects-sidebar__edit-btn",
                                 onClick: (e) => startEdit(p, e),
                                 title: "Editar nombre/icono",
                                 children: "✏️"
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("button", {
                                 className: "projects-sidebar__del",
                                 onClick: () => setConfirmDelete(p.id),
                                 title: "Eliminar proyecto",
@@ -66771,50 +67271,57 @@ function ProjectsPage({ onToast }) {
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("main", {
+              /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("main", {
                 className: "split-layout__detail projects-detail",
-                children: !selected ? /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                children: !selected ? /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                   className: "empty-state",
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                    /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                       className: "empty-state__icon",
                       children: "\uD83D\uDDC2️"
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("p", {
+                    /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("p", {
                       className: "empty-state__text",
                       children: projects.length === 0 ? "Crea tu primer proyecto y añade generaciones" : "Selecciona un proyecto para ver su contenido"
                     }, undefined, false, undefined, this)
                   ]
-                }, undefined, true, undefined, this) : itemsLoading ? /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(FeedSkeleton, {}, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(jsx_dev_runtime37.Fragment, {
+                }, undefined, true, undefined, this) : itemsLoading ? /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(FeedSkeleton, {}, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(jsx_dev_runtime39.Fragment, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                    /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                       className: "projects-detail__header",
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                        /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("span", {
                           className: "projects-detail__title",
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                            /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("span", {
                               children: selected.emoji
                             }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                            /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("span", {
                               children: selected.name
                             }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                            /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("span", {
                               className: "projects-sidebar__item-count",
                               children: items.length
                             }, undefined, false, undefined, this)
                           ]
                         }, undefined, true, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("span", {
+                        /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("span", {
                           className: "projects-detail__view-toggle",
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                            /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(Button, {
+                              variant: "secondary",
+                              size: "sm",
+                              onClick: handleExport,
+                              disabled: exporting || items.length === 0,
+                              children: exporting ? "Exportando…" : "\uD83D\uDCE6 Export Pack"
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("button", {
                               className: `projects-detail__view-btn${viewMode === "grid" ? " projects-detail__view-btn--active" : ""}`,
                               onClick: () => setViewMode("grid"),
                               title: "Vista cuadrícula",
                               children: "⊞"
                             }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("button", {
+                            /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("button", {
                               className: `projects-detail__view-btn${viewMode === "list" ? " projects-detail__view-btn--active" : ""}`,
                               onClick: () => setViewMode("list"),
                               title: "Vista lista",
@@ -66824,27 +67331,27 @@ function ProjectsPage({ onToast }) {
                         }, undefined, true, undefined, this)
                       ]
                     }, undefined, true, undefined, this),
-                    items.length === 0 ? /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                    items.length === 0 ? /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                       className: "empty-state",
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                        /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                           className: "empty-state__icon",
                           children: selected.emoji
                         }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("p", {
+                        /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("p", {
                           className: "empty-state__text",
                           children: [
                             "Este proyecto está vacío. Añade generaciones con el botón ",
-                            /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("strong", {
+                            /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("strong", {
                               children: "＋ Proyecto"
                             }, undefined, false, undefined, this),
                             " en cualquier tarjeta."
                           ]
                         }, undefined, true, undefined, this)
                       ]
-                    }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime37.jsxDEV("div", {
+                    }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("div", {
                       className: `projects-detail__grid projects-detail__grid--${viewMode}`,
-                      children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime37.jsxDEV(ProjectItemCard, {
+                      children: items.map((gen) => /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(ProjectItemCard, {
                         gen,
                         isFav: favIds.has(gen.id),
                         onFavToggle: (id, add) => {
@@ -66865,8 +67372,8 @@ function ProjectsPage({ onToast }) {
 }
 
 // frontend/pages/WorldCreatorPage.tsx
-var import_react56 = __toESM(require_react(), 1);
-var jsx_dev_runtime38 = __toESM(require_jsx_dev_runtime(), 1);
+var import_react58 = __toESM(require_react(), 1);
+var jsx_dev_runtime40 = __toESM(require_jsx_dev_runtime(), 1);
 var EXAMPLES = [
   "Un reino de volcanes activos donde dragones de obsidiana custodian templos subterráneos llenos de lava y ruinas antiguas",
   "Bosques mágicos eternos donde los árboles brillan de noche y los elfos construyeron ciudades en las copas. La niebla cubre el suelo y esconde criaturas ancestrales",
@@ -67750,16 +68257,16 @@ function parsePromptLocally(prompt) {
   };
 }
 function WorldCreatorPage({ onToast }) {
-  const [prompt, setPrompt] = import_react56.useState("");
-  const [loading2, setLoading] = import_react56.useState(false);
-  const [description, setDescription] = import_react56.useState(null);
-  const [params, setParams] = import_react56.useState(null);
-  const [useAssets, setUseAssets] = import_react56.useState(false);
-  const [savedGenId, setSavedGenId] = import_react56.useState(null);
-  const [saving, setSaving] = import_react56.useState(false);
-  const [showAddProj, setShowAddProj] = import_react56.useState(false);
-  const baseParamsRef = import_react56.useRef(null);
-  const textareaRef = import_react56.useRef(null);
+  const [prompt, setPrompt] = import_react58.useState("");
+  const [loading2, setLoading] = import_react58.useState(false);
+  const [description, setDescription] = import_react58.useState(null);
+  const [params, setParams] = import_react58.useState(null);
+  const [useAssets, setUseAssets] = import_react58.useState(false);
+  const [savedGenId, setSavedGenId] = import_react58.useState(null);
+  const [saving, setSaving] = import_react58.useState(false);
+  const [showAddProj, setShowAddProj] = import_react58.useState(false);
+  const baseParamsRef = import_react58.useRef(null);
+  const textareaRef = import_react58.useRef(null);
   const handleSave = async () => {
     if (!params)
       return;
@@ -67860,57 +68367,57 @@ function WorldCreatorPage({ onToast }) {
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey))
       handleCreate();
   };
-  return /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
     className: "page-bg-wrap",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
         className: "social-bg",
         "aria-hidden": "true",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--1"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--2"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--3"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
             className: "social-bg__orb social-bg__orb--4"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
             className: "social-bg__grid"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(PageContainer, {
+      /* @__PURE__ */ jsx_dev_runtime40.jsxDEV(PageContainer, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
             className: "page-hero",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("h1", {
+              /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("h1", {
                 className: "page-hero__title",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("span", {
                     className: "plain-emoji",
                     children: "\uD83C\uDF0D"
                   }, undefined, false, undefined, this),
                   " World Creator"
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("p", {
+              /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("p", {
                 className: "page-hero__sub",
                 children: "Describe tu mundo en palabras. La IA lo imaginará y construirá un mapa 3D interactivo en tiempo real."
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
                 className: "wc-hero-random",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("span", {
                     className: "wc-hero-random__label",
                     children: "¿Sin ideas? Genera un mapa completamente aleatorio al instante:"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("button", {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("button", {
                     className: "wc-hero-random-btn",
                     onClick: handleRandom,
                     disabled: loading2,
@@ -67920,27 +68427,27 @@ function WorldCreatorPage({ onToast }) {
               }, undefined, true, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
             className: "wc-prompt-card",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
                 className: "wc-prompt-card__header",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("span", {
                     className: "wc-prompt-card__icon",
                     children: "✍️"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("span", {
                     className: "wc-prompt-card__title",
                     children: "Describe tu mundo"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("span", {
                     className: "wc-prompt-card__hint",
                     children: "Ctrl + Enter para generar"
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("textarea", {
+              /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("textarea", {
                 ref: textareaRef,
                 className: "wc-textarea",
                 value: prompt,
@@ -67951,17 +68458,17 @@ function WorldCreatorPage({ onToast }) {
                 maxLength: 800,
                 disabled: loading2
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
                 className: "wc-prompt-card__footer",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("span", {
                     className: "wc-char-count",
                     children: [
                       prompt.length,
                       "/800"
                     ]
                   }, undefined, true, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(Button, {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV(Button, {
                     variant: "primary",
                     size: "md",
                     loading: loading2,
@@ -67974,16 +68481,16 @@ function WorldCreatorPage({ onToast }) {
               }, undefined, true, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          !params && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+          !params && /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
             className: "wc-examples",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("span", {
                 className: "wc-examples__label",
                 children: "Inspiración rápida:"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
                 className: "wc-examples__chips",
-                children: EXAMPLES.map((ex, i) => /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("button", {
+                children: EXAMPLES.map((ex, i) => /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("button", {
                   className: "wc-example-chip",
                   onClick: () => handleExample(ex),
                   disabled: loading2,
@@ -67995,51 +68502,39 @@ function WorldCreatorPage({ onToast }) {
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          loading2 && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
-            className: "wc-loading",
-            children: [
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(Loader, {
-                size: "lg"
-              }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("p", {
-                className: "wc-loading__text",
-                children: "La IA está imaginando tu mundo..."
-              }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("p", {
-                className: "wc-loading__sub",
-                children: "Generando lore, extrayendo parámetros de terreno y preparando el mapa 3D"
-              }, undefined, false, undefined, this)
-            ]
-          }, undefined, true, undefined, this),
-          description && !loading2 && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+          loading2 && /* @__PURE__ */ jsx_dev_runtime40.jsxDEV(PointCloudLoader, {
+            text: "La IA está imaginando tu mundo…",
+            subtext: "Generando lore, extrayendo parámetros de terreno y preparando el mapa 3D"
+          }, undefined, false, undefined, this),
+          description && !loading2 && /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
             className: "wc-description",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
                 className: "wc-description__header",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("span", {
                     className: "wc-description__icon",
                     children: "\uD83D\uDCDC"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("span", {
                     className: "wc-description__title",
                     children: "El mundo que la IA imaginó"
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("p", {
+              /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("p", {
                 className: "wc-description__text",
                 children: description
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
             className: "wc-options-bar",
-            children: /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("label", {
+            children: /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("label", {
               className: "wc-assets-toggle",
               title: "Usa modelos 3D reales (.gltf) del pack de naturaleza en lugar de geometría procedural",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("input", {
+                /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("input", {
                   type: "checkbox",
                   checked: useAssets,
                   onChange: (e) => {
@@ -68052,32 +68547,32 @@ function WorldCreatorPage({ onToast }) {
                   },
                   disabled: loading2
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
+                /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("span", {
                   className: "wc-assets-toggle__icon",
                   children: "\uD83C\uDF32"
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
+                /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("span", {
                   className: "wc-assets-toggle__label",
                   children: "Usar assets glTF reales"
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
+                /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("span", {
                   className: "wc-assets-toggle__hint",
                   children: useAssets ? "Cargando modelos 3D…" : "Geometría procedural"
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this)
           }, undefined, false, undefined, this),
-          params && !loading2 && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+          params && !loading2 && /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
             className: "wc-map-section",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
                 className: "wc-map-regen-bar",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("span", {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("span", {
                     className: "wc-map-regen-bar__label",
                     children: "\uD83C\uDF10 Cada mapa es único:"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("button", {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("button", {
                     className: "wc-map-regen-btn",
                     onClick: () => {
                       if (!baseParamsRef.current)
@@ -68090,40 +68585,40 @@ function WorldCreatorPage({ onToast }) {
                     },
                     children: "\uD83C\uDFB2 Nueva Forma"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("button", {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("button", {
                     className: "wc-map-regen-btn",
                     onClick: handleRandom,
                     children: "\uD83C\uDF0D Mundo Aleatorio"
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("div", {
                 className: "wc-save-bar",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("button", {
+                  /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("button", {
                     className: `wc-save-btn${savedGenId ? " wc-save-btn--saved" : ""}`,
                     onClick: handleSave,
                     disabled: saving || !!savedGenId,
                     children: saving ? "\uD83D\uDCBE Guardando…" : savedGenId ? "✅ Guardado" : "\uD83D\uDCBE Guardar mundo"
                   }, undefined, false, undefined, this),
-                  savedGenId && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV("button", {
+                  savedGenId && /* @__PURE__ */ jsx_dev_runtime40.jsxDEV("button", {
                     className: "wc-save-btn wc-save-btn--project",
                     onClick: () => setShowAddProj(true),
                     children: "\uD83D\uDCC1 Añadir a proyecto"
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(WorldMapPanel, {
+              /* @__PURE__ */ jsx_dev_runtime40.jsxDEV(WorldMapPanel, {
                 params
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          showAddProj && savedGenId && /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(Modal, {
+          showAddProj && savedGenId && /* @__PURE__ */ jsx_dev_runtime40.jsxDEV(Modal, {
             open: true,
             onClose: () => setShowAddProj(false),
             title: "\uD83D\uDCC1 Añadir a proyecto",
             size: "sm",
-            children: /* @__PURE__ */ jsx_dev_runtime38.jsxDEV(AddToProjectPanel, {
+            children: /* @__PURE__ */ jsx_dev_runtime40.jsxDEV(AddToProjectPanel, {
               generationId: savedGenId,
               onClose: () => setShowAddProj(false),
               onToast
@@ -68135,63 +68630,762 @@ function WorldCreatorPage({ onToast }) {
   }, undefined, true, undefined, this);
 }
 
+// frontend/pages/ForgePage.tsx
+var import_react60 = __toESM(require_react(), 1);
+init_api();
+
+// frontend/components/ui/ForgeAnimation.tsx
+var import_react59 = __toESM(require_react(), 1);
+var jsx_dev_runtime41 = __toESM(require_jsx_dev_runtime(), 1);
+var TYPE_COLORS2 = {
+  npc: "#f59e0b",
+  quest: "#3b82f6",
+  item: "#10b981",
+  lore: "#8b5cf6",
+  weapon: "#ef4444",
+  enemy: "#6b7280"
+};
+var RUNES2 = "ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛈᛇᛉᛊᛏᛒᛖᛗᛚᛝᛟᛞ";
+function ForgeAnimation({ active, typeA = "npc", typeB = "weapon", onComplete }) {
+  const canvasRef = import_react59.useRef(null);
+  const rafRef = import_react59.useRef(0);
+  const [phase, setPhase] = import_react59.useState("idle");
+  import_react59.useEffect(() => {
+    if (active) {
+      setPhase("converge");
+    } else {
+      setPhase("idle");
+    }
+  }, [active]);
+  import_react59.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas)
+      return;
+    const ctx = canvas.getContext("2d");
+    let W = 0, H = 0;
+    const resize = () => {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      W = rect.width;
+      H = rect.height;
+      canvas.width = W * devicePixelRatio;
+      canvas.height = H * devicePixelRatio;
+      canvas.style.width = W + "px";
+      canvas.style.height = H + "px";
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+    const colorA = TYPE_COLORS2[typeA] || "#f59e0b";
+    const colorB = TYPE_COLORS2[typeB] || "#ef4444";
+    const particles = [];
+    let t = 0;
+    let phaseStart = 0;
+    let currentPhase = phase;
+    let orbAx = 0, orbAy = 0;
+    let orbBx = 0, orbBy = 0;
+    const cx = () => W / 2;
+    const cy = () => H / 2;
+    function spawnSpark(x, y, color) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1 + Math.random() * 3;
+      particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1,
+        life: 1,
+        maxLife: 30 + Math.random() * 40,
+        size: 1 + Math.random() * 3,
+        color,
+        type: "spark"
+      });
+    }
+    function spawnEmber(x, y, color) {
+      particles.push({
+        x,
+        y,
+        vx: (Math.random() - 0.5) * 2,
+        vy: -1 - Math.random() * 2,
+        life: 1,
+        maxLife: 60 + Math.random() * 60,
+        size: 2 + Math.random() * 4,
+        color,
+        type: "ember"
+      });
+    }
+    function spawnRune(x, y, color) {
+      const angle = Math.random() * Math.PI * 2;
+      particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * 0.5,
+        vy: Math.sin(angle) * 0.5,
+        life: 1,
+        maxLife: 80 + Math.random() * 40,
+        size: 12 + Math.random() * 8,
+        color,
+        type: "rune",
+        char: RUNES2[Math.floor(Math.random() * RUNES2.length)]
+      });
+    }
+    function drawOrb(x, y, radius, color, pulse) {
+      const r = radius + Math.sin(t * 0.05) * 3 * pulse;
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 2.5);
+      grad.addColorStop(0, color + "60");
+      grad.addColorStop(0.4, color + "20");
+      grad.addColorStop(1, "transparent");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(x, y, r * 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      const coreGrad = ctx.createRadialGradient(x, y, 0, x, y, r);
+      coreGrad.addColorStop(0, "#ffffff");
+      coreGrad.addColorStop(0.3, color + "ee");
+      coreGrad.addColorStop(1, color + "44");
+      ctx.fillStyle = coreGrad;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    function drawForgeRing(progress) {
+      const centerX = cx();
+      const centerY = cy();
+      const maxR = Math.min(W, H) * 0.3;
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(t * 0.02);
+      const sides = 6;
+      for (let ring = 0;ring < 3; ring++) {
+        const r = maxR * (0.4 + ring * 0.2) * progress;
+        const alpha = (0.6 - ring * 0.15) * progress;
+        ctx.strokeStyle = `rgba(255, 140, 40, ${alpha})`;
+        ctx.lineWidth = 2 - ring * 0.5;
+        ctx.beginPath();
+        for (let i = 0;i <= sides; i++) {
+          const angle = i / sides * Math.PI * 2 - Math.PI / 2;
+          const px = Math.cos(angle) * r;
+          const py = Math.sin(angle) * r;
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+      ctx.restore();
+      const fuseGrad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, maxR * 0.6 * progress);
+      fuseGrad.addColorStop(0, `rgba(255, 200, 60, ${0.3 * progress})`);
+      fuseGrad.addColorStop(0.5, `rgba(255, 100, 20, ${0.15 * progress})`);
+      fuseGrad.addColorStop(1, "transparent");
+      ctx.fillStyle = fuseGrad;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, maxR * 0.6 * progress, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    function drawAnvil() {
+      const centerX = cx();
+      const centerY = cy() + 30;
+      ctx.fillStyle = "#2a2a3a";
+      ctx.beginPath();
+      ctx.moveTo(centerX - 40, centerY);
+      ctx.lineTo(centerX - 50, centerY + 15);
+      ctx.lineTo(centerX + 50, centerY + 15);
+      ctx.lineTo(centerX + 40, centerY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = "#3a3a4e";
+      ctx.beginPath();
+      ctx.moveTo(centerX - 35, centerY);
+      ctx.lineTo(centerX - 45, centerY - 8);
+      ctx.lineTo(centerX + 55, centerY - 8);
+      ctx.lineTo(centerX + 35, centerY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,180,60,0.4)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(centerX - 45, centerY - 8);
+      ctx.lineTo(centerX + 55, centerY - 8);
+      ctx.stroke();
+    }
+    function drawHammerStrike(progress) {
+      const centerX = cx();
+      const centerY = cy();
+      const maxR = Math.min(W, H) * 0.4;
+      const r = maxR * progress;
+      const alpha = 1 - progress;
+      ctx.strokeStyle = `rgba(255, 220, 100, ${alpha})`;
+      ctx.lineWidth = 3 * (1 - progress);
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
+      ctx.stroke();
+      if (progress < 0.3) {
+        const flashAlpha = (1 - progress / 0.3) * 0.6;
+        ctx.fillStyle = `rgba(255, 255, 240, ${flashAlpha})`;
+        ctx.fillRect(0, 0, W, H);
+      }
+    }
+    function tick() {
+      t++;
+      ctx.clearRect(0, 0, W, H);
+      if (currentPhase !== "idle") {
+        const heatAlpha = currentPhase === "reveal" ? 0.04 : 0.02;
+        ctx.fillStyle = `rgba(255, 100, 20, ${heatAlpha})`;
+        ctx.fillRect(0, 0, W, H);
+      }
+      const phaseDuration = t - phaseStart;
+      if (currentPhase === "converge") {
+        const progress = Math.min(phaseDuration / 120, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const startAx = W * 0.15;
+        const startBx = W * 0.85;
+        orbAx = startAx + (cx() - startAx - 25) * ease;
+        orbAy = cy() + Math.sin(t * 0.04) * 8;
+        orbBx = startBx + (cx() - startBx + 25) * ease;
+        orbBy = cy() + Math.cos(t * 0.04) * 8;
+        drawOrb(orbAx, orbAy, 22, colorA, 1);
+        drawOrb(orbBx, orbBy, 22, colorB, 1);
+        if (t % 3 === 0) {
+          spawnSpark(orbAx, orbAy, colorA);
+          spawnSpark(orbBx, orbBy, colorB);
+        }
+        if (progress > 0.3) {
+          const arcAlpha = (progress - 0.3) / 0.7;
+          ctx.strokeStyle = `rgba(255, 200, 100, ${arcAlpha * 0.3})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(orbAx, orbAy);
+          ctx.quadraticCurveTo(cx(), cy() - 30 + Math.sin(t * 0.1) * 10, orbBx, orbBy);
+          ctx.stroke();
+        }
+        if (progress >= 1) {
+          currentPhase = "clash";
+          phaseStart = t;
+        }
+      } else if (currentPhase === "clash") {
+        const progress = Math.min(phaseDuration / 60, 1);
+        drawHammerStrike(progress);
+        drawAnvil();
+        if (phaseDuration < 15 && t % 2 === 0) {
+          for (let i = 0;i < 8; i++) {
+            spawnSpark(cx(), cy(), i % 2 === 0 ? colorA : colorB);
+            spawnEmber(cx(), cy(), i % 2 === 0 ? "#ff8c28" : "#ffcc44");
+          }
+          for (let i = 0;i < 3; i++) {
+            spawnRune(cx(), cy(), i % 2 === 0 ? colorA : colorB);
+          }
+        }
+        if (progress >= 1) {
+          currentPhase = "forge";
+          phaseStart = t;
+        }
+      } else if (currentPhase === "forge") {
+        const progress = Math.min(phaseDuration / 200, 1);
+        drawAnvil();
+        drawForgeRing(Math.min(progress * 2, 1));
+        if (t % 4 === 0) {
+          spawnEmber(cx() + (Math.random() - 0.5) * 60, cy(), Math.random() > 0.5 ? colorA : colorB);
+          spawnSpark(cx() + (Math.random() - 0.5) * 40, cy() - 10, "#ffcc44");
+        }
+        if (t % 30 === 0) {
+          spawnRune(cx() + (Math.random() - 0.5) * 80, cy() + (Math.random() - 0.5) * 60, "#ff8c28");
+        }
+        const fuseR = 10 + progress * 25;
+        const mixColor = `rgba(255, ${160 + progress * 60}, ${40 + progress * 80}, ${0.5 + progress * 0.3})`;
+        drawOrb(cx(), cy() - 15, fuseR, mixColor, 2);
+        if (progress >= 1) {
+          currentPhase = "reveal";
+          phaseStart = t;
+        }
+      } else if (currentPhase === "reveal") {
+        const progress = Math.min(phaseDuration / 80, 1);
+        if (progress < 0.2) {
+          const flashAlpha = (1 - progress / 0.2) * 0.8;
+          ctx.fillStyle = `rgba(255, 255, 250, ${flashAlpha})`;
+          ctx.fillRect(0, 0, W, H);
+        }
+        const ringR = Math.min(W, H) * 0.4 * progress;
+        const ringAlpha = 1 - progress;
+        ctx.strokeStyle = `rgba(255, 200, 80, ${ringAlpha})`;
+        ctx.lineWidth = 4 * (1 - progress);
+        ctx.beginPath();
+        ctx.arc(cx(), cy(), ringR, 0, Math.PI * 2);
+        ctx.stroke();
+        if (phaseDuration < 30 && t % 2 === 0) {
+          for (let i = 0;i < 6; i++) {
+            spawnSpark(cx() + (Math.random() - 0.5) * 100, cy() + (Math.random() - 0.5) * 60, "#ffdd66");
+            spawnEmber(cx() + (Math.random() - 0.5) * 120, cy(), "#ff9933");
+          }
+        }
+        const finalR = 30 * progress;
+        const grad = ctx.createRadialGradient(cx(), cy(), 0, cx(), cy(), finalR);
+        grad.addColorStop(0, "#ffffff");
+        grad.addColorStop(0.4, "#ffdd88");
+        grad.addColorStop(1, "#ff880033");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx(), cy(), finalR, 0, Math.PI * 2);
+        ctx.fill();
+        if (progress >= 1) {
+          onComplete?.();
+          currentPhase = "idle";
+        }
+      }
+      for (let i = particles.length - 1;i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.02;
+        p.life -= 1 / p.maxLife;
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+        const alpha = p.life;
+        if (p.type === "spark") {
+          ctx.fillStyle = p.color + Math.round(alpha * 255).toString(16).padStart(2, "0");
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (p.type === "ember") {
+          ctx.fillStyle = p.color + Math.round(alpha * 180).toString(16).padStart(2, "0");
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * (0.5 + alpha * 0.5), 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 8;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        } else if (p.type === "rune" && p.char) {
+          ctx.font = `${p.size}px serif`;
+          ctx.fillStyle = p.color + Math.round(alpha * 200).toString(16).padStart(2, "0");
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(p.char, p.x, p.y);
+        }
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    }
+    if (phase !== "idle") {
+      phaseStart = 0;
+      currentPhase = phase;
+      rafRef.current = requestAnimationFrame(tick);
+    }
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener("resize", resize);
+    };
+  }, [phase, typeA, typeB, onComplete]);
+  return /* @__PURE__ */ jsx_dev_runtime41.jsxDEV("canvas", {
+    ref: canvasRef,
+    className: "forge-animation__canvas",
+    style: { display: active ? "block" : "none" }
+  }, undefined, false, undefined, this);
+}
+
+// frontend/pages/ForgePage.tsx
+var jsx_dev_runtime42 = __toESM(require_jsx_dev_runtime(), 1);
+function SlotCard({
+  slot,
+  gen,
+  onPick,
+  onClear
+}) {
+  if (!gen) {
+    return /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+      className: "forge-slot forge-slot--empty",
+      onClick: onPick,
+      children: [
+        /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+          className: "forge-slot__icon",
+          children: slot === "A" ? "⚡" : "\uD83C\uDF00"
+        }, undefined, false, undefined, this),
+        /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+          className: "forge-slot__label",
+          children: [
+            "Seleccionar creación ",
+            slot
+          ]
+        }, undefined, true, undefined, this),
+        /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+          className: "forge-slot__hint",
+          children: "Toca para elegir del historial"
+        }, undefined, false, undefined, this)
+      ]
+    }, undefined, true, undefined, this);
+  }
+  const meta = TYPE_META[gen.type];
+  const title = getGenerationTitle(gen.result, gen.type, gen.id);
+  return /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+    className: "forge-slot forge-slot--filled",
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "forge-slot__header",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(Badge, {
+            type: gen.type,
+            icon: meta.icon,
+            label: meta.label
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+            className: "forge-slot__clear",
+            onClick: onClear,
+            title: "Quitar",
+            children: "✕"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "forge-slot__title",
+        children: title
+      }, undefined, false, undefined, this),
+      gen.image_url && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("img", {
+        src: gen.image_url,
+        alt: title,
+        className: "forge-slot__image"
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+        className: "forge-slot__change",
+        onClick: onPick,
+        children: "Cambiar"
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+function PickerModal({
+  open,
+  history,
+  loading: loading2,
+  exclude,
+  onPick,
+  onClose
+}) {
+  const items = history.filter((g) => g.id !== exclude && g.type !== "worldmap");
+  return /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(Modal, {
+    open,
+    onClose,
+    title: "\uD83D\uDD25 Seleccionar creación",
+    size: "lg",
+    children: [
+      loading2 && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "forge-picker__loading",
+        children: "Cargando historial…"
+      }, undefined, false, undefined, this),
+      !loading2 && items.length === 0 && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "forge-picker__empty",
+        children: "No hay creaciones disponibles. Genera algo primero en la página de Generar."
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "forge-picker__grid",
+        children: items.map((gen) => {
+          const meta = TYPE_META[gen.type];
+          const title = getGenerationTitle(gen.result, gen.type, gen.id);
+          return /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+            className: "forge-picker__item",
+            onClick: () => onPick(gen),
+            children: [
+              gen.image_url && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("img", {
+                src: gen.image_url,
+                alt: title,
+                className: "forge-picker__thumb"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+                className: "forge-picker__info",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(Badge, {
+                    type: gen.type,
+                    icon: meta.icon,
+                    label: meta.label,
+                    small: true
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                    className: "forge-picker__name",
+                    children: title
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this)
+            ]
+          }, gen.id, true, undefined, this);
+        })
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+function ForgePage({ onToast }) {
+  const { selectedModel, setSelectedModel } = useAppState();
+  const { history, loading: histLoading, reload } = useHistory();
+  const [slotA, setSlotA] = import_react60.useState(null);
+  const [slotB, setSlotB] = import_react60.useState(null);
+  const [picking, setPicking] = import_react60.useState(null);
+  const [forging, setForging] = import_react60.useState(false);
+  const [animating, setAnimating] = import_react60.useState(false);
+  const [result, setResult] = import_react60.useState(null);
+  import_react60.useEffect(() => {
+    reload();
+  }, [reload]);
+  const handlePick = import_react60.useCallback((gen) => {
+    if (picking === "A")
+      setSlotA(gen);
+    else
+      setSlotB(gen);
+    setPicking(null);
+  }, [picking]);
+  const canForge = slotA && slotB && !forging;
+  const handleForge = async () => {
+    if (!slotA || !slotB)
+      return;
+    setForging(true);
+    setAnimating(true);
+    setResult(null);
+    const { data, error: error2 } = await apiForge(slotA.id, slotB.id, selectedModel);
+    if (data) {
+      setResult(data);
+    } else {
+      onToast(error2 || "Error al fusionar", "error");
+      setAnimating(false);
+      setForging(false);
+    }
+  };
+  const handleAnimComplete = () => {
+    setAnimating(false);
+    setForging(false);
+    if (result) {
+      onToast("¡Fusión legendaria completada! \uD83D\uDD25", "ok");
+    }
+  };
+  const handleReset = () => {
+    setSlotA(null);
+    setSlotB(null);
+    setResult(null);
+  };
+  return /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+    className: "forge-page",
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "forge-page__header",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("h1", {
+            className: "forge-page__title",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                className: "forge-page__title-icon",
+                children: "\uD83D\uDD25"
+              }, undefined, false, undefined, this),
+              "Fusion Forge"
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("p", {
+            className: "forge-page__subtitle",
+            children: "Selecciona dos creaciones y fusiónalas en un híbrido legendario con IA"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "forge-area",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "forge-area__slot",
+            children: /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(SlotCard, {
+              slot: "A",
+              gen: slotA,
+              onPick: () => setPicking("A"),
+              onClear: () => setSlotA(null)
+            }, undefined, false, undefined, this)
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "forge-area__center",
+            children: animating ? /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+              className: "forge-area__animation-wrap",
+              children: /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(ForgeAnimation, {
+                active: animating,
+                typeA: slotA?.type,
+                typeB: slotB?.type,
+                onComplete: handleAnimComplete
+              }, undefined, false, undefined, this)
+            }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(jsx_dev_runtime42.Fragment, {
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+                  className: "forge-area__versus",
+                  children: /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                    className: "forge-area__cross",
+                    children: "✦"
+                  }, undefined, false, undefined, this)
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(Button, {
+                  variant: "primary",
+                  size: "lg",
+                  disabled: !canForge,
+                  loading: forging && !animating,
+                  onClick: handleForge,
+                  className: "forge-area__btn",
+                  children: "\uD83D\uDD25 FORJAR FUSIÓN"
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+                  className: "forge-area__model-row",
+                  children: /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(ModelSelector, {
+                    value: selectedModel,
+                    onChange: setSelectedModel
+                  }, undefined, false, undefined, this)
+                }, undefined, false, undefined, this)
+              ]
+            }, undefined, true, undefined, this)
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "forge-area__slot",
+            children: /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(SlotCard, {
+              slot: "B",
+              gen: slotB,
+              onPick: () => setPicking("B"),
+              onClear: () => setSlotB(null)
+            }, undefined, false, undefined, this)
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      result && !animating && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "forge-result",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "forge-result__badge",
+            children: "⚗️ RESULTADO DE FUSIÓN"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(ResultCard, {
+            gen: result,
+            isFav: false,
+            onFavToggle: () => {},
+            showActions: false
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(Button, {
+            variant: "secondary",
+            onClick: handleReset,
+            className: "forge-result__reset",
+            children: "\uD83D\uDD04 Nueva fusión"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      !slotA && !slotB && !result && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(Card, {
+        className: "forge-page__intro",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("h3", {
+            children: "⚔️ ¿Cómo funciona?"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("ol", {
+            className: "forge-page__steps",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("li", {
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("strong", {
+                    children: "Selecciona"
+                  }, undefined, false, undefined, this),
+                  " dos creaciones de tu historial (NPCs, armas, objetos, enemigos…)"
+                ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("li", {
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("strong", {
+                    children: "Pulsa FORJAR"
+                  }, undefined, false, undefined, this),
+                  " y la IA fusionará ambas en un híbrido épico nunca visto"
+                ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("li", {
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("strong", {
+                    children: "Descubre"
+                  }, undefined, false, undefined, this),
+                  " la nueva creación con rasgos, habilidades y lore fusionados"
+                ]
+              }, undefined, true, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "forge-page__combos",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                className: "forge-page__combo",
+                children: "\uD83E\uDDD9 + \uD83D\uDDE1️ = Guerrero legendario"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                className: "forge-page__combo",
+                children: "\uD83D\uDC8E + \uD83D\uDC80 = Reliquia maldita"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                className: "forge-page__combo",
+                children: "⚔️ + \uD83D\uDCDC = Misión épica con lore"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(PickerModal, {
+        open: picking !== null,
+        history,
+        loading: histLoading,
+        exclude: picking === "A" ? slotB?.id ?? null : slotA?.id ?? null,
+        onPick: handlePick,
+        onClose: () => setPicking(null)
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+
 // frontend/app.tsx
-var jsx_dev_runtime39 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime43 = __toESM(require_jsx_dev_runtime(), 1);
 var CLERK_KEY = "pk_test_Y29tbXVuYWwtbW9jY2FzaW4tNS5jbGVyay5hY2NvdW50cy5kZXYk";
 function ClerkTokenSync() {
   const { getToken, isSignedIn } = useAuth();
-  import_react57.default.useEffect(() => {
+  import_react61.default.useEffect(() => {
     setTokenGetter(isSignedIn ? getToken : null);
   }, [getToken, isSignedIn]);
   return null;
 }
 function Pages() {
   const { tab, toasts, showToast, navCollapsed } = useAppState();
-  import_react57.default.useEffect(() => {
+  import_react61.default.useEffect(() => {
     document.getElementById("root")?.classList.toggle("nav-collapsed", navCollapsed);
   }, [navCollapsed]);
-  return /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(jsx_dev_runtime39.Fragment, {
+  return /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(jsx_dev_runtime43.Fragment, {
     children: [
-      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(Header, {}, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(LeftNav, {}, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV("main", {
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(Header, {}, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(LeftNav, {}, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("main", {
         className: "app-main",
         children: [
-          tab === "generate" && /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(HomePage, {
+          tab === "generate" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(HomePage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "history" && /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(HistoryPage, {
+          tab === "history" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(HistoryPage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "favorites" && /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(FavoritesPage, {
+          tab === "favorites" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(FavoritesPage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "social" && /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(SocialPage, {
+          tab === "social" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(SocialPage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "projects" && /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(ProjectsPage, {
+          tab === "projects" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(ProjectsPage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "worldcreator" && /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(WorldCreatorPage, {
+          tab === "worldcreator" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(WorldCreatorPage, {
+            onToast: showToast
+          }, undefined, false, undefined, this),
+          tab === "forge" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(ForgePage, {
             onToast: showToast
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(ToastContainer, {
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(ToastContainer, {
         toasts
       }, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this);
 }
 function App() {
-  return /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(ClerkProvider, {
+  return /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(ClerkProvider, {
     publishableKey: CLERK_KEY,
     children: [
-      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(ClerkTokenSync, {}, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(AppProvider, {
-        children: /* @__PURE__ */ jsx_dev_runtime39.jsxDEV(Pages, {}, undefined, false, undefined, this)
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(ClerkTokenSync, {}, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(AppProvider, {
+        children: /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(Pages, {}, undefined, false, undefined, this)
       }, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this);
 }
-import_client.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsx_dev_runtime39.jsxDEV(App, {}, undefined, false, undefined, this));
+import_client.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsx_dev_runtime43.jsxDEV(App, {}, undefined, false, undefined, this));
