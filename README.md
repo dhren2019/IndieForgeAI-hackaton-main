@@ -398,6 +398,14 @@ Fusion Forge permite al usuario **seleccionar dos creaciones existentes** de su 
 - Genera un **nombre y descripción únicos** para el híbrido
 - Mantiene metadatos de trazabilidad: `_fusion: true`, `_source_a`, `_source_b`
 
+![Forja](public/images-doc/forja.png)
+
+<div style="background:#fff4e5;border-left:4px solid #ffae42;padding:12px;border-radius:6px;margin:10px 0;">
+La respuesta puede tardar varios segundos, espera.
+</div>
+
+**Nota:** Si alguno de los modelos no funciona, prueba con `Llama 3.3 70B`.
+
 ### Animación de invocación arcana
 
 Antes de revelar el resultado, se muestra una secuencia de animación estilo RPG/gacha compuesta de:
