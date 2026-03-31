@@ -3,43 +3,25 @@ var __getProtoOf = Object.getPrototypeOf;
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-function __accessProp(key) {
-  return this[key];
-}
-var __toESMCache_node;
-var __toESMCache_esm;
 var __toESM = (mod, isNodeMode, target) => {
-  var canCache = mod != null && typeof mod === "object";
-  if (canCache) {
-    var cache = isNodeMode ? __toESMCache_node ??= new WeakMap : __toESMCache_esm ??= new WeakMap;
-    var cached = cache.get(mod);
-    if (cached)
-      return cached;
-  }
   target = mod != null ? __create(__getProtoOf(mod)) : {};
   const to = isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target;
   for (let key of __getOwnPropNames(mod))
     if (!__hasOwnProp.call(to, key))
       __defProp(to, key, {
-        get: __accessProp.bind(mod, key),
+        get: () => mod[key],
         enumerable: true
       });
-  if (canCache)
-    cache.set(mod, to);
   return to;
 };
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
-var __returnValue = (v) => v;
-function __exportSetter(name, newValue) {
-  this[name] = __returnValue.bind(null, newValue);
-}
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, {
       get: all[name],
       enumerable: true,
       configurable: true,
-      set: __exportSetter.bind(all, name)
+      set: (newValue) => all[name] = () => newValue
     });
 };
 var __esm = (fn, res) => () => (fn && (res = fn(fn = 0)), res);
@@ -1849,9 +1831,8 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/index.js
 var require_react = __commonJS((exports, module) => {
-  var react_development = __toESM(require_react_development());
   if (false) {} else {
-    module.exports = react_development;
+    module.exports = require_react_development();
   }
 });
 
@@ -2300,16 +2281,15 @@ var require_scheduler_development = __commonJS((exports) => {
 
 // node_modules/scheduler/index.js
 var require_scheduler = __commonJS((exports, module) => {
-  var scheduler_development = __toESM(require_scheduler_development());
   if (false) {} else {
-    module.exports = scheduler_development;
+    module.exports = require_scheduler_development();
   }
 });
 
 // node_modules/react-dom/cjs/react-dom.development.js
 var require_react_dom_development = __commonJS((exports) => {
-  var React = __toESM(require_react());
-  var Scheduler = __toESM(require_scheduler());
+  var React = __toESM(require_react(), 1);
+  var Scheduler = __toESM(require_scheduler(), 1);
   if (true) {
     (function() {
       if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
@@ -22755,15 +22735,14 @@ You might need to use a local HTTP server (instead of file://): ` + "https://rea
 
 // node_modules/react-dom/index.js
 var require_react_dom = __commonJS((exports, module) => {
-  var react_dom_development = __toESM(require_react_dom_development());
   if (false) {} else {
-    module.exports = react_dom_development;
+    module.exports = require_react_dom_development();
   }
 });
 
 // node_modules/react-dom/client.js
 var require_client = __commonJS((exports) => {
-  var m = __toESM(require_react_dom());
+  var m = __toESM(require_react_dom(), 1);
   if (false) {} else {
     i = m.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
     exports.createRoot = function(c, o) {
@@ -22788,7 +22767,7 @@ var require_client = __commonJS((exports) => {
 
 // node_modules/use-sync-external-store/cjs/use-sync-external-store-shim.development.js
 var require_use_sync_external_store_shim_development = __commonJS((exports) => {
-  var React = __toESM(require_react());
+  var React = __toESM(require_react(), 1);
   (function() {
     function is(x, y) {
       return x === y && (x !== 0 || 1 / x === 1 / y) || x !== x && y !== y;
@@ -22847,7 +22826,7 @@ var require_shim = __commonJS((exports, module) => {
 
 // node_modules/react/cjs/react-jsx-dev-runtime.development.js
 var require_react_jsx_dev_runtime_development = __commonJS((exports) => {
-  var React9 = __toESM(require_react());
+  var React9 = __toESM(require_react(), 1);
   if (true) {
     (function() {
       var REACT_ELEMENT_TYPE = Symbol.for("react.element");
@@ -23728,9 +23707,8 @@ Check the top-level render call using <` + parentName + ">.";
 
 // node_modules/react/jsx-dev-runtime.js
 var require_jsx_dev_runtime = __commonJS((exports, module) => {
-  var react_jsx_dev_runtime_development = __toESM(require_react_jsx_dev_runtime_development());
   if (false) {} else {
-    module.exports = react_jsx_dev_runtime_development;
+    module.exports = require_react_jsx_dev_runtime_development();
   }
 });
 
@@ -51214,7 +51192,9 @@ function parallelTraverse(a, b, callback) {
     parallelTraverse(a.children[i], b.children[i], callback);
   }
 }
-var init_SkeletonUtils = () => {};
+var init_SkeletonUtils = __esm(() => {
+  init_three_module();
+});
 
 // node_modules/three/examples/jsm/loaders/GLTFLoader.js
 var exports_GLTFLoader = {};
@@ -53609,7 +53589,7 @@ var init_GLTFLoader = __esm(() => {
 });
 
 // frontend/app.tsx
-var import_react61 = __toESM(require_react(), 1);
+var import_react62 = __toESM(require_react(), 1);
 var import_client = __toESM(require_client(), 1);
 
 // node_modules/@clerk/clerk-react/node_modules/@clerk/shared/dist/runtime/error-Dl9xmUf3.mjs
@@ -61999,8 +61979,8 @@ function PageContainer({ children, narrow = false, wide = false }) {
 }
 
 // frontend/hooks/useGenerate.ts
-init_api();
 var import_react45 = __toESM(require_react(), 1);
+init_api();
 function useGenerate() {
   const [state, setState] = import_react45.useState({
     loading: false,
@@ -62698,9 +62678,10 @@ function CommentList({ postId, onToast }) {
 init_api();
 var jsx_dev_runtime31 = __toESM(require_jsx_dev_runtime(), 1);
 function FieldsView2({ data }) {
+  const entries = Object.entries(data).filter(([k]) => !k.startsWith("_"));
   return /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
     className: "fields-grid fields-grid--compact",
-    children: Object.entries(data).map(([k, v]) => /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+    children: entries.map(([k, v]) => /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
       className: "field-item",
       children: [
         /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
@@ -62718,6 +62699,173 @@ function FieldsView2({ data }) {
     }, k, true, undefined, this))
   }, undefined, false, undefined, this);
 }
+function FusionInfo({ result }) {
+  if (result._fusion !== true)
+    return null;
+  const srcA = result._source_a;
+  const srcB = result._source_b;
+  const nameA = srcA?.name ?? "?";
+  const nameB = srcB?.name ?? "?";
+  const iconA = srcA?.type ? TYPE_META[srcA.type]?.icon ?? "✦" : "✦";
+  const iconB = srcB?.type ? TYPE_META[srcB.type]?.icon ?? "✦" : "✦";
+  return /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+    className: "fusion-info",
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+        className: "fusion-info__row",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
+            className: "fusion-info__label",
+            children: "Fusión"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
+            className: "fusion-info__value fusion-badge",
+            children: "✔ Sí"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+        className: "fusion-info__row",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
+            className: "fusion-info__label",
+            children: "Fuente A"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
+            className: "fusion-info__value",
+            children: [
+              iconA,
+              " ",
+              nameA
+            ]
+          }, undefined, true, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+        className: "fusion-info__row",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
+            className: "fusion-info__label",
+            children: "Fuente B"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
+            className: "fusion-info__value",
+            children: [
+              iconB,
+              " ",
+              nameB
+            ]
+          }, undefined, true, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+function PostDetailModal({
+  post,
+  onClose
+}) {
+  const meta = TYPE_META[post.type];
+  const sourceA = post.result._source_a;
+  const sourceB = post.result._source_b;
+  return /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(Modal, {
+    open: true,
+    onClose,
+    title: post.title,
+    size: "lg",
+    children: /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+      className: "post-detail",
+      children: [
+        /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+          className: "post-detail__badges",
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(Badge, {
+              type: post.type,
+              icon: meta.icon,
+              label: meta.label
+            }, undefined, false, undefined, this),
+            post.result._fusion === true && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
+              className: "fusion-badge",
+              children: "✔ Fusión"
+            }, undefined, false, undefined, this)
+          ]
+        }, undefined, true, undefined, this),
+        sourceA && sourceB && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+          className: "post-detail__lineage",
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
+              className: "post-detail__lineage-src",
+              children: [
+                (TYPE_META[sourceA.type] ?? { icon: "✦" }).icon,
+                " ",
+                sourceA.name
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
+              className: "post-detail__lineage-sep",
+              children: "⚗️"
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
+              className: "post-detail__lineage-src",
+              children: [
+                (TYPE_META[sourceB.type] ?? { icon: "✦" }).icon,
+                " ",
+                sourceB.name
+              ]
+            }, undefined, true, undefined, this)
+          ]
+        }, undefined, true, undefined, this),
+        post.image_url && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+          className: "post-detail__image-wrap",
+          children: /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("img", {
+            src: post.image_url,
+            alt: post.title,
+            className: "post-detail__image"
+          }, undefined, false, undefined, this)
+        }, undefined, false, undefined, this),
+        post.glb_url && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+          className: "post-3d-viewer post-3d-viewer--modal",
+          children: /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("model-viewer", {
+            src: post.glb_url,
+            alt: "Modelo 3D",
+            "auto-rotate": true,
+            "camera-controls": true,
+            "shadow-intensity": "1",
+            "environment-image": "neutral",
+            class: "post-3d-viewer__canvas"
+          }, undefined, false, undefined, this)
+        }, undefined, false, undefined, this),
+        post.description && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("p", {
+          className: "post-detail__desc",
+          children: post.description
+        }, undefined, false, undefined, this),
+        /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(FusionInfo, {
+          result: post.result
+        }, undefined, false, undefined, this),
+        /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(FieldsView2, {
+          data: post.result
+        }, undefined, false, undefined, this),
+        /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
+          className: "post-detail__meta",
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
+              children: [
+                "✍️ ",
+                post.author
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
+              children: [
+                "\uD83D\uDD52 ",
+                timeAgo(post.created_at)
+              ]
+            }, undefined, true, undefined, this)
+          ]
+        }, undefined, true, undefined, this)
+      ]
+    }, undefined, true, undefined, this)
+  }, undefined, false, undefined, this);
+}
 function FeedPost({
   post,
   followedTags,
@@ -62727,7 +62875,7 @@ function FeedPost({
   onDelete,
   onToast
 }) {
-  const [expanded, setExpanded] = import_react52.useState(false);
+  const [showDetail, setShowDetail] = import_react52.useState(false);
   const [showCmts, setShowCmts] = import_react52.useState(false);
   const [liked, setLiked] = import_react52.useState(post.liked_by_me);
   const [likeCount, setLikeCount] = import_react52.useState(post.like_count);
@@ -62737,7 +62885,8 @@ function FeedPost({
     apiRecordInteraction(post.id, "view");
   }, [post.id]);
   const meta = TYPE_META[post.type];
-  const preview = String(post.result.personality ?? post.result.objective ?? post.result.description ?? post.result.summary ?? post.result.special_ability ?? post.result.attack_style ?? "");
+  const rawPreview = String(post.result.personality ?? post.result.objective ?? post.result.description ?? post.result.summary ?? post.result.special_ability ?? post.result.attack_style ?? "");
+  const preview = rawPreview.length > 100 ? rawPreview.slice(0, 100) + "…" : rawPreview;
   const handleLike = async (e) => {
     e.stopPropagation();
     const { data } = await apiToggleLike(post.id);
@@ -62760,14 +62909,12 @@ function FeedPost({
       onToast("Error al quitar la publicación", "error");
     }
   };
-  const handleExpand = () => {
-    const next = !expanded;
-    setExpanded(next);
-    if (next)
-      apiRecordInteraction(post.id, "expand");
+  const handleOpenDetail = () => {
+    setShowDetail(true);
+    apiRecordInteraction(post.id, "expand");
   };
   return /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("article", {
-    className: `post-card${isOwn ? " post-card--own" : ""}`,
+    className: "post-card",
     style: { "--type-color": meta.color },
     children: [
       /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
@@ -62776,7 +62923,7 @@ function FeedPost({
       isOwn && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("button", {
         className: "post-card__unshare",
         onClick: openUnshare,
-        title: "Dejar de compartir (el contenido se conserva en tu historial)",
+        title: "Dejar de compartir",
         "aria-label": "Dejar de compartir",
         children: [
           /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("svg", {
@@ -62832,13 +62979,16 @@ function FeedPost({
       }, undefined, true, undefined, this),
       /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("header", {
         className: "post-card__header",
-        onClick: handleExpand,
         children: [
           /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(Badge, {
             type: post.type,
             icon: meta.icon,
             label: meta.label,
             small: true
+          }, undefined, false, undefined, this),
+          post.result._fusion === true && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
+            className: "fusion-badge",
+            children: "✔ Fusión"
           }, undefined, false, undefined, this),
           /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
             className: "post-card__title-area",
@@ -62866,9 +63016,12 @@ function FeedPost({
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
-            className: "post-card__chevron",
-            children: expanded ? "▲" : "▼"
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("button", {
+            className: "post-card__expand-btn",
+            onClick: handleOpenDetail,
+            title: "Ver detalles completos",
+            "aria-label": "Expandir",
+            children: "▼"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
@@ -62880,46 +63033,10 @@ function FeedPost({
           className: "post-image"
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      post.glb_url && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
-        className: "post-3d-viewer",
-        children: [
-          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("model-viewer", {
-            src: post.glb_url,
-            alt: "Modelo 3D",
-            "auto-rotate": true,
-            "camera-controls": true,
-            "shadow-intensity": "1",
-            "environment-image": "neutral",
-            class: "post-3d-viewer__canvas"
-          }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
-            className: "post-3d-viewer__hint",
-            children: "\uD83D\uDDB1 Arrastra para rotar · Scroll para zoom"
-          }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("a", {
-            href: post.glb_url,
-            download: "personaje-3d.glb",
-            className: "post-glb-download",
-            children: "⬇ Descargar modelo 3D (.glb)"
-          }, undefined, false, undefined, this)
-        ]
-      }, undefined, true, undefined, this),
-      !expanded && preview && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("p", {
+      preview && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("p", {
         className: "post-card__preview",
         children: preview
       }, undefined, false, undefined, this),
-      expanded && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
-        className: "post-card__body",
-        children: [
-          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(FieldsView2, {
-            data: post.result
-          }, undefined, false, undefined, this),
-          post.generation_id && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(ImagePreview, {
-            type: post.type,
-            result: post.result
-          }, undefined, false, undefined, this)
-        ]
-      }, undefined, true, undefined, this),
       post.tags.length > 0 && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("div", {
         className: "post-card__tags",
         children: post.tags.map((tag) => /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("span", {
@@ -62954,7 +63071,6 @@ function FeedPost({
             onClick: (e) => {
               e.stopPropagation();
               setShowCmts((v) => !v);
-              setCmtCount(cmtCount);
             },
             children: [
               "\uD83D\uDCAC ",
@@ -62973,12 +63089,21 @@ function FeedPost({
               "# ",
               post.tags[0]
             ]
-          }, undefined, true, undefined, this)
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime31.jsxDEV("button", {
+            className: "post-card__detail-btn",
+            onClick: handleOpenDetail,
+            children: "Ver más ▼"
+          }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
       showCmts && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(CommentList, {
         postId: post.id,
         onToast
+      }, undefined, false, undefined, this),
+      showDetail && /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(PostDetailModal, {
+        post,
+        onClose: () => setShowDetail(false)
       }, undefined, false, undefined, this),
       /* @__PURE__ */ jsx_dev_runtime31.jsxDEV(Modal, {
         open: showUnshareModal,
@@ -63371,8 +63496,8 @@ function SocialPage({ onToast }) {
 var import_react57 = __toESM(require_react(), 1);
 
 // frontend/components/projects/ProjectItemCard.tsx
-init_three_module();
 var import_react56 = __toESM(require_react(), 1);
+init_three_module();
 
 // node_modules/three/examples/jsm/controls/OrbitControls.js
 init_three_module();
@@ -64247,8 +64372,8 @@ function interceptControlUp(event) {
 }
 
 // frontend/components/results/WorldMap3D.tsx
-init_three_module();
 var import_react55 = __toESM(require_react(), 1);
+init_three_module();
 
 // node_modules/simplex-noise/dist/esm/simplex-noise.js
 var SQRT3 = /* @__PURE__ */ Math.sqrt(3);
@@ -64362,8 +64487,8 @@ function buildPermutationTable(random) {
 }
 
 // frontend/components/ui/PointCloudLoader.tsx
-init_three_module();
 var import_react54 = __toESM(require_react(), 1);
+init_three_module();
 var jsx_dev_runtime36 = __toESM(require_jsx_dev_runtime(), 1);
 function PointCloudLoader({
   text = "La IA está imaginando tu mundo…",
@@ -68631,7 +68756,7 @@ function WorldCreatorPage({ onToast }) {
 }
 
 // frontend/pages/ForgePage.tsx
-var import_react60 = __toESM(require_react(), 1);
+var import_react61 = __toESM(require_react(), 1);
 init_api();
 
 // frontend/components/ui/ForgeAnimation.tsx
@@ -68649,7 +68774,11 @@ var RUNES2 = "ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛈᛇᛉᛊᛏᛒᛖᛗᛚᛝ
 function ForgeAnimation({ active, typeA = "npc", typeB = "weapon", onComplete }) {
   const canvasRef = import_react59.useRef(null);
   const rafRef = import_react59.useRef(0);
+  const onCompleteRef = import_react59.useRef(onComplete);
   const [phase, setPhase] = import_react59.useState("idle");
+  import_react59.useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
   import_react59.useEffect(() => {
     if (active) {
       setPhase("converge");
@@ -68925,7 +69054,7 @@ function ForgeAnimation({ active, typeA = "npc", typeB = "weapon", onComplete })
         ctx.arc(cx(), cy(), finalR, 0, Math.PI * 2);
         ctx.fill();
         if (progress >= 1) {
-          onComplete?.();
+          onCompleteRef.current?.();
           currentPhase = "idle";
         }
       }
@@ -68973,7 +69102,7 @@ function ForgeAnimation({ active, typeA = "npc", typeB = "weapon", onComplete })
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
     };
-  }, [phase, typeA, typeB, onComplete]);
+  }, [phase, typeA, typeB]);
   return /* @__PURE__ */ jsx_dev_runtime41.jsxDEV("canvas", {
     ref: canvasRef,
     className: "forge-animation__canvas",
@@ -68981,8 +69110,515 @@ function ForgeAnimation({ active, typeA = "npc", typeB = "weapon", onComplete })
   }, undefined, false, undefined, this);
 }
 
-// frontend/pages/ForgePage.tsx
+// frontend/components/results/ForgeResultDisplay.tsx
+var import_react60 = __toESM(require_react(), 1);
+init_api();
 var jsx_dev_runtime42 = __toESM(require_jsx_dev_runtime(), 1);
+var IDENTITY_FIELDS = new Set([
+  "role",
+  "race",
+  "age",
+  "class",
+  "alignment",
+  "difficulty",
+  "rarity",
+  "element",
+  "style",
+  "range",
+  "damage",
+  "speed",
+  "armor",
+  "hp",
+  "type",
+  "value",
+  "era"
+]);
+var STORY_FIELDS = new Set([
+  "backstory",
+  "description",
+  "history",
+  "lore",
+  "summary",
+  "overview",
+  "impact",
+  "twist",
+  "objective",
+  "synopsis",
+  "moral_dilemma",
+  "failure_consequences",
+  "important_events",
+  "myths_and_prophecies",
+  "geography",
+  "magic_or_power"
+]);
+var ABILITY_FIELDS = new Set([
+  "appearance",
+  "personality",
+  "motivation",
+  "combat_style",
+  "special_ability",
+  "passive",
+  "abilities",
+  "attack_style",
+  "weakness",
+  "resistance",
+  "drops",
+  "secret",
+  "effect",
+  "reward",
+  "crafting_material",
+  "requirements",
+  "encounter_tips",
+  "npcs_involved",
+  "relationships",
+  "curse",
+  "steps",
+  "enemies",
+  "key_figures",
+  "factions",
+  "factions_desc",
+  "region",
+  "location",
+  "region_name"
+]);
+var DIALOGUE_FIELDS = new Set(["dialogue"]);
+var SKIP_FIELDS = new Set(["name", "title", "_fusion", "_source_a", "_source_b"]);
+var LIST_FIELDS = new Set([
+  "abilities",
+  "steps",
+  "drops",
+  "enemies",
+  "key_figures",
+  "factions",
+  "npcs_involved",
+  "relationships",
+  "requirements",
+  "encounter_tips",
+  "important_events",
+  "factions_desc"
+]);
+var TYPE_COLORS3 = {
+  npc: "#f59e0b",
+  quest: "#3b82f6",
+  item: "#10b981",
+  lore: "#8b5cf6",
+  weapon: "#ef4444",
+  enemy: "#6b7280"
+};
+var TABS = [
+  { id: "identity", icon: "⚡", label: "Identidad" },
+  { id: "story", icon: "\uD83D\uDCD6", label: "Historia" },
+  { id: "abilities", icon: "⚔️", label: "Habilidades" }
+];
+function getStr(v) {
+  if (Array.isArray(v))
+    return v.map(String).join(", ");
+  return String(v ?? "");
+}
+function ExpandableField({
+  fieldKey,
+  label,
+  value,
+  index,
+  typeColor
+}) {
+  const [expanded, setExpanded] = import_react60.useState(false);
+  const isArr = Array.isArray(value);
+  const isList = isArr && LIST_FIELDS.has(fieldKey);
+  const str = isArr ? "" : String(value ?? "");
+  const isLong = str.length > 220;
+  const isWide = isArr || str.length > 120;
+  const display = !isLong || expanded ? str : str.slice(0, 220) + "…";
+  return /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+    className: `fr-field${isWide ? " fr-field--wide" : ""}`,
+    style: { animationDelay: `${index * 55}ms`, "--fr-color": typeColor },
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "fr-field__label",
+        children: label
+      }, undefined, false, undefined, this),
+      isList ? /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "fr-field__list",
+        children: value.map((item, i) => /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+          className: "fr-field__list-item",
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+              className: "fr-field__list-num",
+              children: i + 1
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+              className: "fr-field__list-text",
+              children: String(item)
+            }, undefined, false, undefined, this)
+          ]
+        }, i, true, undefined, this))
+      }, undefined, false, undefined, this) : isArr ? /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "fr-field__tags",
+        children: value.map((item, i) => /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+          className: "fr-field__tag",
+          children: String(item)
+        }, i, false, undefined, this))
+      }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(jsx_dev_runtime42.Fragment, {
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "fr-field__value",
+            children: display
+          }, undefined, false, undefined, this),
+          isLong && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+            className: "fr-field__expand",
+            onClick: () => setExpanded((e) => !e),
+            children: expanded ? "▲ Menos" : "▼ Leer más"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+function ForgeResultDisplay({ gen, onReset, onToast }) {
+  const { isSignedIn } = useAuth();
+  const [tab, setTab] = import_react60.useState("identity");
+  const [visible, setVisible] = import_react60.useState(false);
+  const [isFav, setIsFav] = import_react60.useState(false);
+  const [showIllustrator, setShowIllustrator] = import_react60.useState(false);
+  const [showAddProject, setShowAddProject] = import_react60.useState(false);
+  const [showPublish, setShowPublish] = import_react60.useState(false);
+  const [localImageUrl, setLocalImageUrl] = import_react60.useState(gen.image_url ?? null);
+  import_react60.useEffect(() => {
+    setVisible(false);
+    setTab("identity");
+    setShowIllustrator(false);
+    setLocalImageUrl(gen.image_url ?? null);
+    const t = setTimeout(() => setVisible(true), 30);
+    return () => clearTimeout(t);
+  }, [gen.id]);
+  import_react60.useEffect(() => {
+    apiFavorites().then(({ data }) => {
+      if (data)
+        setIsFav(data.some((f) => f.id === gen.id));
+    });
+  }, [gen.id]);
+  const typeColor = TYPE_COLORS3[gen.type] ?? "#ff8c28";
+  const meta = TYPE_META[gen.type] ?? TYPE_META.npc;
+  const title = getGenerationTitle(gen.result, gen.type, gen.id);
+  const sourceA = gen.result._source_a;
+  const sourceB = gen.result._source_b;
+  const allFields = Object.entries(gen.result).filter(([k]) => !SKIP_FIELDS.has(k));
+  const byTab = {
+    identity: allFields.filter(([k]) => IDENTITY_FIELDS.has(k)),
+    story: allFields.filter(([k]) => STORY_FIELDS.has(k)),
+    abilities: allFields.filter(([k]) => ABILITY_FIELDS.has(k) || DIALOGUE_FIELDS.has(k))
+  };
+  const categorised = new Set([...IDENTITY_FIELDS, ...STORY_FIELDS, ...ABILITY_FIELDS, ...DIALOGUE_FIELDS]);
+  const uncategorised = allFields.filter(([k]) => !categorised.has(k));
+  byTab.abilities = [...byTab.abilities, ...uncategorised];
+  const activeTabs = TABS.filter((t) => byTab[t.id].length > 0);
+  const quickStats = byTab.identity.filter(([, v]) => !Array.isArray(v) && String(v ?? "").length <= 40).slice(0, 8);
+  const handleCopy = () => navigator.clipboard.writeText(JSON.stringify(gen.result, null, 2));
+  const handleFavToggle = async () => {
+    if (isFav) {
+      await apiRemoveFavorite(gen.id);
+      setIsFav(false);
+      onToast?.("Eliminado de favoritos", "info");
+    } else {
+      await apiAddFavorite(gen.id);
+      setIsFav(true);
+      onToast?.("¡Añadido a favoritos! ★", "ok");
+    }
+  };
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(gen.result, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${gen.type}-fusion-${gen.id}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  return /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+    className: `fr-reveal${visible ? " fr-reveal--in" : ""}`,
+    style: { "--fr-color": typeColor },
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "fr-reveal__border-glow"
+      }, undefined, false, undefined, this),
+      sourceA && sourceB && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "fr-origin",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "fr-origin__src",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                className: "fr-origin__src-icon",
+                children: (TYPE_META[sourceA.type] ?? { icon: "✦" }).icon
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                className: "fr-origin__src-name",
+                children: sourceA.name
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                className: "fr-origin__src-type",
+                children: sourceA.type.toUpperCase()
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+            className: "fr-origin__alchemy",
+            children: "⚗️"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "fr-origin__src",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                className: "fr-origin__src-icon",
+                children: (TYPE_META[sourceB.type] ?? { icon: "✦" }).icon
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                className: "fr-origin__src-name",
+                children: sourceB.name
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                className: "fr-origin__src-type",
+                children: sourceB.type.toUpperCase()
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+            className: "fr-origin__arrow",
+            children: "→"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+            className: "fr-origin__result-badge",
+            children: "✨ FUSIÓN LEGENDARIA"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "fr-hero",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "fr-hero__aura"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "fr-hero__icon",
+            children: meta.icon
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "fr-hero__type-badge",
+            style: { background: `${typeColor}22`, borderColor: `${typeColor}55`, color: typeColor },
+            children: meta.label
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("h2", {
+            className: "fr-hero__name",
+            children: title
+          }, undefined, false, undefined, this),
+          localImageUrl && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "fr-hero__image-wrap",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+                className: "fr-hero__image-glow",
+                style: { background: `radial-gradient(ellipse at center, ${typeColor}55 0%, transparent 70%)` }
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("img", {
+                src: localImageUrl,
+                alt: title,
+                className: "fr-hero__image"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "fr-toolbar",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+            className: `fr-tool-btn${isFav ? " fr-tool-btn--active-fav" : ""}`,
+            onClick: handleFavToggle,
+            title: isFav ? "Quitar de favoritos" : "Guardar en favoritos",
+            children: [
+              isFav ? "★" : "☆",
+              " ",
+              isFav ? "Guardado" : "Favorito"
+            ]
+          }, undefined, true, undefined, this),
+          isSignedIn && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+            className: "fr-tool-btn",
+            onClick: () => setShowAddProject(true),
+            title: "Añadir a proyecto",
+            children: "＋ Proyecto"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+            className: `fr-tool-btn${showIllustrator ? " fr-tool-btn--active-art" : ""}`,
+            onClick: () => setShowIllustrator((v) => !v),
+            title: "Generar ilustración y modelo 3D",
+            children: "\uD83C\uDFA8 Ilustrar"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+            className: "fr-tool-btn fr-tool-btn--share",
+            onClick: () => setShowPublish(true),
+            title: "Compartir esta fusión en la comunidad",
+            children: "\uD83C\uDF0D Compartir Fusión"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+            className: "fr-tool-btn fr-tool-btn--copy",
+            onClick: handleCopy,
+            title: "Copiar JSON",
+            children: "\uD83D\uDCCB Copiar"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+            className: "fr-tool-btn fr-tool-btn--export",
+            onClick: handleExport,
+            title: "Exportar JSON",
+            children: "⬇ Exportar"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      showIllustrator && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "fr-illustrator-wrap",
+        children: /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(ImagePreview, {
+          type: gen.type,
+          result: gen.result,
+          generationId: gen.id,
+          initialImageUrl: localImageUrl,
+          onImageReady: (url) => setLocalImageUrl(url)
+        }, undefined, false, undefined, this)
+      }, undefined, false, undefined, this),
+      quickStats.length > 0 && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "fr-stats",
+        children: quickStats.map(([k, v], i) => /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+          className: "fr-stat",
+          style: { animationDelay: `${180 + i * 70}ms` },
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+              className: "fr-stat__key",
+              children: labelFor(k)
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+              className: "fr-stat__val",
+              children: getStr(v)
+            }, undefined, false, undefined, this)
+          ]
+        }, k, true, undefined, this))
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "fr-divider",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+            className: "fr-divider__line"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+            className: "fr-divider__gem",
+            children: "◆"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+            className: "fr-divider__line"
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      activeTabs.length > 1 && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "fr-tabs-row",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "fr-tabs",
+            children: activeTabs.map((t) => /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+              className: `fr-tab${tab === t.id ? " fr-tab--active" : ""}`,
+              onClick: () => setTab(t.id),
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                  children: t.icon
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                  children: t.label
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                  className: "fr-tab__count",
+                  children: byTab[t.id].length
+                }, undefined, false, undefined, this)
+              ]
+            }, t.id, true, undefined, this))
+          }, undefined, false, undefined, this),
+          tab === "abilities" && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            className: "fr-tab-actions",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+                className: `fr-tab-action-btn${isFav ? " fr-tab-action-btn--fav" : ""}`,
+                onClick: handleFavToggle,
+                title: isFav ? "Quitar de favoritos" : "Guardar en favoritos",
+                children: [
+                  isFav ? "★" : "☆",
+                  " ",
+                  isFav ? "Guardado" : "Favorito"
+                ]
+              }, undefined, true, undefined, this),
+              isSignedIn && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+                className: "fr-tab-action-btn",
+                onClick: () => setShowAddProject(true),
+                title: "Añadir a proyecto",
+                children: "＋ Proyecto"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+                className: `fr-tab-action-btn${showIllustrator ? " fr-tab-action-btn--art" : ""}`,
+                onClick: () => setShowIllustrator((v) => !v),
+                title: "Ilustrar",
+                children: "\uD83C\uDFA8 Ilustrar"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+                className: "fr-tab-action-btn fr-tab-action-btn--share",
+                onClick: () => setShowPublish(true),
+                title: "Compartir en social",
+                children: "\uD83C\uDF0D Compartir"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "fr-fields",
+        children: [
+          byTab[tab].map(([k, v], i) => /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(ExpandableField, {
+            fieldKey: k,
+            label: labelFor(k),
+            value: v,
+            index: i,
+            typeColor
+          }, k, false, undefined, this)),
+          byTab[tab].length === 0 && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("p", {
+            className: "fr-fields__empty",
+            children: "Sin datos para esta sección."
+          }, undefined, false, undefined, this)
+        ]
+      }, tab, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+        className: "fr-actions",
+        children: /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+          className: "fr-action-btn fr-action-btn--reset",
+          onClick: onReset,
+          children: "\uD83D\uDD04 Nueva fusión"
+        }, undefined, false, undefined, this)
+      }, undefined, false, undefined, this),
+      showAddProject && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(Modal, {
+        open: true,
+        onClose: () => setShowAddProject(false),
+        title: "➕ Añadir a proyecto",
+        size: "sm",
+        children: /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(AddToProjectPanel, {
+          generationId: gen.id,
+          onClose: () => setShowAddProject(false),
+          onToast: (msg) => onToast?.(msg, "ok")
+        }, undefined, false, undefined, this)
+      }, undefined, false, undefined, this),
+      showPublish && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(PublishModal, {
+        gen,
+        initialImageUrl: localImageUrl ?? undefined,
+        onClose: () => setShowPublish(false),
+        onPublished: () => onToast?.("¡Fusión compartida en la comunidad! \uD83C\uDF0D", "ok"),
+        onToast: (msg, kind) => onToast?.(msg, kind)
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+
+// frontend/pages/ForgePage.tsx
+var jsx_dev_runtime43 = __toESM(require_jsx_dev_runtime(), 1);
 function SlotCard({
   slot,
   gen,
@@ -68990,22 +69626,22 @@ function SlotCard({
   onClear
 }) {
   if (!gen) {
-    return /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+    return /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("button", {
       className: "forge-slot forge-slot--empty",
       onClick: onPick,
       children: [
-        /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+        /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("span", {
           className: "forge-slot__icon",
           children: slot === "A" ? "⚡" : "\uD83C\uDF00"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+        /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("span", {
           className: "forge-slot__label",
           children: [
             "Seleccionar creación ",
             slot
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+        /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("span", {
           className: "forge-slot__hint",
           children: "Toca para elegir del historial"
         }, undefined, false, undefined, this)
@@ -69014,18 +69650,18 @@ function SlotCard({
   }
   const meta = TYPE_META[gen.type];
   const title = getGenerationTitle(gen.result, gen.type, gen.id);
-  return /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
     className: "forge-slot forge-slot--filled",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
         className: "forge-slot__header",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(Badge, {
+          /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(Badge, {
             type: gen.type,
             icon: meta.icon,
             label: meta.label
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+          /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("button", {
             className: "forge-slot__clear",
             onClick: onClear,
             title: "Quitar",
@@ -69033,16 +69669,16 @@ function SlotCard({
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
         className: "forge-slot__title",
         children: title
       }, undefined, false, undefined, this),
-      gen.image_url && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("img", {
+      gen.image_url && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("img", {
         src: gen.image_url,
         alt: title,
         className: "forge-slot__image"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("button", {
         className: "forge-slot__change",
         onClick: onPick,
         children: "Cambiar"
@@ -69059,44 +69695,44 @@ function PickerModal({
   onClose
 }) {
   const items = history.filter((g) => g.id !== exclude && g.type !== "worldmap");
-  return /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(Modal, {
+  return /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(Modal, {
     open,
     onClose,
     title: "\uD83D\uDD25 Seleccionar creación",
     size: "lg",
     children: [
-      loading2 && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+      loading2 && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
         className: "forge-picker__loading",
         children: "Cargando historial…"
       }, undefined, false, undefined, this),
-      !loading2 && items.length === 0 && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+      !loading2 && items.length === 0 && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
         className: "forge-picker__empty",
         children: "No hay creaciones disponibles. Genera algo primero en la página de Generar."
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
         className: "forge-picker__grid",
         children: items.map((gen) => {
           const meta = TYPE_META[gen.type];
           const title = getGenerationTitle(gen.result, gen.type, gen.id);
-          return /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("button", {
+          return /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("button", {
             className: "forge-picker__item",
             onClick: () => onPick(gen),
             children: [
-              gen.image_url && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("img", {
+              gen.image_url && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("img", {
                 src: gen.image_url,
                 alt: title,
                 className: "forge-picker__thumb"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
                 className: "forge-picker__info",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(Badge, {
+                  /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(Badge, {
                     type: gen.type,
                     icon: meta.icon,
                     label: meta.label,
                     small: true
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                  /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("span", {
                     className: "forge-picker__name",
                     children: title
                   }, undefined, false, undefined, this)
@@ -69112,16 +69748,20 @@ function PickerModal({
 function ForgePage({ onToast }) {
   const { selectedModel, setSelectedModel } = useAppState();
   const { history, loading: histLoading, reload } = useHistory();
-  const [slotA, setSlotA] = import_react60.useState(null);
-  const [slotB, setSlotB] = import_react60.useState(null);
-  const [picking, setPicking] = import_react60.useState(null);
-  const [forging, setForging] = import_react60.useState(false);
-  const [animating, setAnimating] = import_react60.useState(false);
-  const [result, setResult] = import_react60.useState(null);
-  import_react60.useEffect(() => {
+  const [slotA, setSlotA] = import_react61.useState(null);
+  const [slotB, setSlotB] = import_react61.useState(null);
+  const [picking, setPicking] = import_react61.useState(null);
+  const [forging, setForging] = import_react61.useState(false);
+  const [animating, setAnimating] = import_react61.useState(false);
+  const [result, setResult] = import_react61.useState(null);
+  const [resultReady, setResultReady] = import_react61.useState(false);
+  const resultRef = import_react61.useRef(null);
+  const animTimeoutRef = import_react61.useRef(null);
+  const summonActivatedRef = import_react61.useRef(false);
+  import_react61.useEffect(() => {
     reload();
   }, [reload]);
-  const handlePick = import_react60.useCallback((gen) => {
+  const handlePick = import_react61.useCallback((gen) => {
     if (picking === "A")
       setSlotA(gen);
     else
@@ -69135,81 +69775,108 @@ function ForgePage({ onToast }) {
     setForging(true);
     setAnimating(true);
     setResult(null);
+    setResultReady(false);
+    summonActivatedRef.current = false;
+    animTimeoutRef.current = setTimeout(() => {
+      setAnimating(false);
+      setForging(false);
+    }, 12000);
     const { data, error: error2 } = await apiForge(slotA.id, slotB.id, selectedModel);
     if (data) {
       setResult(data);
+      setForging(false);
     } else {
+      if (animTimeoutRef.current)
+        clearTimeout(animTimeoutRef.current);
       onToast(error2 || "Error al fusionar", "error");
       setAnimating(false);
       setForging(false);
     }
   };
-  const handleAnimComplete = () => {
+  const handleAnimComplete = import_react61.useCallback(() => {
+    if (animTimeoutRef.current)
+      clearTimeout(animTimeoutRef.current);
     setAnimating(false);
-    setForging(false);
-    if (result) {
+  }, []);
+  import_react61.useEffect(() => {
+    if (!animating && result && resultReady) {
       onToast("¡Fusión legendaria completada! \uD83D\uDD25", "ok");
+      setTimeout(() => {
+        resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
     }
-  };
+  }, [animating, result, resultReady]);
+  import_react61.useEffect(() => {
+    if (forging && !animating && !result) {
+      summonActivatedRef.current = true;
+    }
+  }, [forging, animating, result]);
+  import_react61.useEffect(() => {
+    if (result && !animating && !resultReady && !summonActivatedRef.current) {
+      setResultReady(true);
+    }
+  }, [result, animating, resultReady]);
   const handleReset = () => {
     setSlotA(null);
     setSlotB(null);
     setResult(null);
+    setResultReady(false);
+    summonActivatedRef.current = false;
   };
-  return /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
     className: "forge-page",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
         className: "forge-page__header",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("h1", {
+          /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("h1", {
             className: "forge-page__title",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("span", {
                 className: "forge-page__title-icon",
                 children: "\uD83D\uDD25"
               }, undefined, false, undefined, this),
               "Fusion Forge"
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("p", {
+          /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("p", {
             className: "forge-page__subtitle",
             children: "Selecciona dos creaciones y fusiónalas en un híbrido legendario con IA"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
         className: "forge-area",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
             className: "forge-area__slot",
-            children: /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(SlotCard, {
+            children: /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(SlotCard, {
               slot: "A",
               gen: slotA,
               onPick: () => setPicking("A"),
               onClear: () => setSlotA(null)
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
             className: "forge-area__center",
-            children: animating ? /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+            children: animating ? /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
               className: "forge-area__animation-wrap",
-              children: /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(ForgeAnimation, {
+              children: /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(ForgeAnimation, {
                 active: animating,
                 typeA: slotA?.type,
                 typeB: slotB?.type,
                 onComplete: handleAnimComplete
               }, undefined, false, undefined, this)
-            }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(jsx_dev_runtime42.Fragment, {
+            }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(jsx_dev_runtime43.Fragment, {
               children: [
-                /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+                /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
                   className: "forge-area__versus",
-                  children: /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+                  children: /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("span", {
                     className: "forge-area__cross",
                     children: "✦"
                   }, undefined, false, undefined, this)
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(Button, {
+                /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(Button, {
                   variant: "primary",
                   size: "lg",
                   disabled: !canForge,
@@ -69218,9 +69885,9 @@ function ForgePage({ onToast }) {
                   className: "forge-area__btn",
                   children: "\uD83D\uDD25 FORJAR FUSIÓN"
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+                /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
                   className: "forge-area__model-row",
-                  children: /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(ModelSelector, {
+                  children: /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(ModelSelector, {
                     value: selectedModel,
                     onChange: setSelectedModel
                   }, undefined, false, undefined, this)
@@ -69228,9 +69895,9 @@ function ForgePage({ onToast }) {
               ]
             }, undefined, true, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
             className: "forge-area__slot",
-            children: /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(SlotCard, {
+            children: /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(SlotCard, {
               slot: "B",
               gen: slotB,
               onPick: () => setPicking("B"),
@@ -69239,55 +69906,47 @@ function ForgePage({ onToast }) {
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      result && !animating && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
-        className: "forge-result",
-        children: [
-          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
-            className: "forge-result__badge",
-            children: "⚗️ RESULTADO DE FUSIÓN"
-          }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(ResultCard, {
-            gen: result,
-            isFav: false,
-            onFavToggle: () => {},
-            showActions: false
-          }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(Button, {
-            variant: "secondary",
-            onClick: handleReset,
-            className: "forge-result__reset",
-            children: "\uD83D\uDD04 Nueva fusión"
-          }, undefined, false, undefined, this)
-        ]
-      }, undefined, true, undefined, this),
-      !slotA && !slotB && !result && /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(Card, {
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(SummonCircle, {
+        active: forging && !animating && !result,
+        type: slotA?.type ?? slotB?.type ?? "npc",
+        onRevealDone: () => setResultReady(true)
+      }, undefined, false, undefined, this),
+      result && !animating && resultReady && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
+        ref: resultRef,
+        children: /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(ForgeResultDisplay, {
+          gen: result,
+          onReset: handleReset,
+          onToast
+        }, undefined, false, undefined, this)
+      }, undefined, false, undefined, this),
+      !slotA && !slotB && !result && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(Card, {
         className: "forge-page__intro",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("h3", {
+          /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("h3", {
             children: "⚔️ ¿Cómo funciona?"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("ol", {
+          /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("ol", {
             className: "forge-page__steps",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("li", {
+              /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("li", {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("strong", {
+                  /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("strong", {
                     children: "Selecciona"
                   }, undefined, false, undefined, this),
                   " dos creaciones de tu historial (NPCs, armas, objetos, enemigos…)"
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("li", {
+              /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("li", {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("strong", {
+                  /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("strong", {
                     children: "Pulsa FORJAR"
                   }, undefined, false, undefined, this),
                   " y la IA fusionará ambas en un híbrido épico nunca visto"
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("li", {
+              /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("li", {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("strong", {
+                  /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("strong", {
                     children: "Descubre"
                   }, undefined, false, undefined, this),
                   " la nueva creación con rasgos, habilidades y lore fusionados"
@@ -69295,18 +69954,18 @@ function ForgePage({ onToast }) {
               }, undefined, true, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("div", {
             className: "forge-page__combos",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("span", {
                 className: "forge-page__combo",
                 children: "\uD83E\uDDD9 + \uD83D\uDDE1️ = Guerrero legendario"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("span", {
                 className: "forge-page__combo",
                 children: "\uD83D\uDC8E + \uD83D\uDC80 = Reliquia maldita"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime42.jsxDEV("span", {
+              /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("span", {
                 className: "forge-page__combo",
                 children: "⚔️ + \uD83D\uDCDC = Misión épica con lore"
               }, undefined, false, undefined, this)
@@ -69314,7 +69973,7 @@ function ForgePage({ onToast }) {
           }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime42.jsxDEV(PickerModal, {
+      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(PickerModal, {
         open: picking !== null,
         history,
         loading: histLoading,
@@ -69327,65 +69986,65 @@ function ForgePage({ onToast }) {
 }
 
 // frontend/app.tsx
-var jsx_dev_runtime43 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime44 = __toESM(require_jsx_dev_runtime(), 1);
 var CLERK_KEY = "pk_test_Y29tbXVuYWwtbW9jY2FzaW4tNS5jbGVyay5hY2NvdW50cy5kZXYk";
 function ClerkTokenSync() {
   const { getToken, isSignedIn } = useAuth();
-  import_react61.default.useEffect(() => {
+  import_react62.default.useEffect(() => {
     setTokenGetter(isSignedIn ? getToken : null);
   }, [getToken, isSignedIn]);
   return null;
 }
 function Pages() {
   const { tab, toasts, showToast, navCollapsed } = useAppState();
-  import_react61.default.useEffect(() => {
+  import_react62.default.useEffect(() => {
     document.getElementById("root")?.classList.toggle("nav-collapsed", navCollapsed);
   }, [navCollapsed]);
-  return /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(jsx_dev_runtime43.Fragment, {
+  return /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(jsx_dev_runtime44.Fragment, {
     children: [
-      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(Header, {}, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(LeftNav, {}, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV("main", {
+      /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(Header, {}, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(LeftNav, {}, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime44.jsxDEV("main", {
         className: "app-main",
         children: [
-          tab === "generate" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(HomePage, {
+          tab === "generate" && /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(HomePage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "history" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(HistoryPage, {
+          tab === "history" && /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(HistoryPage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "favorites" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(FavoritesPage, {
+          tab === "favorites" && /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(FavoritesPage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "social" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(SocialPage, {
+          tab === "social" && /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(SocialPage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "projects" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(ProjectsPage, {
+          tab === "projects" && /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(ProjectsPage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "worldcreator" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(WorldCreatorPage, {
+          tab === "worldcreator" && /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(WorldCreatorPage, {
             onToast: showToast
           }, undefined, false, undefined, this),
-          tab === "forge" && /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(ForgePage, {
+          tab === "forge" && /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(ForgePage, {
             onToast: showToast
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(ToastContainer, {
+      /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(ToastContainer, {
         toasts
       }, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this);
 }
 function App() {
-  return /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(ClerkProvider, {
+  return /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(ClerkProvider, {
     publishableKey: CLERK_KEY,
     children: [
-      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(ClerkTokenSync, {}, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(AppProvider, {
-        children: /* @__PURE__ */ jsx_dev_runtime43.jsxDEV(Pages, {}, undefined, false, undefined, this)
+      /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(ClerkTokenSync, {}, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(AppProvider, {
+        children: /* @__PURE__ */ jsx_dev_runtime44.jsxDEV(Pages, {}, undefined, false, undefined, this)
       }, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this);
 }
-import_client.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsx_dev_runtime43.jsxDEV(App, {}, undefined, false, undefined, this));
+import_client.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsx_dev_runtime44.jsxDEV(App, {}, undefined, false, undefined, this));

@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useAppState } from "../state/app-state";
 import { useHistory }  from "../hooks/useHistory";
 import { apiForge }    from "../lib/api";
-import { ForgeAnimation } from "../components/ui/ForgeAnimation";
-import { ResultCard }     from "../components/results/ResultCard";
-import { Card }           from "../components/ui/Card";
-import { Button }         from "../components/ui/Button";
+import { ForgeAnimation }        from "../components/ui/ForgeAnimation";
+import { ForgeResultDisplay }    from "../components/results/ForgeResultDisplay";
+import { Card }                  from "../components/ui/Card";
+import { Button }                from "../components/ui/Button";
+import { SummonCircle }          from "../components/ui/SummonCircle";
 import { Badge }          from "../components/ui/Badge";
 import { ModelSelector }  from "../components/generate/ModelSelector";
 import { Modal }          from "../components/ui/Modal";
@@ -119,6 +120,13 @@ export function ForgePage({ onToast }: ForgePageProps) {
   const [forging, setForging] = useState(false);
   const [animating, setAnimating] = useState(false);
   const [result, setResult] = useState<Generation | null>(null);
+  const [resultReady, setResultReady] = useState(false);
+  const resultRef = useRef<HTMLDivElement>(null);
+  const animTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Tracks whether SummonCircle was ever active in the current forge session.
+  // If the API responds before the ForgeAnimation ends, SummonCircle is never
+  // activated so we skip the reveal gate and show the card immediately.
+  const summonActivatedRef = useRef(false);
 
   useEffect(() => { reload(); }, [reload]);
 
@@ -135,31 +143,68 @@ export function ForgePage({ onToast }: ForgePageProps) {
     setForging(true);
     setAnimating(true);
     setResult(null);
+    setResultReady(false);
+    summonActivatedRef.current = false;
+
+    // Safety: if animation never fires onComplete, stop after 12 s
+    animTimeoutRef.current = setTimeout(() => {
+      setAnimating(false);
+      setForging(false);
+    }, 12_000);
 
     const { data, error } = await apiForge(slotA.id, slotB.id, selectedModel);
 
     // Let animation finish before showing result
     if (data) {
       setResult(data);
+      setForging(false);
     } else {
+      if (animTimeoutRef.current) clearTimeout(animTimeoutRef.current);
       onToast(error || "Error al fusionar", "error");
       setAnimating(false);
       setForging(false);
     }
   };
 
-  const handleAnimComplete = () => {
+  // Stable callback — only stop the animation; forging stays true until API responds
+  const handleAnimComplete = useCallback(() => {
+    if (animTimeoutRef.current) clearTimeout(animTimeoutRef.current);
     setAnimating(false);
-    setForging(false);
-    if (result) {
+    // forging stays true until handleForge resolves or safety timeout fires
+  }, []);
+
+  // Show toast and scroll once reveal animation is done AND result has arrived
+  useEffect(() => {
+    if (!animating && result && resultReady) {
       onToast("¡Fusión legendaria completada! 🔥", "ok");
+      setTimeout(() => {
+        resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animating, result, resultReady]);
+
+  // Track whether SummonCircle actually became active this session.
+  useEffect(() => {
+    if (forging && !animating && !result) {
+      summonActivatedRef.current = true;
+    }
+  }, [forging, animating, result]);
+
+  // Fallback: if the API responded while ForgeAnimation was still playing,
+  // SummonCircle was never activated and onRevealDone won’t fire — show result directly.
+  useEffect(() => {
+    if (result && !animating && !resultReady && !summonActivatedRef.current) {
+      setResultReady(true);
+    }
+  }, [result, animating, resultReady]);
 
   const handleReset = () => {
     setSlotA(null);
     setSlotB(null);
     setResult(null);
+    setResultReady(false);
+    summonActivatedRef.current = false;
   };
 
   return (
@@ -231,19 +276,19 @@ export function ForgePage({ onToast }: ForgePageProps) {
         </div>
       </div>
 
-      {/* Fusion result */}
-      {result && !animating && (
-        <div className="forge-result">
-          <div className="forge-result__badge">⚗️ RESULTADO DE FUSIÓN</div>
-          <ResultCard
-            gen={result}
-            isFav={false}
-            onFavToggle={() => {}}
-            showActions={false}
-          />
-          <Button variant="secondary" onClick={handleReset} className="forge-result__reset">
-            🔄 Nueva fusión
-          </Button>
+      {/* SummonCircle: arcane invocation animation while API is pending.
+          When active goes false (result arrives), SummonCircle runs its
+          reveal flash, then calls onRevealDone to unlock the result card. */}
+      <SummonCircle
+        active={forging && !animating && !result}
+        type={slotA?.type ?? slotB?.type ?? "npc"}
+        onRevealDone={() => setResultReady(true)}
+      />
+
+      {/* Fusion result — shown only after the SummonCircle reveal flash completes */}
+      {result && !animating && resultReady && (
+        <div ref={resultRef}>
+          <ForgeResultDisplay gen={result} onReset={handleReset} onToast={onToast} />
         </div>
       )}
 

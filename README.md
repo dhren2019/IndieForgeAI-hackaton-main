@@ -26,7 +26,7 @@
 - [Export Pack — Descarga de proyectos en ZIP](#-export-pack--descarga-de-proyectos-en-zip)
 - [Base de datos](#-base-de-datos)
 - [Social — Algoritmo ML de recomendación](#-social--algoritmo-de-machine-learning-para-el-feed)
-- [Invocación Épica — Efecto WOW](#-invocación-épica--efecto-wow-de-generación)
+- [Fusión Forge — Combinación arcana de creaciones](#-fusión-forge--combinación-arcana-de-creaciones)
 - [World Creator](#-world-creator--mapa-del-mundo-3d-procedural)
 - [Desarrollo local](#desarrollo-local)
 - [Endpoints clave](#endpoints-clave-rápido)
@@ -379,53 +379,66 @@ Solo muestra posts de los últimos 7 días.
 
 ---
 
-## ✨ Invocación Épica — Efecto WOW de generación
+## 🔥 Fusión Forge — Combinación arcana de creaciones
 
-Cuando el usuario genera contenido (NPC, arma, quest, etc.), en lugar de ver simplemente un spinner, se muestra una **animación de invocación arcana** estilo RPG/gacha que crea tensión y expectativa.
+Fusion Forge permite al usuario **seleccionar dos creaciones existentes** de su historial (NPCs, armas, enemigos, objetos, misiones…) y fusionarlas mediante IA en un **híbrido único** con rasgos, habilidades y lore combinados.
 
-### Qué se ve
+### Flujo de uso
 
-1. **Tres círculos concéntricos** que pulsan con el color del tipo de generación
-2. **Runas nórdicas (Futhark)** girando en dos anillos — exterior (18 runas, sentido horario) e interior (12 runas, sentido antihorario)
-3. **6 líneas radiales** como un pentáculo/crosshair que rota lentamente
-4. **Hexágono central** que gira como emblema del "sello"
-5. **Partículas de energía** que flotan hacia arriba desde el borde del círculo
-6. **Gradiente radial** de fondo que pulsa con el acento de color
+1. Selecciona dos creaciones del historial en los **slots A y B**
+2. Elige el modelo LLM con el que quieres forjar
+3. Pulsa **FORJAR FUSIÓN** para iniciar el proceso
+4. Se muestra una **animación de invocación arcana** (runas Futhark giratorias, partículas de energía, destello de revelación) mientras la IA procesa la fusión
+5. Al completarse, la animación ejecuta un **flash de revelación** y da paso a la creación fusionada
 
-### Colores por tipo
+### Qué genera la IA
 
-| Tipo | Color | Sensación |
-|---|---|---|
-| NPC | 💜 `#a855f7` | Místico / mágico |
-| Quest | 💙 `#3b82f6` | Aventura / exploración |
-| Item | 💛 `#f59e0b` | Tesoro / recompensa |
-| Lore | 💚 `#10b981` | Conocimiento / naturaleza |
-| Weapon | ❤️ `#ef4444` | Peligro / poder |
-| Enemy | 🔴 `#dc2626` | Amenaza / combate |
+- Combina el **lore y trasfondo** de ambas fuentes en una narrativa coherente
+- Fusiona **estadísticas y habilidades** en valores equilibrados
+- Genera un **nombre y descripción únicos** para el híbrido
+- Mantiene metadatos de trazabilidad: `_fusion: true`, `_source_a`, `_source_b`
 
-### Fase de revelación
+### Animación de invocación arcana
 
-Cuando la IA termina de generar, el círculo ejecuta un **"reveal flash"**:
-1. El brillo del canvas se multiplica ×3 (filtro CSS `brightness`)
-2. Llama de partículas se multiplica (95% de spawn rate vs 35%)
-3. El canvas hace scale(1.15) + fade out en 0.9 segundos
-4. Al terminar la animación, aparece el `ResultCard` con el contenido generado
+Antes de revelar el resultado, se muestra una secuencia de animación estilo RPG/gacha compuesta de:
+
+| Elemento | Descripción |
+|---|---|
+| **Círculos concéntricos** | Tres anillos pulsantes con el color del tipo de creación |
+| **Runas nórdicas (Futhark)** | Dos anillos girando en sentidos opuestos (18 runas ext. / 12 int.) |
+| **6 líneas radiales** | Crosshair tipo pentáculo que rota lentamente |
+| **Hexágono central** | Emblema del sello giratorio |
+| **Partículas de energía** | Flotan hacia arriba desde el borde del círculo |
+| **Reveal flash** | Al completarse, brillo ×3 + scale(1.15) + fade out de 0.9 s |
+
+### Colores por tipo de creación
+
+| Tipo | Color |
+|---|---|
+| NPC | `#a855f7` (púrpura) |
+| Quest | `#3b82f6` (azul) |
+| Item | `#f59e0b` (ámbar) |
+| Lore | `#10b981` (esmeralda) |
+| Weapon | `#ef4444` (rojo) |
+| Enemy | `#dc2626` (carmesí) |
 
 ### Implementación técnica
 
-- Canvas 2D con requestAnimationFrame (sin Three.js → liviano)
-- ResizeObserver para responsividad
-- Sistema de partículas con pool y reciclaje de vida
+- Canvas 2D con `requestAnimationFrame` (sin Three.js — ligero)
+- `ResizeObserver` para responsividad automática
+- Sistema de partículas con pool y reciclaje de ciclo de vida
 - Transición de fases: `idle → summoning → reveal → done → idle`
-- El componente se auto-oculta cuando no hay generación activa
+- El resultado solo se muestra después de que el callback `onRevealDone` confirma el fin del flash
 
 ### Archivos clave
 
 | Archivo | Descripción |
 |---|---|
-| `frontend/components/ui/SummonCircle.tsx` | Componente canvas con runas, partículas y reveal |
-| `frontend/pages/HomePage.tsx` | Integración: se activa con `loading` y revela el resultado |
-| `frontend/styles/components.css` | Animaciones CSS (`summonFadeIn`, `summonFlash`, `summonPulseText`) |
+| `frontend/pages/ForgePage.tsx` | Página principal: slots de selección, botón de forja, flujo de estados |
+| `frontend/components/ui/ForgeAnimation.tsx` | Animación inicial de forja (círculos de los tipos A y B) |
+| `frontend/components/ui/SummonCircle.tsx` | Animación de invocación arcana: runas, partículas y reveal flash |
+| `frontend/components/results/ForgeResultDisplay.tsx` | Tarjeta del resultado fusionado con acciones (favorito, proyecto, compartir) |
+| `src/routes/forge.ts` | Endpoint `POST /api/forge` — recibe IDs de A y B, construye el prompt y llama al LLM |
 
 ---
 
@@ -507,7 +520,7 @@ bun run build
    - Los **parámetros de terreno**: bioma, rugosidad, nivel de agua, altura de montañas, peligro, misticismo, colores, semillas procedurales, densidad de vegetación y estilo de asentamiento
 4. Se renderiza un **mapa 3D WebGL interactivo** directamente en el navegador
 
-### El efecto "wow"
+### Características visuales del terreno
 
 - **Terreno procedural único** — fBm con 6 octavas de Simplex Noise, semillas generadas por IA para cada mundo
 - **5 zonas de color por altura** — aguas profundas → playa → vegetación → alturas → nieve/roca

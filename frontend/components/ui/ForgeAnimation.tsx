@@ -31,7 +31,11 @@ const RUNES = "ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛈᛇᛉᛊᛏᛒᛖᛗᛚ�
 export function ForgeAnimation({ active, typeA = "npc", typeB = "weapon", onComplete }: ForgeAnimationProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef(0);
+  const onCompleteRef = useRef(onComplete);
   const [phase, setPhase] = useState<"idle" | "converge" | "clash" | "forge" | "reveal">("idle");
+
+  // Keep ref up-to-date without triggering animation restarts
+  useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
 
   useEffect(() => {
     if (active) {
@@ -364,7 +368,7 @@ export function ForgeAnimation({ active, typeA = "npc", typeB = "weapon", onComp
         ctx.fill();
 
         if (progress >= 1) {
-          onComplete?.();
+          onCompleteRef.current?.();
           currentPhase = "idle";
         }
       }
@@ -421,7 +425,7 @@ export function ForgeAnimation({ active, typeA = "npc", typeB = "weapon", onComp
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
     };
-  }, [phase, typeA, typeB, onComplete]);
+  }, [phase, typeA, typeB]);
 
   return (
     <canvas

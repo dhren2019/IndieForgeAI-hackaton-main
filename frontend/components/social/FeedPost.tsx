@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { Badge }       from "../ui/Badge";
 import { CommentList } from "./CommentList";
 import { ImagePreview } from "../results/ImagePreview";
@@ -19,10 +19,12 @@ interface FeedPostProps {
   onToast:       (msg: string, kind?: "ok" | "error") => void;
 }
 
+// Renders all non-internal fields, skipping _-prefixed metadata
 function FieldsView({ data }: { data: Record<string, unknown> }) {
+  const entries = Object.entries(data).filter(([k]) => !k.startsWith("_"));
   return (
     <div className="fields-grid fields-grid--compact">
-      {Object.entries(data).map(([k, v]) => (
+      {entries.map(([k, v]) => (
         <div className="field-item" key={k}>
           <div className="field-item__key">{labelFor(k)}</div>
           <div className="field-item__value">
@@ -36,26 +38,136 @@ function FieldsView({ data }: { data: Record<string, unknown> }) {
   );
 }
 
+// Fusion metadata row shown inside the detail modal
+function FusionInfo({ result }: { result: Record<string, unknown> }) {
+  if (result._fusion !== true) return null;
+  const srcA = result._source_a as { name?: string; type?: string } | undefined;
+  const srcB = result._source_b as { name?: string; type?: string } | undefined;
+  const nameA = srcA?.name ?? "?";
+  const nameB = srcB?.name ?? "?";
+  const iconA = srcA?.type ? (TYPE_META[srcA.type as keyof typeof TYPE_META]?.icon ?? "✦") : "✦";
+  const iconB = srcB?.type ? (TYPE_META[srcB.type as keyof typeof TYPE_META]?.icon ?? "✦") : "✦";
+  return (
+    <div className="fusion-info">
+      <div className="fusion-info__row">
+        <span className="fusion-info__label">Fusión</span>
+        <span className="fusion-info__value fusion-badge">✔ Sí</span>
+      </div>
+      <div className="fusion-info__row">
+        <span className="fusion-info__label">Fuente A</span>
+        <span className="fusion-info__value">{iconA} {nameA}</span>
+      </div>
+      <div className="fusion-info__row">
+        <span className="fusion-info__label">Fuente B</span>
+        <span className="fusion-info__value">{iconB} {nameB}</span>
+      </div>
+    </div>
+  );
+}
+
+// Full-detail modal for a post
+function PostDetailModal({
+  post,
+  onClose,
+}: {
+  post: Post;
+  onClose: () => void;
+}) {
+  const meta = TYPE_META[post.type];
+  const sourceA = post.result._source_a as { name: string; type: string } | undefined;
+  const sourceB = post.result._source_b as { name: string; type: string } | undefined;
+
+  return (
+    <Modal open onClose={onClose} title={post.title} size="lg">
+      <div className="post-detail">
+        {/* Badge row */}
+        <div className="post-detail__badges">
+          <Badge type={post.type} icon={meta.icon} label={meta.label} />
+          {post.result._fusion === true && (
+            <span className="fusion-badge">✔ Fusión</span>
+          )}
+        </div>
+
+        {/* Fusion lineage */}
+        {sourceA && sourceB && (
+          <div className="post-detail__lineage">
+            <span className="post-detail__lineage-src">
+              {(TYPE_META[sourceA.type as keyof typeof TYPE_META] ?? { icon: "✦" }).icon}&nbsp;{sourceA.name}
+            </span>
+            <span className="post-detail__lineage-sep">⚗️</span>
+            <span className="post-detail__lineage-src">
+              {(TYPE_META[sourceB.type as keyof typeof TYPE_META] ?? { icon: "✦" }).icon}&nbsp;{sourceB.name}
+            </span>
+          </div>
+        )}
+
+        {/* Image */}
+        {post.image_url && (
+          <div className="post-detail__image-wrap">
+            <img src={post.image_url} alt={post.title} className="post-detail__image" />
+          </div>
+        )}
+
+        {/* 3D model */}
+        {post.glb_url && (
+          <div className="post-3d-viewer post-3d-viewer--modal">
+            {/* @ts-ignore */}
+            <model-viewer
+              src={post.glb_url}
+              alt="Modelo 3D"
+              auto-rotate
+              camera-controls
+              shadow-intensity="1"
+              environment-image="neutral"
+              class="post-3d-viewer__canvas"
+            />
+          </div>
+        )}
+
+        {/* Description */}
+        {post.description && (
+          <p className="post-detail__desc">{post.description}</p>
+        )}
+
+        {/* Fusion metadata (formatted) */}
+        <FusionInfo result={post.result} />
+
+        {/* All fields (internal keys filtered) */}
+        <FieldsView data={post.result} />
+
+        {/* Meta */}
+        <div className="post-detail__meta">
+          <span>✍️ {post.author}</span>
+          <span>🕒 {timeAgo(post.created_at)}</span>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 export function FeedPost({
   post, followedTags, onTagFilter, onTagToggle,
   isOwn, onDelete, onToast,
 }: FeedPostProps) {
-  const [expanded, setExpanded]   = useState(false);
-  const [showCmts, setShowCmts]   = useState(false);
-  const [liked, setLiked]         = useState(post.liked_by_me);
-  const [likeCount, setLikeCount] = useState(post.like_count);
-  const [cmtCount, setCmtCount]   = useState(post.comment_count);
+  const [showDetail, setShowDetail]         = useState(false);
+  const [showCmts, setShowCmts]             = useState(false);
+  const [liked, setLiked]                   = useState(post.liked_by_me);
+  const [likeCount, setLikeCount]           = useState(post.like_count);
+  const [cmtCount, setCmtCount]             = useState(post.comment_count);
   const [showUnshareModal, setShowUnshareModal] = useState(false);
 
   useEffect(() => {
     apiRecordInteraction(post.id, "view");
   }, [post.id]);
 
-  const meta    = TYPE_META[post.type];
-  const preview = String(
+  const meta = TYPE_META[post.type];
+
+  // 100-char preview from the most descriptive field
+  const rawPreview = String(
     post.result.personality ?? post.result.objective ?? post.result.description ??
     post.result.summary ?? post.result.special_ability ?? post.result.attack_style ?? ""
   );
+  const preview = rawPreview.length > 100 ? rawPreview.slice(0, 100) + "…" : rawPreview;
 
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -82,26 +194,25 @@ export function FeedPost({
     }
   };
 
-  const handleExpand = () => {
-    const next = !expanded;
-    setExpanded(next);
-    if (next) apiRecordInteraction(post.id, "expand");
+  const handleOpenDetail = () => {
+    setShowDetail(true);
+    apiRecordInteraction(post.id, "expand");
   };
 
   return (
     <article
-      className={`post-card${isOwn ? " post-card--own" : ""}`}
+      className="post-card"
       style={{ "--type-color": meta.color } as React.CSSProperties}
     >
-      {/* Accent top border via CSS var */}
+      {/* Accent top border */}
       <div className="post-card__accent" />
 
-      {/* Unshare floating button — only for own posts */}
+      {/* Unshare button — own posts only */}
       {isOwn && (
         <button
           className="post-card__unshare"
           onClick={openUnshare}
-          title="Dejar de compartir (el contenido se conserva en tu historial)"
+          title="Dejar de compartir"
           aria-label="Dejar de compartir"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -116,9 +227,12 @@ export function FeedPost({
         </button>
       )}
 
-      {/* Header row */}
-      <header className="post-card__header" onClick={handleExpand}>
+      {/* Header row — click arrow to open detail modal */}
+      <header className="post-card__header">
         <Badge type={post.type} icon={meta.icon} label={meta.label} small />
+        {post.result._fusion === true && (
+          <span className="fusion-badge">✔ Fusión</span>
+        )}
         <div className="post-card__title-area">
           <h3 className="post-card__title">{post.title}</h3>
           {post.description && (
@@ -129,49 +243,26 @@ export function FeedPost({
           <span className="post-card__author">{post.author}</span>
           <span className="post-card__time">{timeAgo(post.created_at)}</span>
         </div>
-        <span className="post-card__chevron">{expanded ? "▲" : "▼"}</span>
+        <button
+          className="post-card__expand-btn"
+          onClick={handleOpenDetail}
+          title="Ver detalles completos"
+          aria-label="Expandir"
+        >
+          ▼
+        </button>
       </header>
 
-      {/* Image */}
+      {/* Image thumbnail */}
       {post.image_url && (
         <div className="post-image-wrap">
           <img src={post.image_url} alt="Hoja de diseño" className="post-image" />
         </div>
       )}
 
-      {/* 3D model viewer */}
-      {post.glb_url && (
-        <div className="post-3d-viewer">
-          {/* @ts-ignore custom element */}
-          <model-viewer
-            src={post.glb_url}
-            alt="Modelo 3D"
-            auto-rotate
-            camera-controls
-            shadow-intensity="1"
-            environment-image="neutral"
-            class="post-3d-viewer__canvas"
-          />
-          <div className="post-3d-viewer__hint">🖱 Arrastra para rotar · Scroll para zoom</div>
-          <a href={post.glb_url} download="personaje-3d.glb" className="post-glb-download">
-            ⬇ Descargar modelo 3D (.glb)
-          </a>
-        </div>
-      )}
-
-      {/* Preview snippet (collapsed) */}
-      {!expanded && preview && (
+      {/* 100-char preview */}
+      {preview && (
         <p className="post-card__preview">{preview}</p>
-      )}
-
-      {/* Full body (expanded) */}
-      {expanded && (
-        <div className="post-card__body">
-          <FieldsView data={post.result} />
-          {post.generation_id && (
-            <ImagePreview type={post.type} result={post.result} />
-          )}
-        </div>
       )}
 
       {/* Tags */}
@@ -201,7 +292,7 @@ export function FeedPost({
 
         <button
           className="comment-btn"
-          onClick={(e) => { e.stopPropagation(); setShowCmts((v) => !v); setCmtCount(cmtCount); }}
+          onClick={(e) => { e.stopPropagation(); setShowCmts((v) => !v); }}
         >
           💬 <span>{cmtCount}</span>
         </button>
@@ -214,12 +305,22 @@ export function FeedPost({
             # {post.tags[0]}
           </button>
         )}
+
+        <button className="post-card__detail-btn" onClick={handleOpenDetail}>
+          Ver más ▼
+        </button>
       </div>
 
       {showCmts && (
         <CommentList postId={post.id} onToast={onToast} />
       )}
 
+      {/* Full detail modal */}
+      {showDetail && (
+        <PostDetailModal post={post} onClose={() => setShowDetail(false)} />
+      )}
+
+      {/* Unshare confirmation modal */}
       <Modal
         open={showUnshareModal}
         onClose={() => setShowUnshareModal(false)}
